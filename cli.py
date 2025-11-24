@@ -1366,8 +1366,12 @@ def cmd_tables(table_name=None):
 
                 elif action and "Importer" in action:
                     cmd_import()
-                    console.print("\n[dim]Press Enter to continue...[/]")
-                    input()
+                    import time
+                    time.sleep(0.1)  # Let message render
+                    try:
+                        input("\n[dim]Press Enter to continue...[/] ")
+                    except (EOFError, KeyboardInterrupt):
+                        pass
                     cmd_tables(table_name)
 
                 elif action and "structure" in action:
