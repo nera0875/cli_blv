@@ -151,8 +151,11 @@ def chat_stream(msg, history, thinking_enabled=False):
 
     add_msg("user", msg)
 
+    # Get current model from env (may have changed via /model)
+    model = os.getenv("LITELLM_MODEL", MODEL)
+
     kwargs = {
-        "model": MODEL,
+        "model": model,
         "messages": messages,
         "stream": True,
         "api_base": API_BASE,
