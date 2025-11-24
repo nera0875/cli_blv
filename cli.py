@@ -690,6 +690,7 @@ def cmd_model():
 
     # Auto-fix OpenRouter models if needed
     if selected_model.startswith("openrouter/"):
+        status_spinner = None
         try:
             import requests
             API_BASE = os.getenv("LITELLM_API_BASE")
@@ -710,6 +711,9 @@ def cmd_model():
 
                             # If has openrouter/ prefix, fix it
                             if internal_model.startswith("openrouter/"):
+                                status_spinner = console.status("[cyan]🔧 Fixing model config...", spinner="dots")
+                                status_spinner.start()
+
                                 fixed_model = internal_model.replace("openrouter/", "", 1)
                                 fixed_params = litellm_params.copy()
                                 fixed_params["model"] = fixed_model
@@ -726,10 +730,17 @@ def cmd_model():
                                     timeout=5
                                 )
 
+                                if status_spinner:
+                                    status_spinner.stop()
+
                                 if fix_response.status_code == 200:
-                                    console.print(f"[dim cyan]🔧 Auto-fixed model config[/]")
+                                    console.print(f"[green]✓ Model config fixed[/]")
+                                else:
+                                    console.print(f"[yellow]⚠ Fix failed, model may not work[/]")
                             break
         except Exception:
+            if status_spinner:
+                status_spinner.stop()
             pass  # Silent fail, don't block model switch
 
     env_path = Path(".env")
