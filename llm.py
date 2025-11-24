@@ -207,7 +207,7 @@ def chat_stream(msg, history, thinking_enabled=False):
     text = ""
     thinking_detected = False
     last_chunk = None
-    tool_calls = []
+    tool_calls_builder = {}  # index → {name, arguments}
 
     for chunk in response:
         last_chunk = chunk
@@ -223,23 +223,29 @@ def chat_stream(msg, history, thinking_enabled=False):
                     yield ("thinking", "")
                     thinking_detected = True
 
-            # Handle tool calls
+            # Handle tool calls (streaming - accumulate by index)
             if hasattr(delta, 'tool_calls') and delta.tool_calls:
                 for tc in delta.tool_calls:
+                    idx = tc.index if hasattr(tc, 'index') else 0
+
+                    if idx not in tool_calls_builder:
+                        tool_calls_builder[idx] = {"name": None, "arguments": ""}
+
                     if hasattr(tc, 'function'):
-                        tool_calls.append({
-                            "name": tc.function.name if hasattr(tc.function, 'name') else None,
-                            "arguments": tc.function.arguments if hasattr(tc.function, 'arguments') else "{}"
-                        })
+                        if hasattr(tc.function, 'name') and tc.function.name:
+                            tool_calls_builder[idx]["name"] = tc.function.name
+                        if hasattr(tc.function, 'arguments') and tc.function.arguments:
+                            tool_calls_builder[idx]["arguments"] += tc.function.arguments
 
             # Handle normal content
             if hasattr(delta, 'content') and delta.content:
                 text += delta.content
                 yield ("content", delta.content)
 
-    # Execute any tool calls
+    # Execute any tool calls (convert builder dict to list)
     import json
-    for tc in tool_calls:
+    for idx in sorted(tool_calls_builder.keys()):
+        tc = tool_calls_builder[idx]
         if tc["name"]:
             try:
                 args = json.loads(tc["arguments"]) if tc["arguments"] else {}
