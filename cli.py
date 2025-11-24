@@ -151,16 +151,19 @@ def safe_prompt(prompt_text, style_str="", **kwargs):
 def cmd_help():
     console.print(Panel(
         "[cyan]/chat[/] [dim]or[/] [yellow]/c[/]     - Stream chat with LLM\n"
-        "[cyan]/menu[/]                    - Interactive menu (findings, rules, triggers)\n"
         "[cyan]/prompt[/] [dim]or[/] [yellow]/p[/]   - Manage system prompts\n"
-        "[cyan]/rules[/]                   - Manage behavioral rules (add/del/toggle)\n"
-        "[cyan]/trigger[/]                 - Manage BLV triggers (add/del/toggle)\n"
+        "[cyan]/rules[/]                   - Manage behavioral rules\n"
+        "[cyan]/trigger[/]                 - Manage BLV triggers\n"
         "[cyan]/import[/] [dim]or[/] [yellow]/i[/]   - Import Burp XML requests\n"
+        "[cyan]/tables[/] [table]          - Show DB tables (interactive)\n"
         "[cyan]/model[/]                   - Switch LLM model\n"
         "[cyan]/clear[/]                   - Start new conversation\n"
         "[cyan]/resume[/]                  - Switch to previous conversation\n"
-        "[cyan]/tables[/] [table]          - Show DB structure or table content\n"
+        "[cyan]/prune[/]                   - Delete empty conversations\n"
+        "[cyan]/cost[/]                    - Display LiteLLM cost analytics\n"
         "[cyan]/stats[/] [dim]or[/] [yellow]/s[/]    - Display usage stats\n"
+        "[cyan]/cls[/]                     - Clear screen\n"
+        "[cyan]/menu[/]                    - Interactive menu (findings)\n"
         "[cyan]/help[/] [dim]or[/] [yellow]/h[/]     - Show this help\n"
         "[cyan]/quit[/] [dim]or[/] [yellow]/q[/]     - Exit CLI\n\n"
         "[dim]💡 Press Shift+TAB for autocomplete | TAB to toggle thinking[/]",
@@ -1387,7 +1390,11 @@ def main():
 
             # Show all commands if just "/"
             if cmd == "/":
-                cmd_help()
+                # Print all available commands
+                console.print("\n[cyan]Commandes disponibles:[/]")
+                for c in sorted(COMMANDS):
+                    console.print(f"  {c}", style="yellow")
+                console.print()
                 continue
 
             # Single letter + long commands
