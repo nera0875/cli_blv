@@ -435,11 +435,11 @@ def cmd_chat():
                     elif chunk_type == "tool":
                         # Afficher l'appel tool avec style visible
                         if "VULNERABLE" in chunk_content:
-                            console.print(f"\n[bold green]💥 {chunk_content}[/]")
+                            console.print(f"\n[bold red on white] {chunk_content} [/]")
                         elif "BLOCKED" in chunk_content:
-                            console.print(f"\n[bold yellow]⛔ {chunk_content}[/]")
+                            console.print(f"\n[bold blue on white] {chunk_content} [/]")
                         else:
-                            console.print(f"\n[cyan]🔧 {chunk_content}[/]")
+                            console.print(f"\n[cyan]{chunk_content}[/]")
                     elif chunk_type == "content":
                         if status_spinner:
                             status_spinner.stop()
