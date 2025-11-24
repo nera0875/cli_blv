@@ -54,7 +54,7 @@ db.init()
 THINKING_ENABLED = False
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/add', '/stats', '/s', '/import', '/i', '/model', '/thinking', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -173,6 +173,7 @@ def cmd_help():
         ("/import", "Import Burp XML requests", "/i"),
         ("/rules", "Manage behavioral rules", ""),
         ("/trigger", "Manage BLV triggers", ""),
+        ("/plan", "Manage targets & objectives", ""),
         ("/tables", "Browse database tables", ""),
         ("/model", "Switch LLM model", ""),
         ("/clear", "Start new conversation", ""),
@@ -468,12 +469,31 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
             response = ""
             status_spinner = None
             first_content = True
+            thinking_content = ""
+            thinking_start_time = None
 
             try:
                 for chunk_type, chunk_content in chat_stream(msg, hist, THINKING_ENABLED):
-                    if chunk_type == "thinking":
+                    # Thinking mode events (Claude 4+)
+                    if chunk_type == "thinking_start":
+                        import time
+                        thinking_start_time = time.time()
                         if not status_spinner:
-                            status_spinner = console.status("[orange1 italic]Thinking...", spinner="dots")
+                            status_spinner = console.status("[magenta]∴ Thinking...", spinner="dots")
+                            status_spinner.start()
+                    elif chunk_type == "thinking_chunk":
+                        thinking_content += chunk_content
+                        # Show preview in status
+                        if len(thinking_content) < 60 and status_spinner:
+                            preview = thinking_content[:60].replace('\n', ' ')
+                            status_spinner.update(f"[magenta]∴ {preview}...")
+                    # Legacy thinking event
+                    elif chunk_type == "thinking":
+                        import time
+                        if not thinking_start_time:
+                            thinking_start_time = time.time()
+                        if not status_spinner:
+                            status_spinner = console.status("[magenta]∴ Thinking...", spinner="dots")
                             status_spinner.start()
                     elif chunk_type == "tool_start":
                         # Stop thinking spinner si actif
@@ -496,6 +516,11 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                             status_spinner.stop()
                             status_spinner = None
                         if first_content:
+                            # Show thinking summary if there was thinking
+                            if thinking_start_time and thinking_content:
+                                import time
+                                duration = time.time() - thinking_start_time
+                                console.print(f"[dim magenta]∴ Thought for {duration:.0f}s[/]")
                             console.print("[white]●[/] ", end="")
                             first_content = False
                         response += chunk_content
@@ -771,17 +796,25 @@ def cmd_model():
     """Switch LLM model."""
     current = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
 
-    models = fetch_available_models()
-    if not models:
-        models = ["claude-sonnet-4-5-20250929", "claude-haiku-4-5-20251001"]
+    # Model descriptions
+    model_choices = {
+        "Sonnet 4.5 (Balanced - default)": "claude-sonnet-4-5-20250929",
+        "Opus 4.5 (Most Intelligent - NEW!)": "claude-opus-4-5-20251101",
+        "Opus 4.1 (Advanced Reasoning)": "claude-opus-4-1-20250805",
+        "Haiku 4.5 (Fast & Cheap)": "claude-haiku-4-5-20251001",
+    }
 
     # Build choices with current marker
-    choices = [f"{m} {'✓' if m == current else ''}" for m in models]
+    choices = []
+    for desc, model_id in model_choices.items():
+        marker = " ✓" if model_id == current else ""
+        choices.append(f"{desc}{marker}")
 
     try:
         result = questionary.select(
             "Select LLM Model:",
-            choices=choices
+            choices=choices,
+            style=custom_style
         ).ask()
     except (EOFError, KeyboardInterrupt):
         console.print("\n[yellow]Back to main[/]")
@@ -791,21 +824,116 @@ def cmd_model():
         console.print("[yellow]Back to main[/]")
         return
 
-    # Extract model name (remove ✓ if present)
-    selected_model = result.replace(" ✓", "").strip()
+    # Extract model ID from description
+    selected_desc = result.replace(" ✓", "").strip()
+    selected_model = model_choices.get(selected_desc)
 
+    if not selected_model:
+        console.print("[red]Invalid model selection[/]")
+        return
+
+    # Update .env
     env_path = Path(".env")
     lines = env_path.read_text().splitlines()
     updated = []
+    model_found = False
     for line in lines:
         if line.startswith("LITELLM_MODEL="):
             updated.append(f"LITELLM_MODEL={selected_model}")
+            model_found = True
         else:
             updated.append(line)
+
+    # Add if not exists
+    if not model_found:
+        updated.append(f"LITELLM_MODEL={selected_model}")
+
     env_path.write_text("\n".join(updated) + "\n")
 
     os.environ["LITELLM_MODEL"] = selected_model
-    console.print(f"[green]✓ Switched to {selected_model}[/]")
+
+    # Show pricing info
+    prices = {
+        "claude-opus-4-5-20251101": "$5/$25 per M tokens",
+        "claude-opus-4-1-20250805": "$15/$75 per M tokens",
+        "claude-sonnet-4-5-20250929": "$3/$15 per M tokens",
+        "claude-haiku-4-5-20251001": "$0.25/$1.25 per M tokens",
+    }
+    price = prices.get(selected_model, "N/A")
+    console.print(f"[green]✓ Switched to {selected_desc.split('(')[0].strip()}[/]")
+    console.print(f"[dim]  Pricing: {price}[/]")
+
+def cmd_thinking():
+    """Configure thinking mode budget."""
+    current = os.getenv("THINKING_MODE", "none")
+
+    # Thinking budget options
+    budget_choices = {
+        "None (Disabled)": "none",
+        "Quick (4K tokens - fast)": "quick",
+        "Normal (16K tokens - balanced)": "normal",
+        "Deep (32K tokens - thorough)": "deep",
+        "Ultra (64K tokens - maximum)": "ultra",
+    }
+
+    # Build choices with current marker
+    choices = []
+    for desc, mode in budget_choices.items():
+        marker = " ✓" if mode == current else ""
+        choices.append(f"{desc}{marker}")
+
+    try:
+        result = questionary.select(
+            "Select Thinking Budget:",
+            choices=choices,
+            style=custom_style
+        ).ask()
+    except (EOFError, KeyboardInterrupt):
+        console.print("\n[yellow]Cancelled[/]")
+        return
+
+    if not result:
+        return
+
+    # Extract mode from description
+    selected_desc = result.replace(" ✓", "").strip()
+    selected_mode = budget_choices.get(selected_desc)
+
+    if not selected_mode:
+        console.print("[red]Invalid selection[/]")
+        return
+
+    # Update .env
+    env_path = Path(".env")
+    lines = env_path.read_text().splitlines()
+    updated = []
+    mode_found = False
+    for line in lines:
+        if line.startswith("THINKING_MODE="):
+            updated.append(f"THINKING_MODE={selected_mode}")
+            mode_found = True
+        else:
+            updated.append(line)
+
+    # Add if not exists
+    if not mode_found:
+        updated.append(f"THINKING_MODE={selected_mode}")
+
+    env_path.write_text("\n".join(updated) + "\n")
+
+    os.environ["THINKING_MODE"] = selected_mode
+
+    # Update llm.py global
+    import llm
+    llm.THINKING_MODE = selected_mode
+
+    # Show info
+    if selected_mode == "none":
+        console.print(f"[yellow]✓ Thinking mode disabled[/]")
+    else:
+        budgets = {"quick": "4K", "normal": "16K", "deep": "32K", "ultra": "64K"}
+        console.print(f"[green]✓ Thinking budget: {budgets[selected_mode]} tokens[/]")
+        console.print(f"[dim]  Claude will think before responding[/]")
 
 def cmd_clear():
     """Start new conversation."""
@@ -1273,6 +1401,80 @@ def cmd_triggers():
     elif action and "Retour" in action:
         return
 
+def cmd_plan():
+    """Gestion des plans (targets + objectifs)."""
+    plans = db.get_plans(active_only=False)
+
+    # Afficher table
+    table = Table(title="Plans (Targets & Objectifs)", border_style="green")
+    table.add_column("ID", width=5)
+    table.add_column("Name", style="cyan")
+    table.add_column("Target", style="yellow")
+    table.add_column("Objective", style="green")
+    table.add_column("Priority", width=8)
+    table.add_column("Active", width=8)
+
+    if plans:
+        for p in plans:
+            active = "[green]✓[/]" if p['active'] else "[dim]✗[/]"
+            table.add_row(
+                str(p['id']),
+                p['name'],
+                p['target'][:30],
+                p['objective'][:40],
+                str(p['priority']),
+                active
+            )
+        console.print(table)
+    else:
+        console.print("[yellow]Aucun plan défini[/]")
+
+    # Menu actions
+    choices = ["➕ Ajouter plan"]
+    if plans:
+        choices.extend(["🗑️  Supprimer plan", "🔄 Toggle plan"])
+    choices.append("← Retour")
+
+    action = questionary.select("Action:", choices=choices, style=custom_style).ask()
+
+    if action and "Ajouter" in action:
+        name = questionary.text("Nom du plan:").ask()
+        if not name:
+            return
+        target = questionary.text("Target (site/app):").ask()
+        if not target:
+            return
+        objective = questionary.text("Objectif:").ask()
+        if not objective:
+            return
+        priority = questionary.text("Priorité (0-10, défaut 0):").ask()
+        priority = int(priority) if priority and priority.isdigit() else 0
+
+        db.add_plan(name, target, objective, priority)
+        console.print(f"[green]✓ Plan '{name}' ajouté[/]")
+        cmd_plan()
+
+    elif action and "Supprimer" in action:
+        choices = [f"{p['id']} - {p['name']}" for p in plans]
+        selected = questionary.select("Quel plan supprimer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            plan_id = int(selected.split(" - ")[0])
+            db.delete_plan(plan_id)
+            console.print(f"[green]✓ Plan supprimé[/]")
+            cmd_plan()
+
+    elif action and "Toggle" in action:
+        choices = [f"{p['id']} - {p['name']} ({'✓' if p['active'] else '✗'})" for p in plans]
+        selected = questionary.select("Quel plan toggle ?", choices=choices, style=custom_style).ask()
+        if selected:
+            plan_id = int(selected.split(" - ")[0])
+            db.toggle_plan(plan_id)
+            console.print(f"[green]✓ Plan toggled[/]")
+            cmd_plan()
+
+    elif action and "Retour" in action:
+        return
+
 def cmd_hooks():
     """Gestion des hooks de validation."""
     hooks = db.get_hooks(active_only=False)
@@ -1695,7 +1897,7 @@ def main():
         "[cyan]/chat[/]     Chat with AI",
         "[cyan]/import[/]   Import Burp XML",
         "[cyan]/model[/]    Switch model",
-        "[cyan]/tables[/]   Browse data"
+        "[cyan]/thinking[/] Thinking budget"
     ]
 
     cmds_col2 = [
@@ -1779,6 +1981,8 @@ def main():
                 cmd_import()
             elif cmd == "/model":
                 cmd_model()
+            elif cmd == "/thinking":
+                cmd_thinking()
             elif cmd == "/cls":
                 console.clear()
             elif cmd == "/clear":
@@ -1889,6 +2093,8 @@ def main():
                     console.print('[red]Usage: /trigger [add|del|toggle] "nom" "pattern" "response"[/]')
             elif cmd == "/hooks":
                 cmd_hooks()
+            elif cmd == "/plan":
+                cmd_plan()
             elif cmd in ["/stats", "/s"]:
                 cmd_stats()
             elif cmd.startswith("/tables"):

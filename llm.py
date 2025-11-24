@@ -1,11 +1,31 @@
 """LLM streaming with LiteLLM."""
 import os
 from litellm import completion
-from db import get_requests, add_msg, get_findings, add_finding, get_rules, get_triggers, get_prompts
+from db import get_requests, add_msg, get_findings, add_finding, get_rules, get_triggers, get_prompts, get_plans
 
 API_BASE = os.getenv("LITELLM_API_BASE")
 API_KEY = os.getenv("LITELLM_API_KEY")
 MODEL = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
+
+# Available models
+MODELS = {
+    "sonnet-4.5": "claude-sonnet-4-5-20250929",
+    "opus-4.5": "claude-opus-4-5-20251101",
+    "opus-4.1": "claude-opus-4-1-20250805",
+    "haiku-4.5": "claude-haiku-4-5-20251001",
+}
+
+# Thinking budgets
+THINKING_BUDGETS = {
+    "none": 0,
+    "quick": 4000,
+    "normal": 16000,
+    "deep": 32000,
+    "ultra": 64000
+}
+
+# Global thinking config
+THINKING_MODE = os.getenv("THINKING_MODE", "none")  # none, quick, normal, deep, ultra
 
 # Tools for auto-learning
 BLV_TOOLS = [
@@ -370,7 +390,17 @@ def build_prompt():
             parts.append(f"- {r['description']}\n")
         parts.append("\n")
 
-    # 2. BLV Triggers (SQLite)
+    # 2. Plans (Targets & Objectives)
+    plans = get_plans(active_only=True)
+    if plans:
+        parts.append("# PLAN ACTIF\n")
+        for p in plans:
+            parts.append(f"## {p['name']}\n")
+            parts.append(f"- Target: {p['target']}\n")
+            parts.append(f"- Objectif: {p['objective']}\n")
+        parts.append("\n")
+
+    # 3. BLV Triggers (SQLite)
     triggers = get_triggers(active_only=True)
     if triggers:
         parts.append("# TRIGGERS BLV\n")
@@ -468,19 +498,28 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
         "stream": True,
         "api_base": API_BASE,
         "api_key": API_KEY,
-        "timeout": 60,
+        "timeout": 120,  # Increased for thinking mode
     }
 
     if use_tools:
         kwargs["tools"] = BLV_TOOLS
 
-    # Add thinking parameter if enabled (only for Anthropic models)
-    if thinking_enabled and "claude" in model.lower():
-        kwargs["thinking"] = {"type": "enabled", "budget_tokens": 4096}
+    # Add thinking parameter based on global THINKING_MODE or explicit override
+    global THINKING_MODE
+    thinking_mode = os.getenv("THINKING_MODE", THINKING_MODE)
+    budget = THINKING_BUDGETS.get(thinking_mode, 0)
+
+    # Override if thinking_enabled explicitly passed
+    if thinking_enabled and budget == 0:
+        budget = THINKING_BUDGETS["normal"]
+
+    if budget > 0 and "claude" in model.lower():
+        kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget}
 
     response = completion(**kwargs)
 
     text = ""
+    thinking_text = ""
     thinking_detected = False
     last_chunk = None
     tool_calls_builder = {}  # index → {name, arguments}
@@ -491,13 +530,29 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
         if hasattr(chunk, 'choices') and chunk.choices:
             delta = chunk.choices[0].delta
 
-            # Detect thinking phase (multiple possible attributes)
-            if thinking_enabled and not thinking_detected:
-                if (hasattr(delta, 'thinking') and delta.thinking) or \
-                   (hasattr(delta, 'reasoning_content') and delta.reasoning_content) or \
-                   (hasattr(delta, 'type') and delta.type == 'thinking'):
-                    yield ("thinking", "")
-                    thinking_detected = True
+            # Handle thinking content streaming (Claude 4+ format)
+            if budget > 0:
+                # Check for thinking in content blocks
+                if hasattr(delta, 'content') and isinstance(delta.content, list):
+                    for block in delta.content:
+                        if hasattr(block, 'type') and block.type == 'thinking':
+                            if not thinking_detected:
+                                yield ("thinking_start", "")
+                                thinking_detected = True
+                            if hasattr(block, 'thinking'):
+                                thinking_text += block.thinking
+                                yield ("thinking_chunk", block.thinking)
+                        elif hasattr(block, 'type') and block.type == 'text':
+                            if hasattr(block, 'text'):
+                                text += block.text
+                                yield ("content", block.text)
+                # Legacy format
+                elif hasattr(delta, 'thinking') and delta.thinking:
+                    if not thinking_detected:
+                        yield ("thinking_start", "")
+                        thinking_detected = True
+                    thinking_text += delta.thinking
+                    yield ("thinking_chunk", delta.thinking)
 
             # Handle tool calls (streaming - accumulate by index)
             if hasattr(delta, 'tool_calls') and delta.tool_calls:
@@ -517,8 +572,8 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
                         if hasattr(tc.function, 'arguments') and tc.function.arguments:
                             tool_calls_builder[idx]["arguments"] += tc.function.arguments
 
-            # Handle normal content
-            if hasattr(delta, 'content') and delta.content:
+            # Handle normal content (string format, when not in content blocks)
+            if hasattr(delta, 'content') and delta.content and isinstance(delta.content, str):
                 text += delta.content
                 yield ("content", delta.content)
 

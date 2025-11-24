@@ -55,6 +55,14 @@ def init():
             priority INTEGER DEFAULT 0,
             active INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS plans (
+            id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            target TEXT NOT NULL,
+            objective TEXT NOT NULL,
+            priority INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
         c.execute("""CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY, url TEXT, method TEXT,
             headers TEXT, body TEXT, response TEXT)""")
@@ -426,4 +434,33 @@ def toggle_hook(hook_id):
     """Toggle hook active status."""
     with conn() as c:
         c.execute("UPDATE hooks SET active = 1-active WHERE id=?", (hook_id,))
+        c.commit()
+
+# === PLANS ===
+def get_plans(active_only=True):
+    """Get all plans ordered by priority."""
+    with conn() as c:
+        q = "SELECT * FROM plans"
+        if active_only:
+            q += " WHERE active=1"
+        q += " ORDER BY priority DESC, name ASC"
+        return [dict(r) for r in c.execute(q).fetchall()]
+
+def add_plan(name, target, objective, priority=0):
+    """Add new plan."""
+    with conn() as c:
+        c.execute("INSERT INTO plans (name, target, objective, priority) VALUES (?,?,?,?)",
+                  (name, target, objective, priority))
+        c.commit()
+
+def delete_plan(plan_id):
+    """Delete plan by ID."""
+    with conn() as c:
+        c.execute("DELETE FROM plans WHERE id=?", (plan_id,))
+        c.commit()
+
+def toggle_plan(plan_id):
+    """Toggle plan active status."""
+    with conn() as c:
+        c.execute("UPDATE plans SET active = 1-active WHERE id=?", (plan_id,))
         c.commit()
