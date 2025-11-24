@@ -99,10 +99,22 @@ def clean_request(headers_str, body_str, response_str):
     return '\n'.join(clean_headers), body_str, clean_response
 
 def add_request(url, method, headers, body, response):
+    import hashlib
+
     headers, body, response = clean_request(headers, body, response)
+
+    # Generate hash for deduplication (url + method + body)
+    hash_input = f"{url}|{method}|{body}".encode('utf-8')
+    request_hash = hashlib.sha256(hash_input).hexdigest()[:16]
+
     with conn() as c:
-        c.execute("INSERT INTO requests VALUES (NULL,?,?,?,?,?)",
-                  (url, method, headers, body, response))
+        # Check if hash exists (duplicate)
+        existing = c.execute("SELECT id FROM requests WHERE hash=?", (request_hash,)).fetchone()
+        if existing:
+            return  # Skip duplicate
+
+        c.execute("INSERT INTO requests (url, method, headers, body, response, hash) VALUES (?,?,?,?,?,?)",
+                  (url, method, headers, body, response, request_hash))
         c.commit()
 
 def get_requests():
