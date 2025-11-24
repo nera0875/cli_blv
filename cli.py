@@ -369,23 +369,31 @@ def cmd_chat():
             status_spinner = None
             first_content = True
 
-            for chunk_type, chunk_content in chat_stream(msg, hist, THINKING_ENABLED):
-                if chunk_type == "thinking":
-                    if not status_spinner:
-                        status_spinner = console.status("[orange1 italic]Thinking...", spinner="dots")
-                        status_spinner.start()
-                elif chunk_type == "tool":
-                    # Afficher l'appel tool avec style
-                    console.print(f"\n[dim cyan]🔧 {chunk_content}[/]")
-                elif chunk_type == "content":
-                    if status_spinner:
-                        status_spinner.stop()
-                        status_spinner = None
-                    if first_content:
-                        console.print("[white]●[/] ", end="")
-                        first_content = False
-                    response += chunk_content
-                    console.print(chunk_content, end="", soft_wrap=True)
+            try:
+                for chunk_type, chunk_content in chat_stream(msg, hist, THINKING_ENABLED):
+                    if chunk_type == "thinking":
+                        if not status_spinner:
+                            status_spinner = console.status("[orange1 italic]Thinking...", spinner="dots")
+                            status_spinner.start()
+                    elif chunk_type == "tool":
+                        # Afficher l'appel tool avec style
+                        console.print(f"\n[dim cyan]🔧 {chunk_content}[/]")
+                    elif chunk_type == "content":
+                        if status_spinner:
+                            status_spinner.stop()
+                            status_spinner = None
+                        if first_content:
+                            console.print("[white]●[/] ", end="")
+                            first_content = False
+                        response += chunk_content
+                        console.print(chunk_content, end="", soft_wrap=True)
+            except Exception as e:
+                if status_spinner:
+                    status_spinner.stop()
+                console.print(f"\n[red]✗ Error: {str(e)}[/]")
+                if "rate limit" in str(e).lower() or "usage limit" in str(e).lower():
+                    console.print("[yellow]💡 API limit reached. Try different model with /model[/]")
+                continue
 
             if status_spinner:
                 status_spinner.stop()
