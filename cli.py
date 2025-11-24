@@ -1166,7 +1166,17 @@ def cmd_tables(table_name=None):
         if not table_name:
             # Show tables in Rich table with stats
             tables = c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()
-            table_names = [t['name'] for t in tables]
+
+            # Filter non-empty tables only
+            table_names = []
+            for t in tables:
+                count = c.execute(f"SELECT COUNT(*) as cnt FROM {t['name']}").fetchone()['cnt']
+                if count > 0:
+                    table_names.append(t['name'])
+
+            if not table_names:
+                console.print("[yellow]Aucune table avec données[/]")
+                return
 
             # Display table list horizontally with row counts
             tables_display = Table(title="[bold cyan]Tables disponibles[/]", border_style="cyan", show_header=True, expand=False)
@@ -1224,7 +1234,7 @@ def cmd_tables(table_name=None):
 
                     # Add rows
                     for row in rows:
-                        t.add_row(*[str(row[k])[:100] if row[k] else "" for k in row.keys()])
+                        t.add_row(*[str(row[k])[:100] if row[k] else "[dim]-[/]" for k in row.keys()])
 
                     console.print(t)
                     console.print(f"[dim]Showing {len(rows)} rows (max 20)[/dim]")

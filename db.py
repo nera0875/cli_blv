@@ -263,11 +263,22 @@ def toggle_trigger(trigger_name_or_id):
 # === FINDINGS ===
 def add_event(pattern, worked=True, target=None, technique=None, impact=None, notes=None, payload=None, context=None, request_id=None):
     """Save test event with full details."""
+    import hashlib
+
+    # Generate hash for deduplication
+    hash_input = f"{pattern}|{target}|{technique}|{impact}".encode('utf-8')
+    event_hash = hashlib.sha256(hash_input).hexdigest()[:16]
+
     with conn() as c:
+        # Check if hash exists (duplicate)
+        existing = c.execute("SELECT id FROM events WHERE hash=?", (event_hash,)).fetchone()
+        if existing:
+            return  # Skip duplicate
+
         c.execute("""INSERT INTO events
-                     (pattern, worked, target, technique, impact, notes, payload, context, request_id)
-                     VALUES (?,?,?,?,?,?,?,?,?)""",
-                  (pattern, 1 if worked else 0, target, technique, impact, notes, payload, context, request_id))
+                     (pattern, worked, target, technique, impact, notes, payload, context, request_id, hash)
+                     VALUES (?,?,?,?,?,?,?,?,?,?)""",
+                  (pattern, 1 if worked else 0, target, technique, impact, notes, payload, context, request_id, event_hash))
         c.commit()
 
 # Aliases for backward compatibility
