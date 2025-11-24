@@ -68,8 +68,10 @@ def handle_tool_call(tool_name, args):
             notes=args.get("notes"),
             payload=args.get("payload")
         )
-        status = "✓ Success" if args.get("worked") else "✗ Failed"
-        return f"{status} Event saved: {args.get('pattern')} ({args.get('target')})"
+        if args.get("worked"):
+            return f"✅ VULNERABLE: {args.get('pattern')} ({args.get('target')})"
+        else:
+            return f"🛡️  BLOCKED: {args.get('pattern')} ({args.get('target')})"
     return "Unknown tool"
 
 LAST_PROMPT_TOKENS = 0

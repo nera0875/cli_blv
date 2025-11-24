@@ -433,8 +433,13 @@ def cmd_chat():
                             status_spinner = console.status("[orange1 italic]Thinking...", spinner="dots")
                             status_spinner.start()
                     elif chunk_type == "tool":
-                        # Afficher l'appel tool avec style
-                        console.print(f"\n[dim cyan]🔧 {chunk_content}[/]")
+                        # Afficher l'appel tool avec style visible
+                        if "VULNERABLE" in chunk_content:
+                            console.print(f"\n[bold green]💥 {chunk_content}[/]")
+                        elif "BLOCKED" in chunk_content:
+                            console.print(f"\n[bold yellow]⛔ {chunk_content}[/]")
+                        else:
+                            console.print(f"\n[cyan]🔧 {chunk_content}[/]")
                     elif chunk_type == "content":
                         if status_spinner:
                             status_spinner.stop()
