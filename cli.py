@@ -296,7 +296,6 @@ def cmd_chat():
                         continue  # Re-loop to /idea again
                     elif action and "Save" in action:
                         # Save to DB todos table
-                        import db
                         with db.conn() as c:
                             c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea_text.strip(),))
                             c.commit()
@@ -1440,6 +1439,51 @@ def cmd_tables(table_name=None):
             except Exception as e:
                 console.print(f"[red]Error: {e}[/red]")
 
+def cmd_idea():
+    """Generate test idea outside chat."""
+    # Build minimal context from DB
+    reqs_count = len(db.get_requests())
+    events_count = len(db.get_events())
+
+    console.print(f"[dim]Context: {reqs_count} requests, {events_count} events[/]\n")
+
+    # Simple idea generation without full chat context
+    ideas = [
+        "Replay requestId cross-transaction",
+        "Test HMAC validation bypass",
+        "Race condition sur state endpoint",
+        "Token replay cross-session",
+        "Parameter pollution (duplicate params)"
+    ]
+
+    import random
+    idea = random.choice(ideas)
+    console.print(f"[cyan]💡 {idea}[/]\n")
+
+    # Menu actions
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "→ Next idée",
+            "📋 Save to /todos",
+            "💬 Explain in /chat",
+            "← Back"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "Next" in action:
+        cmd_idea()
+    elif action and "Save" in action:
+        with db.conn() as c:
+            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea,))
+            c.commit()
+        console.print("[green]✓ Saved to /todos[/]\n")
+        cmd_idea()
+    elif action and "Explain" in action:
+        console.print(f"[dim]Launching chat with idea...[/]\n")
+        cmd_chat()
+
 def cmd_todos():
     """Show saved test ideas."""
     with db.conn() as c:
@@ -1728,6 +1772,8 @@ def main():
                     console.print('[red]Usage: /trigger [add|del|toggle] "nom" "pattern" "response"[/]')
             elif cmd in ["/stats", "/s"]:
                 cmd_stats()
+            elif cmd == "/idea":
+                cmd_idea()
             elif cmd.startswith("/tables"):
                 parts = cmd.split(maxsplit=1)
                 table_arg = parts[1] if len(parts) > 1 else None
