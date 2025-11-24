@@ -12,16 +12,20 @@ BLV_TOOLS = [
     {
         "type": "function",
         "function": {
-            "name": "save_finding",
-            "description": "Sauvegarde un pattern BLV testé. Appelle quand user confirme résultat test.",
+            "name": "save_event",
+            "description": "Sauvegarde un event de test BLV (success/failed/patched). Appelle automatiquement quand user donne résultat de test.",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "pattern": {"type": "string", "description": "Le pattern testé (ex: state→authorize bypass)"},
-                    "worked": {"type": "boolean", "description": "True si vulnérable, False si bloqué"},
-                    "target": {"type": "string", "description": "Cible (ex: Cdiscount 3DS, PayPal checkout)"}
+                    "pattern": {"type": "string", "description": "Pattern testé (ex: 3DS2 CRes replay cross-card)"},
+                    "worked": {"type": "boolean", "description": "True si vulnérable/bypass réussi, False si bloqué/refusé"},
+                    "target": {"type": "string", "description": "Cible/app (ex: Cdiscount, PayPal)"},
+                    "technique": {"type": "string", "description": "Technique utilisée (ex: drop validation + replay token)"},
+                    "impact": {"type": "string", "description": "Impact si worked=True (ex: payment bypass, IDOR)"},
+                    "notes": {"type": "string", "description": "Notes/détails supplémentaires du user"},
+                    "payload": {"type": "string", "description": "Payload/requête HTTP utilisée (optionnel)"}
                 },
-                "required": ["pattern", "worked"]
+                "required": ["pattern", "worked", "target"]
             }
         }
     }
@@ -29,13 +33,19 @@ BLV_TOOLS = [
 
 def handle_tool_call(tool_name, args):
     """Execute tool and return result."""
-    if tool_name == "save_finding":
-        add_finding(
+    if tool_name == "save_event" or tool_name == "save_finding":
+        from db import add_event
+        add_event(
             pattern=args.get("pattern"),
             worked=args.get("worked", True),
-            target=args.get("target")
+            target=args.get("target"),
+            technique=args.get("technique"),
+            impact=args.get("impact"),
+            notes=args.get("notes"),
+            payload=args.get("payload")
         )
-        return f"✓ Finding saved: {args.get('pattern')}"
+        status = "✓ Success" if args.get("worked") else "✗ Failed"
+        return f"{status} Event saved: {args.get('pattern')} ({args.get('target')})"
     return "Unknown tool"
 
 LAST_PROMPT_TOKENS = 0

@@ -265,27 +265,47 @@ def toggle_trigger(trigger_name_or_id):
         c.commit()
 
 # === FINDINGS ===
-def add_finding(pattern, worked=True, target=None, context=None, request_id=None):
+def add_event(pattern, worked=True, target=None, technique=None, impact=None, notes=None, payload=None, context=None, request_id=None):
+    """Save test event with full details."""
     with conn() as c:
-        c.execute("INSERT INTO findings (pattern, worked, target, context, request_id) VALUES (?,?,?,?,?)",
-                  (pattern, 1 if worked else 0, target, context, request_id))
+        c.execute("""INSERT INTO events
+                     (pattern, worked, target, technique, impact, notes, payload, context, request_id)
+                     VALUES (?,?,?,?,?,?,?,?,?)""",
+                  (pattern, 1 if worked else 0, target, technique, impact, notes, payload, context, request_id))
         c.commit()
 
-def get_findings(worked_only=False, limit=20):
-    """Get findings, optionally only successful ones."""
+# Aliases for backward compatibility
+def add_finding(pattern, worked=True, target=None, context=None, request_id=None):
+    """Legacy alias for add_event."""
+    add_event(pattern, worked, target, context=context, request_id=request_id)
+
+def get_events(worked_only=False, limit=20):
+    """Get events, optionally only successful ones."""
     with conn() as c:
-        q = "SELECT * FROM findings"
+        q = "SELECT * FROM events"
         if worked_only:
             q += " WHERE worked=1"
         q += " ORDER BY id DESC LIMIT ?"
         return [dict(r) for r in c.execute(q, (limit,)).fetchall()]
 
-def search_findings(keyword):
-    """Search findings by pattern or target."""
+# Alias for backward compatibility
+def get_findings(worked_only=False, limit=20):
+    """Legacy alias for get_events."""
+    return get_events(worked_only, limit)
+
+def search_events(keyword):
+    """Search events by pattern, target, technique, or notes."""
     with conn() as c:
         return [dict(r) for r in c.execute(
-            "SELECT * FROM findings WHERE pattern LIKE ? OR target LIKE ? ORDER BY id DESC",
-            (f"%{keyword}%", f"%{keyword}%")).fetchall()]
+            """SELECT * FROM events
+               WHERE pattern LIKE ? OR target LIKE ? OR technique LIKE ? OR notes LIKE ?
+               ORDER BY id DESC""",
+            (f"%{keyword}%", f"%{keyword}%", f"%{keyword}%", f"%{keyword}%")).fetchall()]
+
+# Alias for backward compatibility
+def search_findings(keyword):
+    """Legacy alias for search_events."""
+    return search_events(keyword)
 
 # === PROMPTS ===
 def get_prompts(active_only=True):
