@@ -265,6 +265,45 @@ def cmd_chat():
                 elif cmd == "/cls":
                     console.clear()
                     continue
+                elif cmd == "/idea":
+                    # Generate idea via AI
+                    idea_prompt = "Génère 1 idée de test courte basée sur requêtes/events. Format: Test [action] sur [target/variable]. Max 15 mots."
+                    console.print()
+                    idea_text = ""
+                    for chunk_type, chunk_content in chat_stream(idea_prompt, hist, False):
+                        if chunk_type == "content":
+                            idea_text += chunk_content
+                            console.print(chunk_content, end="", soft_wrap=True)
+                    console.print("\n")
+
+                    # Menu actions
+                    action = questionary.select(
+                        "Action:",
+                        choices=[
+                            "✓ Go (AI explique)",
+                            "→ Next idée",
+                            "📋 Save to /todos",
+                            "✗ Skip"
+                        ],
+                        style=custom_style
+                    ).ask()
+
+                    if action and "Go" in action:
+                        msg = f"Explique comment faire: {idea_text.strip()}"
+                        console.print(f"[dim]Auto: {msg[:50]}...[/]\n")
+                        # Continue to LLM with explanation request
+                    elif action and "Next" in action:
+                        continue  # Re-loop to /idea again
+                    elif action and "Save" in action:
+                        # Save to DB todos table
+                        import db
+                        with db.conn() as c:
+                            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea_text.strip(),))
+                            c.commit()
+                        console.print("[green]✓ Saved to /todos[/]\n")
+                        continue
+                    else:  # Skip
+                        continue
                 elif cmd == "/clear":
                     console.clear()
                     name = safe_input("New conversation name (or Enter for auto): ")
@@ -1401,6 +1440,65 @@ def cmd_tables(table_name=None):
             except Exception as e:
                 console.print(f"[red]Error: {e}[/red]")
 
+def cmd_todos():
+    """Show saved test ideas."""
+    with db.conn() as c:
+        todos = [dict(r) for r in c.execute("SELECT * FROM todos ORDER BY id DESC").fetchall()]
+
+    if not todos:
+        console.print("[yellow]No saved ideas. Use /idea in chat to generate.[/]")
+        return
+
+    table = Table(title="Saved Test Ideas", border_style="cyan")
+    table.add_column("ID", width=5)
+    table.add_column("Idea", style="yellow")
+    table.add_column("Status", width=10)
+    table.add_column("Created", width=19)
+
+    for t in todos:
+        status = "[green]✓[/]" if t['status'] == 'done' else "[dim]○[/]"
+        table.add_row(str(t['id']), t['content'][:80], status, t['created_at'])
+
+    console.print(table)
+
+    # Interactive menu
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "✓ Mark as done",
+            "🗑️  Delete",
+            "← Back"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "done" in action:
+        choices = [f"{t['id']} - {t['content'][:50]}" for t in todos if t['status'] != 'done']
+        if choices:
+            selected = questionary.select("Mark which idea as done?", choices=choices, style=custom_style).ask()
+            if selected:
+                todo_id = int(selected.split(" - ")[0])
+                with db.conn() as c:
+                    c.execute("UPDATE todos SET status='done' WHERE id=?", (todo_id,))
+                    c.commit()
+                console.print("[green]✓ Marked as done[/]")
+                cmd_todos()
+        else:
+            console.print("[yellow]No pending ideas[/]")
+    elif action and "Delete" in action:
+        choices = [f"{t['id']} - {t['content'][:50]}" for t in todos]
+        selected = questionary.checkbox("Select ideas to delete:", choices=choices).ask()
+        if selected and len(selected) > 0:
+            confirm = questionary.confirm(f"Delete {len(selected)} idea(s)?").ask()
+            if confirm:
+                with db.conn() as c:
+                    for sel in selected:
+                        todo_id = int(sel.split(" - ")[0])
+                        c.execute("DELETE FROM todos WHERE id=?", (todo_id,))
+                    c.commit()
+                console.print(f"[green]✓ Deleted {len(selected)} idea(s)[/]")
+                cmd_todos()
+
 def cmd_stats():
     reqs = len(db.get_requests())
     minds = len(db.get_mindsets())
@@ -1634,6 +1732,8 @@ def main():
                 parts = cmd.split(maxsplit=1)
                 table_arg = parts[1] if len(parts) > 1 else None
                 cmd_tables(table_arg)
+            elif cmd == "/todos":
+                cmd_todos()
             elif cmd == "/menu":
                 action = questionary.select(
                     "Menu BLV",
