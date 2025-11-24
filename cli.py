@@ -284,7 +284,7 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                         console.print()
                         idea_text = ""
                         with console.status("[cyan]💡 Generating idea...", spinner="dots"):
-                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, False):
+                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, thinking_enabled=False, use_tools=False):
                                 if chunk_type == "content":
                                     idea_text += chunk_content
 

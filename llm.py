@@ -454,7 +454,7 @@ def build_messages(history, new_msg):
 
     return messages
 
-def chat_stream(msg, history, thinking_enabled=False):
+def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
     messages = build_messages(history, msg)
 
     add_msg("user", msg)
@@ -469,8 +469,10 @@ def chat_stream(msg, history, thinking_enabled=False):
         "api_base": API_BASE,
         "api_key": API_KEY,
         "timeout": 60,
-        "tools": BLV_TOOLS,
     }
+
+    if use_tools:
+        kwargs["tools"] = BLV_TOOLS
 
     # Add thinking parameter if enabled (only for Anthropic models)
     if thinking_enabled and "claude" in model.lower():

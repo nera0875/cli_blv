@@ -1,0 +1,96 @@
+═══════════════════════════════════════════════════════════
+TESTS HOOKS - COMMANDES À TAPER EXACTEMENT
+═══════════════════════════════════════════════════════════
+
+1. Lance le CLI:
+   uv run python cli.py
+
+2. Vérifie hooks:
+   /hooks
+   → Doit afficher 10 hooks actifs
+
+3. Entre en chat:
+   /chat
+
+═══════════════════════════════════════════════════════════
+TEST 1: Analyse complète (DEVRAIT MARCHER)
+═══════════════════════════════════════════════════════════
+
+Tape exactement:
+analyse XSS sur example.com
+
+✓ Attendu:
+  - AI appelle show_analysis
+  - Panel s'affiche (bordure cyan)
+  - Spinner 0.3s avant affichage
+  - Pas de blocage
+
+═══════════════════════════════════════════════════════════
+TEST 2: Gibberish (DEVRAIT ask_clarification)
+═══════════════════════════════════════════════════════════
+
+Tape:
+zfgzefg zefzef zefzef
+
+✓ Attendu:
+  - AI appelle ask_clarification
+  - Question courte en français
+  - Aucun texte libre anglais
+
+═══════════════════════════════════════════════════════════
+TEST 3: Demande vague (DEVRAIT ask_clarification)
+═══════════════════════════════════════════════════════════
+
+Tape:
+analyse
+
+✓ Attendu:
+  - AI demande précisions
+  - ask_clarification appelé
+  - Question <30 mots
+
+═══════════════════════════════════════════════════════════
+TEST 4: Suggestion test (DEVRAIT suggest_test)
+═══════════════════════════════════════════════════════════
+
+Tape:
+propose test bypass HMAC
+
+✓ Attendu:
+  - AI appelle suggest_test
+  - Panel avec steps
+  - Pattern + Expected visible
+
+═══════════════════════════════════════════════════════════
+TEST 5: Voir events saved
+═══════════════════════════════════════════════════════════
+
+/back
+/tables events
+
+✓ Vérifie que save_event a bien été appelé quand user confirme
+
+═══════════════════════════════════════════════════════════
+TEST 6: Toggle hook et reteste (HOOK DÉSACTIVÉ)
+═══════════════════════════════════════════════════════════
+
+/hooks
+→ Toggle hook "analysis-title-length"
+/chat
+analyse quelque chose avec un titre ultra mega long qui devrait normalement être bloqué
+
+✓ Attendu:
+  - Hook désactivé = devrait passer
+  - Analyse s'affiche quand même
+
+═══════════════════════════════════════════════════════════
+VÉRIFICATIONS CLÉS
+═══════════════════════════════════════════════════════════
+
+Pour CHAQUE réponse AI:
+□ Aucun texte libre >50 mots (hors Panel)
+□ Tools appelés systématiquement
+□ Messages en FRANÇAIS uniquement
+□ Panels avec expand=False
+□ Spinner avant affichage
+□ Si args invalides → "❌ Hook bloqué: [raison]"
