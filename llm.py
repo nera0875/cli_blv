@@ -48,6 +48,17 @@ def handle_tool_call(tool_name, args):
     """Execute tool and return result."""
     if tool_name == "save_event" or tool_name == "save_finding":
         from db import add_event
+
+        # Debug: log what we received
+        import sys
+        print(f"\n[DEBUG] Tool call received:", file=sys.stderr)
+        print(f"  tool_name: {tool_name}", file=sys.stderr)
+        print(f"  args: {args}", file=sys.stderr)
+
+        # Validate required fields
+        if not args.get("pattern") or not args.get("target"):
+            return f"✗ Error: Missing required fields (pattern={args.get('pattern')}, target={args.get('target')})"
+
         add_event(
             pattern=args.get("pattern"),
             worked=args.get("worked", True),
