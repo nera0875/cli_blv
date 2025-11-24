@@ -54,7 +54,7 @@ db.init()
 THINKING_ENABLED = False
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -266,43 +266,86 @@ def cmd_chat():
                     console.clear()
                     continue
                 elif cmd == "/idea":
-                    # Generate idea via AI
-                    idea_prompt = "Génère 1 idée de test courte basée sur requêtes/events. Format: Test [action] sur [target/variable]. Max 15 mots."
-                    console.print()
-                    idea_text = ""
-                    for chunk_type, chunk_content in chat_stream(idea_prompt, hist, False):
-                        if chunk_type == "content":
-                            idea_text += chunk_content
-                            console.print(chunk_content, end="", soft_wrap=True)
-                    console.print("\n")
+                    # Loop pour générer plusieurs idées
+                    while True:
+                        # Generate idea via AI with structured format
+                        idea_prompt = """Génère 1 idée de test structurée. Format exact:
+Pattern: [nom du pattern]
+Target: [site/API]
+Hypothesis: [hypothèse technique courte]
+Steps: [3 étapes max, séparées par |]
 
-                    # Menu actions
-                    action = questionary.select(
-                        "Action:",
-                        choices=[
-                            "✓ Go (AI explique)",
-                            "→ Next idée",
-                            "📋 Save to /todos",
-                            "✗ Skip"
-                        ],
-                        style=custom_style
-                    ).ask()
+Exemple:
+Pattern: requestId replay cross-card
+Target: Cdiscount
+Hypothesis: requestId faiblement bindé
+Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
 
-                    if action and "Go" in action:
-                        msg = f"Explique comment faire: {idea_text.strip()}"
-                        console.print(f"[dim]Auto: {msg[:50]}...[/]\n")
-                        # Continue to LLM with explanation request
-                    elif action and "Next" in action:
-                        continue  # Re-loop to /idea again
-                    elif action and "Save" in action:
-                        # Save to DB todos table
-                        with db.conn() as c:
-                            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea_text.strip(),))
-                            c.commit()
-                        console.print("[green]✓ Saved to /todos[/]\n")
-                        continue
-                    else:  # Skip
-                        continue
+                        console.print()
+                        idea_text = ""
+                        with console.status("[cyan]💡 Generating idea...", spinner="dots"):
+                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, False):
+                                if chunk_type == "content":
+                                    idea_text += chunk_content
+
+                        # Parse structured format
+                        lines = idea_text.strip().split('\n')
+                        parsed = {}
+                        for line in lines:
+                            if ':' in line:
+                                key, val = line.split(':', 1)
+                                parsed[key.strip().lower()] = val.strip()
+
+                        # Format dans Panel avec style Combo 4
+                        # Highlight keywords in pattern
+                        pattern_text = parsed.get('pattern', 'Unknown')
+                        for keyword in ['bypass', 'injection', 'replay', 'corruption', 'HMAC', '3DS', 'requestId']:
+                            if keyword in pattern_text:
+                                pattern_text = pattern_text.replace(keyword, f'[bold red]{keyword}[/]', 1)
+
+                        steps_list = parsed.get('steps', '').split('|') if parsed.get('steps') else []
+                        steps_formatted = '\n'.join([f"  [green]▸[/] {step.strip()}" for step in steps_list])
+
+                        idea_formatted = f"""[bold cyan]═══════════════════════════════[/]
+[bold white]{pattern_text}[/]
+[bold cyan]═══════════════════════════════[/]
+
+🎯 [bold]Target:[/] [red]{parsed.get('target', 'Unknown')}[/]
+🧠 [bold]Hypothesis:[/] [italic yellow]{parsed.get('hypothesis', 'Unknown')}[/]
+
+[bold magenta]⚡ EXECUTION[/]
+{steps_formatted}
+
+[bold]─────────────────────────────[/]
+[green]✓ VULNERABLE[/] | [yellow]⚠ MEDIUM[/]"""
+
+                        console.print(Panel(
+                            idea_formatted,
+                            title="💡 Test Idea",
+                            border_style="yellow",
+                            padding=(1, 2),
+                            expand=False
+                        ))
+
+                        # Menu actions (chat only)
+                        action = questionary.select(
+                            "Action:",
+                            choices=[
+                                "✓ Go (AI explique)",
+                                "→ Next idée",
+                                "✗ Skip"
+                            ],
+                            style=custom_style
+                        ).ask()
+
+                        if action and "Go" in action:
+                            msg = f"Explique comment faire: {parsed.get('pattern', idea_text.strip())}"
+                            console.print(f"[dim]Auto: {msg[:50]}...[/]\n")
+                            break  # Sort du loop /idea, continue chat
+                        elif action and "Next" in action:
+                            continue  # Re-génère nouvelle idée
+                        else:  # Skip
+                            break  # Sort du loop /idea sans explication
                 elif cmd == "/clear":
                     console.clear()
                     name = safe_input("New conversation name (or Enter for auto): ")
@@ -432,13 +475,21 @@ def cmd_chat():
                         if not status_spinner:
                             status_spinner = console.status("[orange1 italic]Thinking...", spinner="dots")
                             status_spinner.start()
+                    elif chunk_type == "tool_start":
+                        # Stop thinking spinner si actif
+                        if status_spinner:
+                            status_spinner.stop()
+                            status_spinner = None
+                        # Afficher spinner tool
+                        status_spinner = console.status(f"[cyan]🔧 Using {chunk_content}...", spinner="dots")
+                        status_spinner.start()
                     elif chunk_type == "tool":
-                        # Afficher l'appel tool avec style visible
-                        if "VULNERABLE" in chunk_content:
-                            console.print(f"\n[bold red on white] {chunk_content} [/]")
-                        elif "BLOCKED" in chunk_content:
-                            console.print(f"\n[bold blue on white] {chunk_content} [/]")
-                        else:
+                        # Stop tool spinner avant Panel
+                        if status_spinner:
+                            status_spinner.stop()
+                            status_spinner = None
+                        # Tool result already printed by handle_tool_call with Panel
+                        if chunk_content:  # Only print if there's a fallback message
                             console.print(f"\n[cyan]{chunk_content}[/]")
                     elif chunk_type == "content":
                         if status_spinner:
@@ -1222,6 +1273,129 @@ def cmd_triggers():
     elif action and "Retour" in action:
         return
 
+def cmd_hooks():
+    """Gestion des hooks de validation."""
+    hooks = db.get_hooks(active_only=False)
+
+    if not hooks:
+        console.print("[yellow]Aucun hook.[/]")
+        return
+
+    table = Table(title="Hooks de Validation", border_style="cyan")
+    table.add_column("ID", width=5)
+    table.add_column("Name", style="cyan")
+    table.add_column("Event", style="yellow", width=12)
+    table.add_column("Matcher", style="magenta", width=15)
+    table.add_column("Check", style="green", width=15)
+    table.add_column("Action", style="red", width=8)
+    table.add_column("Active", width=8)
+
+    for h in hooks:
+        active = "[green]✓[/]" if h['active'] else "[dim]✗[/]"
+        table.add_row(
+            str(h['id']),
+            h['name'][:20],
+            h['event'],
+            h['matcher'][:15],
+            h['check_type'],
+            h['action'],
+            active
+        )
+
+    console.print(table)
+
+    # Interactive menu
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "➕ Ajouter hook",
+            "🗑️  Supprimer hook",
+            "🔄 Toggle hook",
+            "📋 Détails hook",
+            "← Retour"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "Ajouter" in action:
+        console.print("[cyan]Ajout hook:[/]")
+        name = safe_input("Nom: ")
+        if not name:
+            return
+
+        event = questionary.select(
+            "Event:",
+            choices=["pre_tool", "post_tool", "pre_response", "post_response"],
+            style=custom_style
+        ).ask()
+
+        matcher = safe_input("Matcher (tool name ou * wildcard): ")
+        if not matcher:
+            return
+
+        check_type = questionary.select(
+            "Type de check:",
+            choices=["length", "required_fields", "min_count", "max_count", "enum"],
+            style=custom_style
+        ).ask()
+
+        check_value = safe_input("Check value (field:value): ")
+        action_type = questionary.select(
+            "Action si échec:",
+            choices=["deny", "warn", "allow"],
+            style=custom_style
+        ).ask()
+
+        message = safe_input("Message (optionnel): ")
+        priority = safe_input("Priority (0-100, défaut 0): ")
+        priority = int(priority) if priority and priority.isdigit() else 0
+
+        db.add_hook(name, event, matcher, check_type, action_type, check_value, message, priority)
+        console.print(f"[green]✓ Hook '{name}' ajouté[/]")
+        cmd_hooks()
+
+    elif action and "Supprimer" in action:
+        choices = [f"{h['id']} - {h['name']}" for h in hooks]
+        selected = questionary.select("Quel hook supprimer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            hook_id = int(selected.split(" - ")[0])
+            db.delete_hook(hook_id)
+            console.print(f"[green]✓ Hook supprimé[/]")
+            cmd_hooks()
+
+    elif action and "Toggle" in action:
+        choices = [f"{h['id']} - {h['name']} ({'✓' if h['active'] else '✗'})" for h in hooks]
+        selected = questionary.select("Quel hook toggle ?", choices=choices, style=custom_style).ask()
+        if selected:
+            hook_id = int(selected.split(" - ")[0])
+            db.toggle_hook(hook_id)
+            console.print(f"[green]✓ Hook toggled[/]")
+            cmd_hooks()
+
+    elif action and "Détails" in action:
+        choices = [f"{h['id']} - {h['name']}" for h in hooks]
+        selected = questionary.select("Quel hook ?", choices=choices, style=custom_style).ask()
+        if selected:
+            hook_id = int(selected.split(" - ")[0])
+            hook = next((h for h in hooks if h['id'] == hook_id), None)
+            if hook:
+                details = f"""[bold cyan]Hook: {hook['name']}[/]
+
+[yellow]Event:[/] {hook['event']}
+[yellow]Matcher:[/] {hook['matcher']}
+[yellow]Check Type:[/] {hook['check_type']}
+[yellow]Check Value:[/] {hook['check_value'] or '-'}
+[yellow]Action:[/] {hook['action']}
+[yellow]Message:[/] {hook['message'] or '-'}
+[yellow]Priority:[/] {hook['priority']}
+[yellow]Active:[/] {'✓' if hook['active'] else '✗'}"""
+                console.print(Panel(details, border_style="cyan", expand=False))
+                input("\nAppuyez sur Entrée pour continuer...")
+                cmd_hooks()
+
+    elif action and "Retour" in action:
+        return
+
 def cmd_tables(table_name=None):
     """Show database tables structure or content."""
     with db.conn() as c:
@@ -1444,86 +1618,9 @@ def cmd_tables(table_name=None):
             except Exception as e:
                 console.print(f"[red]Error: {e}[/red]")
 
-def cmd_idea():
-    """Generate test idea outside chat using LLM."""
-    # Build context from DB
-    reqs_count = len(db.get_requests())
-    events_count = len(db.get_events())
+# cmd_idea() removed - use /idea in chat only
 
-    # Generate idea via LLM with spinner
-    idea_prompt = "Basé sur requêtes/events capturés, génère 1 idée de test précise. Format: Test [action] sur [cible]. Max 15 mots. Aucun contexte conversation."
-
-    idea_text = ""
-    status_spinner = None
-    first_token = True
-
-    try:
-        for chunk_type, chunk_content in chat_stream(idea_prompt, [], False):
-            if chunk_type == "content":
-                if first_token:
-                    if status_spinner:
-                        status_spinner.stop()
-                    console.print(f"\n[cyan]💡[/] ", end="")
-                    first_token = False
-                idea_text += chunk_content
-                console.print(chunk_content, end="", soft_wrap=True)
-            elif not idea_text and not status_spinner:
-                status_spinner = console.status(f"[cyan]Analyzing {reqs_count} requests, {events_count} events...", spinner="dots")
-                status_spinner.start()
-
-        if status_spinner:
-            status_spinner.stop()
-        console.print("\n")
-    except Exception as e:
-        if status_spinner:
-            status_spinner.stop()
-        console.print(f"[red]Error generating idea: {e}[/]")
-        return
-
-    # Menu actions
-    action = questionary.select(
-        "Action:",
-        choices=[
-            "→ Next idée",
-            "📋 Save to /todos",
-            "💬 Explain in /chat",
-            "← Back"
-        ],
-        style=custom_style
-    ).ask()
-
-    if action and "Next" in action:
-        cmd_idea()
-    elif action and "Save" in action:
-        with db.conn() as c:
-            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea_text.strip(),))
-            c.commit()
-        console.print("[green]✓ Saved to /todos[/]\n")
-        cmd_idea()
-    elif action and "Explain" in action:
-        console.print(f"[dim]Launching chat with idea...[/]\n")
-        cmd_chat()
-
-def cmd_todos():
-    """Show saved test ideas."""
-    with db.conn() as c:
-        todos = [dict(r) for r in c.execute("SELECT * FROM todos ORDER BY id DESC").fetchall()]
-
-    if not todos:
-        console.print("[yellow]No saved ideas. Use /idea in chat to generate.[/]")
-        return
-
-    table = Table(title="Saved Test Ideas", border_style="cyan")
-    table.add_column("ID", width=5)
-    table.add_column("Idea", style="yellow")
-    table.add_column("Status", width=10)
-    table.add_column("Created", width=19)
-
-    for t in todos:
-        status = "[green]✓[/]" if t['status'] == 'done' else "[dim]○[/]"
-        table.add_row(str(t['id']), t['content'][:80], status, t['created_at'])
-
-    console.print(table)
+# cmd_todos() removed - /todos no longer available
 
     # Interactive menu
     action = questionary.select(
@@ -1604,13 +1701,13 @@ def main():
     cmds_col2 = [
         "[cyan]/prompt[/]   Manage prompts",
         "[cyan]/rules[/]    Manage rules",
-        "[cyan]/resume[/]   Switch chat",
-        "[cyan]/cost[/]     View analytics"
+        "[cyan]/hooks[/]    Manage hooks",
+        "[cyan]/resume[/]   Switch chat"
     ]
 
     cmds_col3 = [
         "[cyan]/clear[/]    New chat",
-        "[cyan]/prune[/]    Clean empty",
+        "[cyan]/cost[/]     View analytics",
         "[cyan]/help[/]     Show help",
         "[cyan]/quit[/]     Exit"
     ]
@@ -1790,16 +1887,14 @@ def main():
                         console.print("[red]Usage: /trigger toggle <id|nom>[/]")
                 else:
                     console.print('[red]Usage: /trigger [add|del|toggle] "nom" "pattern" "response"[/]')
+            elif cmd == "/hooks":
+                cmd_hooks()
             elif cmd in ["/stats", "/s"]:
                 cmd_stats()
-            elif cmd == "/idea":
-                cmd_idea()
             elif cmd.startswith("/tables"):
                 parts = cmd.split(maxsplit=1)
                 table_arg = parts[1] if len(parts) > 1 else None
                 cmd_tables(table_arg)
-            elif cmd == "/todos":
-                cmd_todos()
             elif cmd == "/menu":
                 action = questionary.select(
                     "Menu BLV",

@@ -41,13 +41,155 @@ TOUJOURS remplir: pattern, worked, target, technique, impact.""",
                 "required": ["pattern", "worked", "target", "technique", "impact"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "show_analysis",
+            "description": """Affiche analyse structurée dans Panel. OBLIGATOIRE pour toute analyse >50 mots.
+
+Utilise pour: réponses hypothèses, analyses patterns, explications techniques.""",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "title": {"type": "string", "description": "Titre court (ex: 3DS Bypass Analysis)"},
+                    "pattern": {"type": "string", "description": "Nom du pattern analysé"},
+                    "target": {"type": "string", "description": "Cible (site/API)"},
+                    "hypothesis": {"type": "string", "description": "Hypothèse technique"},
+                    "tests": {"type": "array", "items": {"type": "string"}, "description": "Liste tests à effectuer (3-5 max)"},
+                    "impact": {"type": "string", "description": "Impact si vulnérable"},
+                    "confidence": {"type": "string", "enum": ["LOW", "MEDIUM", "HIGH"], "description": "Niveau confiance"}
+                },
+                "required": ["title", "pattern", "hypothesis", "tests"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "suggest_test",
+            "description": """Suggère un test précis avec steps. OBLIGATOIRE pour suggestions tests.""",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "pattern": {"type": "string", "description": "Pattern à tester"},
+                    "target": {"type": "string", "description": "Cible"},
+                    "steps": {"type": "array", "items": {"type": "string"}, "description": "Étapes précises (3-5 max)"},
+                    "variables": {"type": "array", "items": {"type": "string"}, "description": "Variables critiques à manipuler"},
+                    "expected": {"type": "string", "description": "Résultat attendu si vulnérable"}
+                },
+                "required": ["pattern", "steps", "expected"]
+            }
+        }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "ask_clarification",
+            "description": """Demande clarification user. OBLIGATOIRE si input ambigu/incomplet (ex: 'eazaze', <5 chars).""",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "question": {"type": "string", "description": "Question claire (max 20 mots)"}
+                },
+                "required": ["question"]
+            }
+        }
     }
 ]
 
+def execute_hooks(event, tool_name, args):
+    """Execute hooks for given event and tool. Returns (action, message, updated_args)."""
+    from db import get_hooks
+    import json
+    import re
+
+    # Get matching hooks
+    hooks = get_hooks(event=event, active_only=True)
+
+    for hook in hooks:
+        # Check if hook matches tool (exact match or wildcard)
+        matcher = hook['matcher']
+        if matcher != "*" and matcher != tool_name:
+            # Try regex match
+            try:
+                if not re.match(matcher, tool_name):
+                    continue
+            except:
+                continue  # Invalid regex, skip
+
+        # Execute check based on check_type
+        check_type = hook['check_type']
+        check_value = hook['check_value']
+        action = hook['action']
+        message = hook['message'] or ""
+
+        try:
+            if check_type == "length":
+                # Check text length (for field specified in check_value)
+                field = check_value or "title"
+                value = args.get(field, "")
+                max_len = 50  # Default
+                if ":" in check_value:
+                    field, max_len = check_value.split(":")
+                    max_len = int(max_len)
+                    value = args.get(field, "")
+
+                if len(value) > max_len:
+                    return (action, message.format(field=field, max=max_len), args)
+
+            elif check_type == "required_fields":
+                # Check required fields exist and non-empty
+                fields = json.loads(check_value) if check_value else []
+                missing = [f for f in fields if not args.get(f)]
+                if missing:
+                    return (action, message.format(fields=", ".join(missing)), args)
+
+            elif check_type == "min_count":
+                # Check array has minimum items
+                field, min_count = check_value.split(":") if ":" in check_value else (check_value, "1")
+                value = args.get(field, [])
+                if not isinstance(value, list) or len(value) < int(min_count):
+                    return (action, message.format(field=field, min=min_count), args)
+
+            elif check_type == "max_count":
+                # Check array has maximum items
+                field, max_count = check_value.split(":") if ":" in check_value else (check_value, "10")
+                value = args.get(field, [])
+                if isinstance(value, list) and len(value) > int(max_count):
+                    return (action, message.format(field=field, max=max_count), args)
+
+            elif check_type == "enum":
+                # Check value is in allowed list
+                field, allowed = check_value.split(":") if ":" in check_value else (check_value, "")
+                value = args.get(field)
+                allowed_values = allowed.split(",")
+                if value and value not in allowed_values:
+                    return (action, message.format(field=field, allowed=allowed), args)
+
+        except Exception as e:
+            # Hook execution error, log but continue
+            pass
+
+    # All hooks passed
+    return ("allow", "", args)
+
 def handle_tool_call(tool_name, args):
     """Execute tool and return result."""
+    # Execute pre_tool hooks
+    action, hook_msg, updated_args = execute_hooks("pre_tool", tool_name, args)
+    if action == "deny":
+        return f"❌ Hook bloqué: {hook_msg}"
+    elif action == "warn":
+        # Continue but show warning
+        pass
+    # Use updated args if modified by hooks
+    args = updated_args
+
     if tool_name == "save_event" or tool_name == "save_finding":
         from db import add_event
+        import json
+        import sys
 
         # Validate required fields
         if not args.get("pattern") or not args.get("target"):
@@ -62,10 +204,146 @@ def handle_tool_call(tool_name, args):
             notes=args.get("notes"),
             payload=args.get("payload")
         )
-        if args.get("worked"):
-            return f"💥 {args.get('pattern')} → VULNERABLE on {args.get('target')}"
-        else:
-            return f"🛡️ {args.get('pattern')} → BLOCKED by {args.get('target')}"
+
+        # Build result message with Panel + smooth transition
+        try:
+            from rich.console import Console
+            from rich.panel import Panel
+            from rich.syntax import Syntax
+            import time
+
+            console = Console(file=sys.stderr)
+
+            # Spinner pendant traitement (transition smooth)
+            with console.status("[cyan]🔧 Sauvegarde event...", spinner="dots"):
+                time.sleep(0.3)  # Mini pause pour transition
+
+            # Status emoji + message
+            if args.get("worked"):
+                emoji = "💥"
+                status = "VULNERABLE"
+                border_color = "red"
+                result_msg = f"{emoji} {args.get('pattern')} → {status} on {args.get('target')}"
+            else:
+                emoji = "🛡️"
+                status = "BLOCKED"
+                border_color = "blue"
+                result_msg = f"{emoji} {args.get('pattern')} → {status} by {args.get('target')}"
+
+            # Panel content with JSON
+            syntax = Syntax(json.dumps(args, indent=2), "json", theme="monokai", line_numbers=False)
+
+            # Print Panel with result as title
+            console.print(Panel(
+                syntax,
+                title=f"[bold]{result_msg}[/]",
+                border_style=border_color,
+                padding=(0, 1)
+            ))
+
+            return ""  # No additional message needed (already in Panel)
+        except Exception:
+            # Fallback si Rich pas dispo
+            if args.get("worked"):
+                return f"💥 {args.get('pattern')} → VULNERABLE on {args.get('target')}"
+            else:
+                return f"🛡️ {args.get('pattern')} → BLOCKED by {args.get('target')}"
+
+    elif tool_name == "show_analysis":
+        try:
+            from rich.console import Console
+            from rich.panel import Panel
+            import sys
+            import time
+
+            console = Console(file=sys.stderr)
+
+            with console.status("[cyan]📊 Construction analyse...", spinner="dots"):
+                time.sleep(0.2)
+
+            # Highlight pattern keywords
+            pattern_text = args.get("pattern", "Inconnu")
+            for keyword in ['bypass', 'injection', 'replay', 'corruption', 'HMAC', '3DS']:
+                if keyword in pattern_text:
+                    pattern_text = pattern_text.replace(keyword, f'[bold red]{keyword}[/]', 1)
+
+            tests = args.get("tests", [])
+            tests_formatted = '\n'.join([f"  [cyan]▸[/] {test}" for test in tests])
+
+            confidence = args.get("confidence", "MEDIUM")
+            conf_color = {"LOW": "yellow", "MEDIUM": "yellow", "HIGH": "green"}.get(confidence, "yellow")
+
+            analysis = f"""[bold cyan]═══════════════════════════════[/]
+[bold white]{pattern_text}[/]
+[bold cyan]═══════════════════════════════[/]
+
+[red]●[/] [bold white]Cible[/] [dim]→[/] [bold magenta]{args.get('target', 'Inconnu')}[/]
+[yellow]●[/] [bold white]Hypothèse[/] [dim]→[/] [italic yellow]{args.get('hypothesis', 'Inconnu')}[/]
+
+[bold magenta]⚡ TESTS[/]
+{tests_formatted}
+
+[bold]─────────────────────────────[/]
+[green]✓[/] [dim]Impact:[/] [bold]{args.get('impact', 'Inconnu')}[/]
+[{conf_color}]◆[/] [dim]Confiance:[/] [bold {conf_color}]{confidence}[/]"""
+
+            console.print(Panel(
+                analysis,
+                title=f"📊 {args.get('title', 'Analyse')}",
+                border_style="cyan",
+                padding=(1, 2),
+                expand=False
+            ))
+
+            return ""
+        except Exception as e:
+            return f"Analyse: {args.get('pattern', 'Inconnu')}"
+
+    elif tool_name == "suggest_test":
+        try:
+            from rich.console import Console
+            from rich.panel import Panel
+            import sys
+            import time
+
+            console = Console(file=sys.stderr)
+
+            with console.status("[cyan]🧪 Préparation test...", spinner="dots"):
+                time.sleep(0.2)
+
+            steps = args.get("steps", [])
+            steps_formatted = '\n'.join([f"  [green]{i+1}.[/] {step}" for i, step in enumerate(steps)])
+
+            variables = args.get("variables", [])
+            vars_formatted = '\n'.join([f"  [yellow]•[/] {var}" for var in variables]) if variables else "  [dim]None specified[/]"
+
+            test_panel = f"""[bold white]Pattern:[/] [bold cyan]{args.get('pattern', 'Unknown')}[/]
+[bold white]Target:[/] [red]{args.get('target', 'Unknown')}[/]
+
+[bold yellow]⚡ EXECUTION STEPS[/]
+{steps_formatted}
+
+[bold yellow]🎯 VARIABLES[/]
+{vars_formatted}
+
+[bold]─────────────────────────────[/]
+[green]✓[/] [dim]Expected:[/] [bold]{args.get('expected', 'Unknown')}[/]"""
+
+            console.print(Panel(
+                test_panel,
+                title="🧪 Test Suggestion",
+                border_style="green",
+                padding=(1, 2),
+                expand=False
+            ))
+
+            return ""
+        except Exception as e:
+            return f"Test: {args.get('pattern', 'Unknown')}"
+
+    elif tool_name == "ask_clarification":
+        return f"❓ {args.get('question', 'Peux-tu préciser ?')}"
+
     return "Unknown tool"
 
 LAST_PROMPT_TOKENS = 0
@@ -225,11 +503,15 @@ def chat_stream(msg, history, thinking_enabled=False):
                     idx = tc.index if hasattr(tc, 'index') else 0
 
                     if idx not in tool_calls_builder:
-                        tool_calls_builder[idx] = {"name": None, "arguments": ""}
+                        tool_calls_builder[idx] = {"name": None, "arguments": "", "started": False}
 
                     if hasattr(tc, 'function'):
                         if hasattr(tc.function, 'name') and tc.function.name:
                             tool_calls_builder[idx]["name"] = tc.function.name
+                            # Yield tool_start on first detection
+                            if not tool_calls_builder[idx]["started"]:
+                                yield ("tool_start", tc.function.name)
+                                tool_calls_builder[idx]["started"] = True
                         if hasattr(tc.function, 'arguments') and tc.function.arguments:
                             tool_calls_builder[idx]["arguments"] += tc.function.arguments
 

@@ -43,6 +43,18 @@ def init():
             priority INTEGER DEFAULT 0,
             active INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS hooks (
+            id INTEGER PRIMARY KEY,
+            name TEXT UNIQUE NOT NULL,
+            event TEXT NOT NULL,
+            matcher TEXT NOT NULL,
+            check_type TEXT NOT NULL,
+            check_value TEXT,
+            action TEXT NOT NULL,
+            message TEXT,
+            priority INTEGER DEFAULT 0,
+            active INTEGER DEFAULT 1,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
         c.execute("""CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY, url TEXT, method TEXT,
             headers TEXT, body TEXT, response TEXT)""")
@@ -360,4 +372,58 @@ def toggle_prompt(name):
     """Toggle prompt active status."""
     with conn() as c:
         c.execute("UPDATE prompts SET active = 1-active WHERE name=?", (name,))
+        c.commit()
+
+# === HOOKS ===
+def get_hooks(event=None, active_only=True):
+    """Get hooks, optionally filtered by event."""
+    with conn() as c:
+        q = "SELECT * FROM hooks"
+        conditions = []
+        params = []
+
+        if active_only:
+            conditions.append("active=1")
+        if event:
+            conditions.append("event=?")
+            params.append(event)
+
+        if conditions:
+            q += " WHERE " + " AND ".join(conditions)
+        q += " ORDER BY priority DESC, name ASC"
+
+        return [dict(r) for r in c.execute(q, params).fetchall()]
+
+def add_hook(name, event, matcher, check_type, action, check_value=None, message=None, priority=0):
+    """Add new hook."""
+    with conn() as c:
+        c.execute("""INSERT INTO hooks (name, event, matcher, check_type, check_value, action, message, priority)
+                     VALUES (?,?,?,?,?,?,?,?)""",
+                  (name, event, matcher, check_type, check_value, action, message, priority))
+        c.commit()
+
+def update_hook(hook_id, **kwargs):
+    """Update hook fields."""
+    with conn() as c:
+        fields = []
+        values = []
+        for key, val in kwargs.items():
+            if key in ['event', 'matcher', 'check_type', 'check_value', 'action', 'message', 'priority']:
+                fields.append(f"{key}=?")
+                values.append(val)
+        if fields:
+            values.append(hook_id)
+            c.execute(f"UPDATE hooks SET {', '.join(fields)} WHERE id=?", values)
+            c.commit()
+
+def delete_hook(hook_id):
+    """Delete hook by ID."""
+    with conn() as c:
+        c.execute("DELETE FROM hooks WHERE id=?", (hook_id,))
+        c.commit()
+
+def toggle_hook(hook_id):
+    """Toggle hook active status."""
+    with conn() as c:
+        c.execute("UPDATE hooks SET active = 1-active WHERE id=?", (hook_id,))
         c.commit()
