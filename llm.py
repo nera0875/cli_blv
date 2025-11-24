@@ -54,6 +54,14 @@ def count_tokens(messages):
 def build_prompt():
     parts = []
 
+    # 0. Meta-instructions FIRST (from prompts with name='meta')
+    prompts = get_prompts(active_only=True)
+    meta_prompts = [p for p in prompts if p.get('name') == 'meta']
+    other_prompts = [p for p in prompts if p.get('name') != 'meta']
+
+    for p in meta_prompts:
+        parts.append(p['content'] + "\n\n")
+
     # 1. Behavioral Rules (SQLite)
     rules = get_rules(active_only=True)
     if rules:
@@ -70,9 +78,8 @@ def build_prompt():
             parts.append(f"- {t['pattern']} → {t['response']}\n")
         parts.append("\n")
 
-    # 3. Prompts (SQLite)
-    prompts = get_prompts(active_only=True)
-    for p in prompts:
+    # 3. Other Prompts (SQLite)
+    for p in other_prompts:
         parts.append(p['content'] + "\n\n")
 
     # 4. Findings DB (SQL)
