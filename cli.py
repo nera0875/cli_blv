@@ -67,9 +67,12 @@ def sanitize_text(text):
 
 # Questionary custom style
 custom_style = Style([
-    ('pointer', 'fg:yellow bold'),
-    ('highlighted', 'fg:yellow'),
-    ('selected', 'fg:cyan'),
+    ('qmark', 'fg:#5f87af bold'),           # ? symbole
+    ('question', 'fg:#00d7ff bold'),         # Question text
+    ('answer', 'fg:#5fff5f bold'),           # Sélection finale
+    ('pointer', 'fg:#ff8700 bold'),          # → pointeur (orange)
+    ('highlighted', 'fg:#ffffff bg:#005f87 bold'),  # Ligne active (blanc sur bleu)
+    ('selected', 'fg:#5fff5f'),              # Confirmé (vert)
 ])
 
 def detect_test_list(text):
@@ -84,7 +87,15 @@ def detect_test_list(text):
         for p in patterns:
             m = re.match(p, line)
             if m:
-                tests.append({"id": m.group(1), "desc": m.group(2)[:60]})
+                # Clean and truncate description
+                desc = m.group(2).strip()
+                # Remove markdown bold/italic
+                desc = re.sub(r'\*\*([^*]+)\*\*', r'\1', desc)
+                desc = re.sub(r'\*([^*]+)\*', r'\1', desc)
+                # Truncate at 70 chars
+                if len(desc) > 70:
+                    desc = desc[:67] + "..."
+                tests.append({"id": m.group(1), "desc": desc})
                 break
     return tests if len(tests) >= 2 else None
 
@@ -440,8 +451,11 @@ def cmd_chat():
             # Menu auto après détection liste tests
             tests = detect_test_list(response)
             if tests:
-                choices = [f"{t['id']}. {t['desc']}" for t in tests]
-                choices.append("→ Continuer en chat")
+                # Format choices with proper spacing
+                choices = []
+                for t in tests:
+                    choices.append(f"  {t['id']}. {t['desc']}")
+                choices.append("  → Continuer en chat")
 
                 selected = questionary.select(
                     "Quel test ?",
@@ -450,7 +464,7 @@ def cmd_chat():
                 ).ask()
 
                 if selected and "Continuer" not in selected:
-                    test_id = selected.split(".")[0]
+                    test_id = selected.strip().split(".")[0].strip()
                     msg = f"montre le payload complet pour le test {test_id}"
                     console.print(f"\n[dim]Auto: {msg}[/]\n")
                     continue  # Relance loop avec msg
