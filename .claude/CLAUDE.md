@@ -22,6 +22,26 @@ uv run python cli.py
 **NEVER skip validation.** If tests fail, fix before commit.
 **ALWAYS use `uv run python` - NEVER plain `python` or `python3`.**
 
+## GIT SAVE PROTOCOL (MANDATORY)
+
+**After EVERY major feature added, IMMEDIATELY run:**
+
+```bash
+git add .
+git commit -m "feat: [description courte]"
+git push
+```
+
+**Major feature = any of:**
+- New command (/tables, /rules, etc.)
+- Interactive menu system
+- Database schema change
+- Core functionality (import, chat, etc.)
+- Bug fix that affects multiple functions
+
+**NEVER continue to next feature without git save.**
+**If lost code: check .claude cache or git history.**
+
 ## Project Context
 
 **Stack:**

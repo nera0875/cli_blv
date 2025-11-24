@@ -1,0 +1,14 @@
+[project]
+name = "cli-blv"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "litellm>=1.80.5",
+    "prompt-toolkit>=3.0.52",
+    "questionary>=2.1.1",
+    "requests>=2.32.5",
+    "rich>=14.2.0",
+    "textual>=6.6.0",
+]

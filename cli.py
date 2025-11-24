@@ -54,7 +54,7 @@ db.init()
 THINKING_ENABLED = False
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -1028,66 +1028,131 @@ def cmd_tables(table_name=None):
     """Show database tables structure or content."""
     with db.conn() as c:
         if not table_name:
-            # Show all tables structure
+            # Show tables in Rich table with stats
             tables = c.execute("SELECT name FROM sqlite_master WHERE type='table' ORDER BY name").fetchall()
+            table_names = [t['name'] for t in tables]
 
-            for tbl in tables:
-                tbl_name = tbl['name']
-                console.print(f"\n[bold cyan]Table: {tbl_name}[/bold cyan]")
+            # Display table list horizontally with row counts
+            tables_display = Table(title="[bold cyan]Tables disponibles[/]", border_style="cyan", show_header=True, expand=False)
 
-                # Get columns
-                cols = c.execute(f"PRAGMA table_info({tbl_name})").fetchall()
-                t = Table(show_header=True, border_style="dim")
-                t.add_column("Column", style="yellow")
-                t.add_column("Type", style="cyan")
-                t.add_column("Constraints", style="green")
+            # Add each table as a column
+            for name in table_names:
+                count = c.execute(f"SELECT COUNT(*) as cnt FROM {name}").fetchone()['cnt']
+                tables_display.add_column(name, style="yellow", justify="center", width=15)
 
-                for col in cols:
-                    constraints = []
-                    if col['pk']: constraints.append("PK")
-                    if col['notnull']: constraints.append("NOT NULL")
-                    if col['dflt_value']: constraints.append(f"DEFAULT {col['dflt_value']}")
-                    t.add_row(col['name'], col['type'], " ".join(constraints))
+            # Add row counts in a single row
+            counts = [str(c.execute(f"SELECT COUNT(*) as cnt FROM {name}").fetchone()['cnt']) for name in table_names]
+            tables_display.add_row(*counts)
 
-                console.print(t)
+            console.print(tables_display)
+
+            # Then interactive selection
+            selected = questionary.select(
+                "Quelle table explorer ?",
+                choices=table_names,
+                style=custom_style
+            ).ask()
+
+            if selected:
+                cmd_tables(selected)
+            return
         else:
             # Show table content
             try:
                 rows = c.execute(f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 20").fetchall()
 
-                if not rows:
-                    console.print(f"[yellow]Table '{table_name}' is empty[/yellow]")
-                    return
+                # Display table if has rows
+                if rows:
+                    t = Table(title=f"[bold cyan]{table_name}[/bold cyan] (last 20 rows)", border_style="cyan", show_lines=True)
 
-                t = Table(title=f"[bold cyan]{table_name}[/bold cyan] (last 20 rows)", border_style="cyan")
+                    # Add columns dynamically
+                    for col in rows[0].keys():
+                        t.add_column(col, style="dim" if col in ["id", "created_at"] else "")
 
-                # Add columns dynamically
-                for col in rows[0].keys():
-                    t.add_column(col, style="dim" if col in ["id", "created_at"] else "")
+                    # Add rows
+                    for row in rows:
+                        t.add_row(*[str(row[k])[:100] if row[k] else "" for k in row.keys()])
 
-                # Add rows
-                for row in rows:
-                    t.add_row(*[str(row[k])[:100] if row[k] else "" for k in row.keys()])
+                    console.print(t)
+                    console.print(f"[dim]Showing {len(rows)} rows (max 20)[/dim]")
+                else:
+                    console.print(f"[yellow]Table '{table_name}' is empty[/yellow]\n")
 
-                console.print(t)
-                console.print(f"[dim]Showing {len(rows)} rows (max 20)[/dim]")
+                # Interactive menu (always show, even if empty)
+                menu_choices = ["➕ Ajouter ligne"]
+                if rows:
+                    menu_choices.extend(["🔍 Voir détails row", "🗑️  Supprimer lignes"])
 
-                # ALWAYS show interactive menu after displaying table
-                action = questionary.select(
-                    "Action:",
-                    choices=[
-                        "🗑️  Supprimer lignes",
-                        "🔄 Rafraîchir",
-                        "← Retour"
-                    ]
-                ).ask()
+                # Special action for requests table: import XML
+                if table_name == "requests":
+                    menu_choices.insert(1, "📥 Importer Burp XML")
 
-                if action and "Supprimer" in action:
-                    # Build display with first meaningful column after ID
+                menu_choices.extend(["📋 Voir structure table", "🔄 Rafraîchir", "← Retour"])
+
+                action = questionary.select("Action:", choices=menu_choices, style=custom_style).ask()
+
+                if action and "Ajouter" in action:
+                    # Dynamic form based on table columns
+                    cols_info = c.execute(f"PRAGMA table_info({table_name})").fetchall()
+                    input_cols = [col for col in cols_info if col['name'] not in ['id', 'created_at']]
+
+                    values = {}
+                    for col in input_cols:
+                        prompt_text = f"{col['name']}"
+                        if col['type']:
+                            prompt_text += f" ({col['type']})"
+                        if col['dflt_value']:
+                            prompt_text += f" [défaut: {col['dflt_value']}]"
+
+                        val = questionary.text(prompt_text + ":").ask()
+
+                        if val:
+                            values[col['name']] = val
+                        elif col['dflt_value']:
+                            values[col['name']] = col['dflt_value']
+                        else:
+                            if col['notnull'] == 0:
+                                values[col['name']] = None
+                            else:
+                                values[col['name']] = ""
+
+                    # Build INSERT query
+                    cols = ", ".join(values.keys())
+                    placeholders = ", ".join(["?" for _ in values])
+                    query = f"INSERT INTO {table_name} ({cols}) VALUES ({placeholders})"
+                    c.execute(query, tuple(values.values()))
+                    c.commit()
+                    console.print(f"[green]✓ Ligne ajoutée[/]")
+                    cmd_tables(table_name)
+
+                elif action and "détails" in action:
                     display_cols = [k for k in rows[0].keys() if k not in ['id', 'created_at']]
-                    main_col = display_cols[0] if display_cols else 'id'
+                    main_col = display_cols[0] if display_cols else 'name'
 
-                    choices = [f"{row['id']} - {str(row[main_col])[:50]}" for row in rows]
+                    choices = [f"{dict(row)['id']} - {str(dict(row).get(main_col, ''))[:50]}" for row in rows]
+                    selected = questionary.select("Quelle ligne voir ?", choices=choices, style=custom_style).ask()
+
+                    if selected:
+                        row_id = int(selected.split(" - ")[0])
+                        full_row = next((dict(r) for r in rows if dict(r)['id'] == row_id), None)
+
+                        if full_row:
+                            detail_table = Table(title=f"[bold cyan]Row {row_id} - Détails complets[/]", border_style="cyan", show_header=False)
+                            detail_table.add_column("Field", style="yellow", width=20)
+                            detail_table.add_column("Value", style="white")
+
+                            for key, value in full_row.items():
+                                detail_table.add_row(key, str(value) if value else "[dim]NULL[/dim]")
+
+                            console.print(detail_table)
+                            questionary.text("Appuyer sur Enter pour continuer...").ask()
+                            cmd_tables(table_name)
+
+                elif action and "Supprimer" in action:
+                    display_cols = [k for k in rows[0].keys() if k not in ['id', 'created_at']]
+                    main_col = display_cols[0] if display_cols else 'name'
+
+                    choices = [f"{dict(row)['id']} - {str(dict(row).get(main_col, ''))[:50]}" for row in rows]
                     selected = questionary.checkbox(
                         "Sélectionner lignes (Espace=cocher, Enter=valider):",
                         choices=choices
@@ -1101,10 +1166,35 @@ def cmd_tables(table_name=None):
                                 c.execute(f"DELETE FROM {table_name} WHERE id=?", (row_id,))
                             c.commit()
                             console.print(f"[green]✓ {len(selected)} ligne(s) supprimée(s)[/]")
-                            # Refresh display
                             cmd_tables(table_name)
+
+                elif action and "Importer" in action:
+                    cmd_import()
+                    cmd_tables(table_name)
+
+                elif action and "structure" in action:
+                    cols = c.execute(f"PRAGMA table_info({table_name})").fetchall()
+                    struct_table = Table(title=f"[bold cyan]Structure: {table_name}[/]", border_style="cyan")
+                    struct_table.add_column("Column", style="yellow")
+                    struct_table.add_column("Type", style="cyan")
+                    struct_table.add_column("Constraints", style="green")
+
+                    for col in cols:
+                        constraints = []
+                        if col['pk']: constraints.append("PK")
+                        if col['notnull']: constraints.append("NOT NULL")
+                        if col['dflt_value']: constraints.append(f"DEFAULT {col['dflt_value']}")
+                        struct_table.add_row(col['name'], col['type'], " ".join(constraints))
+
+                    console.print(struct_table)
+                    questionary.text("Appuyer sur Enter pour continuer...").ask()
+                    cmd_tables(table_name)
+
                 elif action and "Rafraîchir" in action:
                     cmd_tables(table_name)
+
+                elif action and "Retour" in action:
+                    cmd_tables()  # Return to table selection menu
 
             except Exception as e:
                 console.print(f"[red]Error: {e}[/red]")
@@ -1158,9 +1248,14 @@ def main():
             # Show footer
             console.print(get_footer(), style="dim")
 
-            cmd = prompt("> ", history=history, completer=completer)
+            cmd = prompt("> ", history=history, completer=completer, complete_while_typing=True, enable_history_search=True)
             cmd = sanitize_text(cmd)
             if not cmd.strip():
+                continue
+
+            # Show all commands if just "/"
+            if cmd == "/":
+                cmd_help()
                 continue
 
             # Single letter + long commands
