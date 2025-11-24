@@ -1440,25 +1440,26 @@ def cmd_tables(table_name=None):
                 console.print(f"[red]Error: {e}[/red]")
 
 def cmd_idea():
-    """Generate test idea outside chat."""
-    # Build minimal context from DB
+    """Generate test idea outside chat using LLM."""
+    # Build context from DB
     reqs_count = len(db.get_requests())
     events_count = len(db.get_events())
 
-    console.print(f"[dim]Context: {reqs_count} requests, {events_count} events[/]\n")
+    console.print(f"[dim]Analyzing {reqs_count} requests, {events_count} events...[/]\n")
 
-    # Simple idea generation without full chat context
-    ideas = [
-        "Replay requestId cross-transaction",
-        "Test HMAC validation bypass",
-        "Race condition sur state endpoint",
-        "Token replay cross-session",
-        "Parameter pollution (duplicate params)"
-    ]
+    # Generate idea via LLM with empty history (one-shot)
+    idea_prompt = "Basé sur requêtes/events capturés, génère 1 idée de test précise. Format: Test [action] sur [cible]. Max 15 mots. Aucun contexte conversation."
 
-    import random
-    idea = random.choice(ideas)
-    console.print(f"[cyan]💡 {idea}[/]\n")
+    idea_text = ""
+    try:
+        for chunk_type, chunk_content in chat_stream(idea_prompt, [], False):
+            if chunk_type == "content":
+                idea_text += chunk_content
+                console.print(chunk_content, end="", soft_wrap=True)
+        console.print("\n")
+    except Exception as e:
+        console.print(f"[red]Error generating idea: {e}[/]")
+        return
 
     # Menu actions
     action = questionary.select(
@@ -1476,7 +1477,7 @@ def cmd_idea():
         cmd_idea()
     elif action and "Save" in action:
         with db.conn() as c:
-            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea,))
+            c.execute("INSERT INTO todos (content, status) VALUES (?, 'pending')", (idea_text.strip(),))
             c.commit()
         console.print("[green]✓ Saved to /todos[/]\n")
         cmd_idea()
