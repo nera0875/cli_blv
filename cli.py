@@ -1196,6 +1196,23 @@ def cmd_tables(table_name=None):
             try:
                 rows = c.execute(f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 20").fetchall()
 
+                # Auto-delete empty rows (all NULL except id)
+                if rows:
+                    empty_ids = []
+                    for row in rows:
+                        # Check if all columns except 'id' are NULL
+                        non_id_values = [row[k] for k in row.keys() if k != 'id']
+                        if all(v is None or str(v).strip() == '' for v in non_id_values):
+                            empty_ids.append(row['id'])
+
+                    if empty_ids:
+                        for empty_id in empty_ids:
+                            c.execute(f"DELETE FROM {table_name} WHERE id=?", (empty_id,))
+                        c.commit()
+                        console.print(f"[dim]🗑️  Auto-deleted {len(empty_ids)} empty row(s)[/dim]")
+                        # Re-fetch after deletion
+                        rows = c.execute(f"SELECT * FROM {table_name} ORDER BY id DESC LIMIT 20").fetchall()
+
                 # Display table if has rows
                 if rows:
                     t = Table(title=f"[bold cyan]{table_name}[/bold cyan] (last 20 rows)", border_style="cyan", show_lines=True)
