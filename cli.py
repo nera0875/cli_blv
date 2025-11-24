@@ -488,11 +488,63 @@ def cmd_prompts():
         table.add_row(p["name"], active, str(p["priority"]), size)
 
     console.print(table)
-    console.print("\n[dim]Commands:[/]")
-    console.print("  [cyan]/prompt add <name>[/] - Add new prompt (multiline editor)")
-    console.print("  [cyan]/prompt edit <name>[/] - Edit prompt content")
-    console.print("  [cyan]/prompt del <name>[/] - Delete prompt")
-    console.print("  [cyan]/prompt toggle <name>[/] - Activate/deactivate")
+
+    # Interactive menu
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "➕ Ajouter prompt",
+            "✏️  Éditer prompt",
+            "🗑️  Supprimer prompt",
+            "🔄 Toggle prompt",
+            "← Retour"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "Ajouter" in action:
+        name = questionary.text("Nom du prompt:").ask()
+        if not name:
+            return
+        content = questionary.text("Contenu (ou Ctrl+C annuler):").ask()
+        if content:
+            db.add_prompt(name, content)
+            console.print(f"[green]✓ Prompt '{name}' ajouté[/]")
+            cmd_prompts()
+
+    elif action and "Éditer" in action:
+        choices = [p['name'] for p in prompts]
+        selected = questionary.select("Quel prompt éditer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            existing = next((p for p in prompts if p['name'] == selected), None)
+            if existing:
+                content = questionary.text("Nouveau contenu:", default=existing['content']).ask()
+                if content:
+                    db.update_prompt(selected, content)
+                    console.print(f"[green]✓ Prompt '{selected}' mis à jour[/]")
+                    cmd_prompts()
+
+    elif action and "Supprimer" in action:
+        choices = [p['name'] for p in prompts]
+        selected = questionary.select("Quel prompt supprimer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            confirm = questionary.confirm(f"Supprimer '{selected}' ?").ask()
+            if confirm:
+                db.delete_prompt(selected)
+                console.print(f"[green]✓ Prompt supprimé[/]")
+                cmd_prompts()
+
+    elif action and "Toggle" in action:
+        choices = [f"{p['name']} ({'✓' if p['active'] else '✗'})" for p in prompts]
+        selected = questionary.select("Quel prompt toggle ?", choices=choices, style=custom_style).ask()
+        if selected:
+            name = selected.split(" (")[0]
+            db.toggle_prompt(name)
+            console.print(f"[green]✓ Prompt toggled[/]")
+            cmd_prompts()
+
+    elif action and "Retour" in action:
+        return
 
 def cmd_add(parts):
     if len(parts) < 3:
@@ -982,12 +1034,47 @@ def cmd_rules():
         )
 
     console.print(table)
-    console.print("\n[dim]Commandes:[/]")
-    console.print('  [cyan]/rules description complète[/] - Ajouter rule')
-    console.print("  [cyan]/rules del[/] - Supprimer (menu interactif)")
-    console.print("  [cyan]/rules toggle[/] - Activer/désactiver (menu interactif)")
-    console.print("  [dim]/rules del <id|nom> - Suppression directe[/]")
-    console.print("  [dim]/rules toggle <id|nom> - Toggle direct[/]")
+
+    # Interactive menu
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "➕ Ajouter rule",
+            "🗑️  Supprimer rule",
+            "🔄 Toggle rule",
+            "← Retour"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "Ajouter" in action:
+        description = questionary.text("Description complète:").ask()
+        if description:
+            name = "_".join(description.split()[:3])
+            db.add_rule(name, description)
+            console.print(f"[green]✓ Rule '{name}' ajoutée[/]")
+            cmd_rules()
+
+    elif action and "Supprimer" in action:
+        choices = [f"{r['id']} - {r['name']}" for r in rules]
+        selected = questionary.select("Quelle rule supprimer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            rule_id = int(selected.split(" - ")[0])
+            db.delete_rule(rule_id)
+            console.print(f"[green]✓ Rule supprimée[/]")
+            cmd_rules()
+
+    elif action and "Toggle" in action:
+        choices = [f"{r['id']} - {r['name']} ({'✓' if r['active'] else '✗'})" for r in rules]
+        selected = questionary.select("Quelle rule toggle ?", choices=choices, style=custom_style).ask()
+        if selected:
+            rule_id = int(selected.split(" - ")[0])
+            db.toggle_rule(rule_id)
+            console.print(f"[green]✓ Rule toggled[/]")
+            cmd_rules()
+
+    elif action and "Retour" in action:
+        return
 
 def cmd_triggers():
     """Gestion des triggers BLV."""
@@ -1019,10 +1106,55 @@ def cmd_triggers():
         )
 
     console.print(table)
-    console.print("\n[dim]Commandes:[/]")
-    console.print('[cyan]/trigger add "nom" "pattern" "response" [category][/] - Ajouter')
-    console.print("  [cyan]/trigger del <id|nom>[/] - Supprimer")
-    console.print("  [cyan]/trigger toggle <id|nom>[/] - Activer/désactiver")
+
+    # Interactive menu
+    action = questionary.select(
+        "Action:",
+        choices=[
+            "➕ Ajouter trigger",
+            "🗑️  Supprimer trigger",
+            "🔄 Toggle trigger",
+            "← Retour"
+        ],
+        style=custom_style
+    ).ask()
+
+    if action and "Ajouter" in action:
+        name = questionary.text("Nom:").ask()
+        if not name:
+            return
+        pattern = questionary.text("Pattern:").ask()
+        if not pattern:
+            return
+        response = questionary.text("Response:").ask()
+        if not response:
+            return
+        category = questionary.text("Category (optionnel):").ask()
+
+        db.add_trigger(name, pattern, response, category if category else None)
+        console.print(f"[green]✓ Trigger '{name}' ajouté[/]")
+        cmd_triggers()
+
+    elif action and "Supprimer" in action:
+        choices = [f"{t['id']} - {t['name']}" for t in triggers]
+        selected = questionary.select("Quel trigger supprimer ?", choices=choices, style=custom_style).ask()
+        if selected:
+            trigger_id = int(selected.split(" - ")[0])
+            db.delete_trigger(trigger_id)
+            console.print(f"[green]✓ Trigger supprimé[/]")
+            cmd_triggers()
+
+    elif action and "Toggle" in action:
+        choices = [f"{t['id']} - {t['name']} ({'✓' if t['active'] else '✗'})" for t in triggers]
+        selected = questionary.select("Quel trigger toggle ?", choices=choices, style=custom_style).ask()
+        if selected:
+            trigger_id = int(selected.split(" - ")[0])
+            db.toggle_trigger(trigger_id)
+            console.print(f"[green]✓ Trigger toggled[/]")
+            cmd_triggers()
+
+    elif action and "Retour" in action:
+        return
 
 def cmd_tables(table_name=None):
     """Show database tables structure or content."""
