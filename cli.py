@@ -1445,19 +1445,33 @@ def cmd_idea():
     reqs_count = len(db.get_requests())
     events_count = len(db.get_events())
 
-    console.print(f"[dim]Analyzing {reqs_count} requests, {events_count} events...[/]\n")
-
-    # Generate idea via LLM with empty history (one-shot)
+    # Generate idea via LLM with spinner
     idea_prompt = "Basé sur requêtes/events capturés, génère 1 idée de test précise. Format: Test [action] sur [cible]. Max 15 mots. Aucun contexte conversation."
 
     idea_text = ""
+    status_spinner = None
+    first_token = True
+
     try:
         for chunk_type, chunk_content in chat_stream(idea_prompt, [], False):
             if chunk_type == "content":
+                if first_token:
+                    if status_spinner:
+                        status_spinner.stop()
+                    console.print(f"\n[cyan]💡[/] ", end="")
+                    first_token = False
                 idea_text += chunk_content
                 console.print(chunk_content, end="", soft_wrap=True)
+            elif not idea_text and not status_spinner:
+                status_spinner = console.status(f"[cyan]Analyzing {reqs_count} requests, {events_count} events...", spinner="dots")
+                status_spinner.start()
+
+        if status_spinner:
+            status_spinner.stop()
         console.print("\n")
     except Exception as e:
+        if status_spinner:
+            status_spinner.stop()
         console.print(f"[red]Error generating idea: {e}[/]")
         return
 
