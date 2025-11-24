@@ -1,0 +1,93 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sat Nov 22 19:47:00 CET 2025">
+  <item>
+    <time>Sat Nov 22 19:44:28 CET 2025</time>
+    <url><![CDATA[https://centinelapi.cardinalcommerce.com/V1/TermURL/2.0/CCA]]></url>
+    <host ip="198.217.251.250">centinelapi.cardinalcommerce.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/V1/TermURL/2.0/CCA]]></path>
+    <extension>0/CCA</extension>
+    <request base64="false"><![CDATA[POST /V1/TermURL/2.0/CCA HTTP/2
+Host: centinelapi.cardinalcommerce.com
+Cookie: BIGipServerCentinel-Prod-Web-CentinelAPI.app~Centinel-Prod-Web-CentinelAPI_pool=!s6VkV2lyje+blbRQNWojnuWLrUOgQUbfzXgCiQn8Z0TjxlZE9/vsZoUZc/9k4Oe9RlufqGA1n3zDJg==; TS01906b0c=01389e5c061307c8e343f6a652e6aea853e0344a5f2788718f97ebda2b90d5634a79c02e7c4d37f5357e4fdc58b40990f16720e42f2cab72156bc639c9d629682ed08b46bc; __cfruid=a587e6cce0923d7364af140a90520767f6d295cc-1763837049
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 354
+Origin: https://acs-challenge.apata.io
+Referer: https://acs-challenge.apata.io/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: iframe
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+Priority: u=4
+Te: trailers
+
+cres=eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiYWNzVHJhbnNJRCI6IjgwM2Q1ZWQyLWJjMjMtNGJlZS1iMTk4LWRlMTFjZmE3YTA2OSIsInRocmVlRFNTZXJ2ZXJUcmFuc0lEIjoiMTA5YTg2MzEtYzE3OC00YTk4LTg1MmUtN2IxOWZkMmZlNzdjIiwidHJhbnNTdGF0dXMiOiJZIiwiY2hhbGxlbmdlQ29tcGxldGlvbkluZCI6IlkifQ&threeDSSessionData=MF9hOWI1YzlkNS0yNDA4LTQ3YTgtYjU4NS00Y2ZjNjg1MWJlMDU]]></request>
+    <status>200</status>
+    <responselength>2032</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Date: Sat, 22 Nov 2025 18:44:31 GMT
+Content-Type: text/html;charset=ISO-8859-1
+Content-Length: 1379
+Cf-Ray: 9a2a942049a26fa0-CDG
+Content-Language: en-US
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+Vary: Accept-Encoding
+Cf-Cache-Status: DYNAMIC
+Report-To: {"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v4?s=TL8cMK79JdtlECNGnYw1dJRB5hVbAqLXpUPE17d5UPQJu6s%2BtFtIkTOHXuE76UGMq4tVHqZnt%2BYaOdaz42HYy7WOlknPIqn7L9cn0wSKnJcznBR%2FsLonGs5dtw%2F346iY7CXSE4FG7Y67hKGdSl5uWvld"}],"group":"cf-nel","max_age":604800}
+Nel: {"success_fraction":0,"report_to":"cf-nel","max_age":604800}
+Server: cloudflare
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html>
+	<head></head>
+	<body>
+	<input type="hidden" id="responseJwt" value={&quot;CardinalJWT&quot;:&quot;eyJhbGciOiJIUzI1NiJ9.eyJpc3MiOiI1Y2I1ZDFmZDc5MWVlZjBlMmMzMTNlYTciLCJpYXQiOjE3NjM4MzcwNzEsImV4cCI6MTc2Mzg0NDI3MSwianRpIjoiOWVlYmEyZTctYTVjNS00Yzk1LWI3YTUtZTg1ODUxOGM1NjVjIiwiQ29uc3VtZXJTZXNzaW9uSWQiOiIwX2E5YjVjOWQ1LTI0MDgtNDdhOC1iNTg1LTRjZmM2ODUxYmUwNSIsIlJlZmVyZW5jZUlkIjoiMjI0NDU2MDYzNzkxOTAxMzkiLCJPcmdVbml0SWQiOiI1ZDIyYTNlMzAxNzI5ZDJhYTg3OTcwOGYiLCJhdWQiOiIzZjBiZjMyMC1jN2QzLTExZjAtYjQ1Zi05ZmU2Y2E3ZWM2NmEiLCJQYXlsb2FkIjp7IlZhbGlkYXRlZCI6dHJ1ZSwiUGF5bWVudCI6eyJUeXBlIjoiQ0NBIiwiUHJvY2Vzc29yVHJhbnNhY3Rpb25JZCI6ImY3M2VNVGxBdGJ6TnNJempTaHcwIiwiRXh0ZW5kZWREYXRhIjp7IkFtb3VudCI6IjI5ODUzIiwiQ0FWViI6IkFBY0JBUUdWZ0FBQUFIU2RsNE1tZFVsNG1RQVx1MDAzZCIsIkN1cnJlbmN5Q29kZSI6Ijk3OCIsIkVDSUZsYWciOiIwNSIsIlRocmVlRFNWZXJzaW9uIjoiMi4yLjAiLCJXaGl0ZUxpc3RTdGF0dXMiOiJOIiwiV2hpdGVMaXN0U3RhdHVzU291cmNlIjoiMDMiLCJQQVJlc1N0YXR1cyI6IlkiLCJTaWduYXR1cmVWZXJpZmljYXRpb24iOiJZIn19LCJBY3Rpb25Db2RlIjoiU1VDQ0VTUyIsIkVycm9yTnVtYmVyIjowLCJFcnJvckRlc2NyaXB0aW9uIjoiU3VjY2VzcyJ9fQ.ZBGQANzglYcxfJh-3ehKHXj4dU2PSeTSOIRhqFeM_xY&quot;} name="responseJwt">
+		<script>
+			function postCustomMessage() {
+				var jwt = document.getElementById('responseJwt').value
+				parent.postMessage(jwt, "*");
+			}
+			window.onload = postCustomMessage;
+		</script>
+	</body>
+</html>]]></response>
+    <comment></comment>
+  </item>
+</items>

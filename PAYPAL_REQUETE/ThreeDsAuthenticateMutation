@@ -1,0 +1,100 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sat Nov 22 19:47:41 CET 2025">
+  <item>
+    <time>Sat Nov 22 19:44:37 CET 2025</time>
+    <url><![CDATA[https://www.paypal.com/graphql/]]></url>
+    <host ip="151.101.61.21">www.paypal.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/graphql/]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /graphql/ HTTP/2
+Host: www.paypal.com
+Cookie: l7_az=dcg16.slc; ts=vreXpYrS%3D1795373077%26vteXpYrS%3D1763838877%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; datadome=RrVxV1Ip4x1z4jAxANma24BnxHans8rL3Y6z9BQ6Tp~MZNTklXu6RH6BivhEX6tdlfFGSZurfr0VkrEtb1oeLwjOn9wWdc_yPFwyi8Kv1kpxqc8~Mbn_i8deVC5Q35pX; enforce_policy=ccpa; cookie_check=yes; d_id=581858a6124649c09c5db3e6677221601763835536897; LANG=fr_FR%3BFR; tsrce=checkoutuinodeweb; x-pp-s=eyJ0IjoiMTc2MzgzNzA3NzMwMyIsImwiOiIwIiwibSI6IjAifQ; _dd_s=rum=2&id=87de2c3b-26df-4a29-b40e-84b077ec308e&created=1763835537350&expire=1763837947036; TLTSID=64170049958339588117420657968181; TLTDID=44204597848366435413502890503184; cookie_prefs=T%3D1%2CP%3D1%2CF%3D1%2Ctype%3Dexplicit_banner; sc_f=yb0vq9UhKzfLSRIUzCZXrFn_JAVpjRgxBwemY5OBWa91aohswGcqXbdEccWaRzmzd57PA_IRIA_ZERoeHPX-l-fhq6rG8sTjRgAP7G; KHcl0EuY7AKSMgfvHl7J5E7hPtK=Xe2xbousp0dHr_0JdFLJ4TkXZDSqdlNdQsP8elCAkun79lQ4hM01l7LuY-n31gQiC-qaPPX_fFgsR_3K; ddi=mL8KQy6M5Z7riKvps2COMMkmtSnuf9hLpLzpi95oHRvrw3yT3qGDurYhtyrw_Zxxp36x_dPM_es4svjNgeo5NKmEoEqg8Efu8b949lrCln7cEG-8; _iidt=6LI06uGoouhW6zBRhpMXIEiBUOCfS/FSWo6oM+XxoRaXFQlMBQYzhT34rorAffUAGFcie9wV4PxU/A==; fn_dt=9XA99873XA309254T; DPz73K5mY4nlBaZpzRkjI3ZzAY3QMmrP=S23AAMgpFpugxlO_YoFQ6kfaVZQF4Idqa1qTEkEjQXPL2YhO_s2MWgRrzwKga-ntIcEAwnSehDE9kUMa5bpL3HVu9JMjlgW6Q; TfXMWj95u2_Zf1Kmv_GCUOjlGG8=abhIlOraNlzC7xxaEh8xVxWFpg3BvI-Kmst4vLwt-rbchZ57VKxfy1JiH0uESVaznc4cgQLzRP_i2wDFIYt6cowsN0uztpj7t4Q96VgSUgkgi36x-_q1ITE03XkGbzXOW7lHleiaqWBENX7Ni3Iu_6_3z6uxEITQHUkuBvA6nVyMxV0TGjEn3dlpX-y; id_token=idtoken3d6f552975c844d99ea471894893f76e; rmuc=VM1Qye1eI083x3G_8P5Jy4HVasnuB2nX-vlzDaM0vVrX_y6PizvEHiowCoyaR7gslt_rDYCXiNJr8IWMXG9sUIDEGKEKmxuf3dUlsw6tuewxmVg0fr4tCRmo21jhbJpmXZnwoABp_CLfzEtGa8h1UlfNEUvLV37NhIo9JMHcRY0gQVzmCEegWpKdnVLYdJNH-GmJYobunOKd97Ek3_YimNCLToG-E2lOtkMYOyhtG_4WFcKW; SEGM=; _gcl_au=1.1.914084791.1763835677; _ga=GA1.1.1934718784.1763835677; _gid=GA1.2.1906158324.1763835677; ddall=1; _ga_FQYH6BLY4K=GS1.1.1763835685.1.1.1763837055.0.0.0; nsid=s%3AvkSu302oXL035_E0rRZkaWpYlh5EdSt_.oGg9TohSH2sNM4%2B76H3sogFJqgyNMXNvfHtciV6anWw; pi_opt_in925803=true; visitor_id925803-hash=90264565fe6a1cfefd1bc77df6f8a1c149e0c9bbddc6bbc1cd91a93df0080bf42bb0db036acabd32f1cbea7ee8037842f85cebdc; lpv925803=aHR0cHM6Ly93d3cucGF5cGFsLmNvbS9mci9ob21l; visitor_id925803=3849430704; ui_experience=did_set%3Dtrue%26login_type%3DEMAIL_PASSWORD%26home%3D2; login_email=martintobias35%40outlook.fr; X-PP-ADS=AToBOAQiaUbXadIk2XrALqnmUOsIJqo; rssk=d%7DC9%40%3C6%3D8%3A%3A%3A%3FA%3D%3D%3Exqx%3E%C2%819%3Fq%3Cgl%3D%3F13; AV894Kt2TSumQQrJwe-8mzmyREO=S23AAMgpFpugxlO_YoFQ6kfaVZQF4Idqa1qTEkEjQXPL2YhO_s2MWgRrzwKga-ntIcEAwnSehDE9kUMa5bpL3HVu9JMjlgW6Q; tcs=main%3Axo%3Alite%7CButtons_base_2xi07%20CheckoutButton_noMargin_mv-3h%20xo-member-c72rwi-button_base-text_button_lg-btn_full_width
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://www.paypal.com/webapps/hermes?flow=1-P&ulReturn=true&token=9XA99873XA309254T&useraction=commit&ssrt=1763836976405&rcache=1&cookieBannerVariant=hidden&country.x=FR&locale.x=fr_FR
+Content-Type: application/json
+X-App-Name: checkoutuinodeweb_hermione
+X-Paypal-Internal-Euat: S23AAMgpFpugxlO_YoFQ6kfaVZQF4Idqa1qTEkEjQXPL2YhO_s2MWgRrzwKga-ntIcEAwnSehDE9kUMa5bpL3HVu9JMjlgW6Q
+Paypal-Client-Metadata-Id: 9XA99873XA309254T
+Content-Length: 1816
+Origin: https://www.paypal.com
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=6
+Te: trailers
+
+{"operationName":"ThreeDsAuthenticateMutation","variables":{"token":"9XA99873XA309254T","threeDsServerTransactionId":"f73eMTlAtbzNsIzjShw0","authenticatePayload":{"flowId":"HERMES","cardTransactionCharacteristics":"PRE_AUTH","creditCardId":"CC-ZJ7GLRHH2WNKG","cardBrand":"VISA","cardUsage":"DEBIT","expirationYear":"2030","expirationMonth":"08","threeDSReferenceId":"22445606379190139","encryptedCardNumber":"ABcK2WPnaVdj0yspQrr2D9wkBBOhcNOVnOCzHSmMmiXUit80s9kNaw","threeDSContingencyReason":"PAYPAL_POLICY","threeDSContingencySource":"PAYPAL_RISK"},"amount":{"currencyCode":"EUR","currencyValue":"298.53"},"paymentAuthenticationRequest":"eyJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwidGhyZWVEU1NlcnZlclRyYW5zSUQiOiIxMDlhODYzMS1jMTc4LTRhOTgtODUyZS03YjE5ZmQyZmU3N2MiLCJhY3NUcmFuc0lEIjoiODAzZDVlZDItYmMyMy00YmVlLWIxOTgtZGUxMWNmYTdhMDY5IiwiY2hhbGxlbmdlV2luZG93U2l6ZSI6IjAzIn0","productDetails":{"productCode":"EXPRESS_CHECKOUT","productFlow":"HERMES"}},"query":"mutation ThreeDsAuthenticateMutation($token: String, $amount: AmountInput!, $productDetails: ProductDetails, $threeDsServerTransactionId: String!, $paymentAuthenticationRequest: String!, $authenticatePayload: threedsLookUpPayload!) {\n  threeDSAuthenticate(\n    token: $token\n    amount: $amount\n    productDetails: $productDetails\n    authenticatePayload: $authenticatePayload\n    threeDsServerTransactionId: $threeDsServerTransactionId\n    paymentAuthenticationRequest: $paymentAuthenticationRequest\n  ) {\n    cavv\n    threeDSStatus\n    threeDSVersion\n    liabilityShift\n    enrollmentStatus\n    cardBrandProcessed\n    threeDSUcafIndicator\n    threeDSTransactionId\n    threeDSEcommerceIndicator\n    signatureVerificationStatus\n    authenticationThreeDSStatus\n    threeDsAuthenticationReason\n    __typename\n  }\n}\n"}]]></request>
+    <status>200</status>
+    <responselength>4254</responselength>
+    <mimetype>JSON</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Permissions-Policy: ch-ua-platform-version=(self "https://c.paypal.com"),ch-ua-arch=(self "https://c.paypal.com"),ch-ua-wow64=(self "https://c.paypal.com"),ch-ua-model=(self "https://c.paypal.com"),ch-ua-bitness=(self "https://c.paypal.com"),ch-ua-full-version=(self "https://c.paypal.com"),ch-ua-full-version-list=(self "https://c.paypal.com")
+Access-Control-Allow-Origin: https://www.paypal.com
+Content-Security-Policy: default-src 'self' https://*.paypal.com https://*.paypalobjects.com; script-src 'self' https://*.paypal.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline' https://*.paypal.com https://*.paypalobjects.com; img-src 'self' data: https://c.paypal.com; object-src 'none'; font-src 'self' https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://*.paypalobjects.com https://*.paypal.com https://*.qualtrics.com; connect-src 'self' https://*.paypal.com https://*.paypalobjects.com https://*.qualtrics.com; base-uri 'self' https://*.paypal.com; form-action 'self' https://*.paypal.com; upgrade-insecure-requests;; report-uri https://www.paypal.com/csplog/api/log/csp
+Origin-Trial: AmF3SS0NWoXo3HaojgmIVVXavukRnZH597u+xZNXRCiKWzSKzfNPHw9NC32GmblY12+HXpkCEYeYGyvRBNkkJg0AAABbeyJvcmlnaW4iOiJodHRwczovL3BheXBhbC5jb206NDQzIiwiZmVhdHVyZSI6IlRwY2QiLCJleHBpcnkiOjE3MzUzNDM5OTksImlzU3ViZG9tYWluIjp0cnVlfQ==
+Etag: W/"1ee-knaFMcqeR1SrdxN46w/qIi3iNWc"
+Accept-Ranges: bytes
+Access-Control-Expose-Headers: Server-Timing
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Content-Type: application/json; charset=utf-8
+Via: 1.1 varnish, 1.1 varnish, 1.1 varnish
+Set-Cookie: enforce_policy=ccpa; Max-Age=31536000; Domain=.paypal.com; Path=/; Expires=Sun, 22 Nov 2026 18:44:43 GMT; Secure; SameSite=None
+Set-Cookie: LANG=fr_FR%3BFR; Max-Age=31556; Domain=.paypal.com; Path=/; Expires=Sun, 23 Nov 2025 03:30:39 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: tsrce=xobuyernodeserv; Max-Age=259199; Domain=.paypal.com; Path=/; Expires=Tue, 25 Nov 2025 18:44:42 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: TLTSID=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure
+Set-Cookie: x-pp-s=eyJ0IjoiMTc2MzgzNzA4MzI0MCIsImwiOiIwIiwibSI6IjAifQ; Domain=.paypal.com; Path=/; HttpOnly; Secure; SameSite=None
+Set-Cookie: tsrce=graphqlnodeweb; Domain=.paypal.com; Path=/; Expires=Tue, 25 Nov 2025 18:44:43 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: l7_az=dcg16.slc; Path=/; Domain=paypal.com; Expires=Sat, 22 Nov 2025 19:14:43 GMT; HttpOnly; Secure
+Set-Cookie: ts=vreXpYrS%3D1795373082%26vteXpYrS%3D1763838882%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:44:43 GMT; HttpOnly; Secure
+Set-Cookie: ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:44:43 GMT; Secure
+Accept-Ch: sec-ch-ua-full, sec-ch-ua-arch, sec-ch-ua-model, sec-ch-ua-platform-version, sec-ch-ua-full-version, sec-ch-ua-full-version-list, sec-ch-ua-bitness, sec-ch-ua-wow64
+Dc: ccg11-origin-www-1.paypal.com
+Paypal-Debug-Id: f724674bfaa7c
+Access-Control-Allow-Credentials: true
+X-Xss-Protection: 1; mode=block
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Date: Sat, 22 Nov 2025 18:44:43 GMT
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Served-By: cache-lcy-egml8630025-LCY, cache-lcy-egml8630025-LCY
+X-Cache: MISS, MISS, MISS, MISS
+X-Cache-Hits: 0, 0, 0, 0
+X-Timer: S1763837083.585657,VS0,VE767
+Vary: Accept-Encoding
+Server-Timing: "traceparent;desc="00-0000000000000000000f724674bfaa7c-45c4061ca53a92ea-01"";content-encoding;desc="gzip",x-cdn;desc="fastly"
+
+{"data":{"threeDSAuthenticate":{"cavv":"AAcBAQGVgAAAAHSdl4MmdUl4mQA=","threeDSStatus":"SUCCESS","threeDSVersion":"2.2.0","liabilityShift":true,"enrollmentStatus":"YES","cardBrandProcessed":"VISA","threeDSUcafIndicator":"","threeDSTransactionId":"22445597936791129","threeDSEcommerceIndicator":"05","signatureVerificationStatus":"YES","authenticationThreeDSStatus":"Y","threeDsAuthenticationReason":"","__typename":"ThreeDSAuthenticateResponse"}},"extensions":{"correlationId":"f724674bfaa7c"}}
+]]></response>
+    <comment></comment>
+  </item>
+</items>

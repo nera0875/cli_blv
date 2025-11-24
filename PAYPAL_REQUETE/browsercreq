@@ -1,0 +1,638 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sat Nov 22 19:46:42 CET 2025">
+  <item>
+    <time>Sat Nov 22 19:44:17 CET 2025</time>
+    <url><![CDATA[https://acs-challenge.apata.io/v1/BrowserCReq]]></url>
+    <host ip="52.57.149.131">acs-challenge.apata.io</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/v1/BrowserCReq]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /v1/BrowserCReq HTTP/1.1
+Host: acs-challenge.apata.io
+Cookie: AWSALB=8ydfhash3NO0jUWzuG8nQ73loN0wuEf09UWy1W1VLh+2h8vEzs86ajSc5NldYk4THtN8+3Inh2srjDMU49HqX8qCgh+J4cbuWpyvb1sF1SDsaqYhH2McRvYLhZqt; AWSALBCORS=8ydfhash3NO0jUWzuG8nQ73loN0wuEf09UWy1W1VLh+2h8vEzs86ajSc5NldYk4THtN8+3Inh2srjDMU49HqX8qCgh+J4cbuWpyvb1sF1SDsaqYhH2McRvYLhZqt
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 327
+Origin: https://centinelapi.cardinalcommerce.com
+Referer: https://centinelapi.cardinalcommerce.com/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: iframe
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+Priority: u=4
+Te: trailers
+Connection: keep-alive
+
+creq=eyJtZXNzYWdlVHlwZSI6IkNSZXEiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwidGhyZWVEU1NlcnZlclRyYW5zSUQiOiIxMDlhODYzMS1jMTc4LTRhOTgtODUyZS03YjE5ZmQyZmU3N2MiLCJhY3NUcmFuc0lEIjoiODAzZDVlZDItYmMyMy00YmVlLWIxOTgtZGUxMWNmYTdhMDY5IiwiY2hhbGxlbmdlV2luZG93U2l6ZSI6IjAzIn0&threeDSSessionData=MF9hOWI1YzlkNS0yNDA4LTQ3YTgtYjU4NS00Y2ZjNjg1MWJlMDU]]></request>
+    <status>200</status>
+    <responselength>19152</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Date: Sat, 22 Nov 2025 18:44:17 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 18475
+Set-Cookie: AWSALB=OvaXBPVYkAz+aFUT/QCEP6J/D/e5eRRnQcUnKWLyU1dMLit2toeWgsotxNeuVfAAN0nX3amRipPTZ7QKTTECtXahGnh9kMKfwSRG01smwK5+cjLI06fvRzqyF4Tb; Expires=Sat, 29 Nov 2025 18:44:17 GMT; Path=/
+Set-Cookie: AWSALBCORS=OvaXBPVYkAz+aFUT/QCEP6J/D/e5eRRnQcUnKWLyU1dMLit2toeWgsotxNeuVfAAN0nX3amRipPTZ7QKTTECtXahGnh9kMKfwSRG01smwK5+cjLI06fvRzqyF4Tb; Expires=Sat, 29 Nov 2025 18:44:17 GMT; Path=/; SameSite=None; Secure
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Access-Control-Allow-Origin: *
+Etag: W/"482b-7yfBlinvBaKNN4aeVUIostGngu0"
+
+<!DOCTYPE html>
+<html lang="en">
+
+<script>
+    let errorEvents = [];
+    window.addEventListener('error', function (event) {
+        errorEvents.push(`error: ${JSON.stringify(event)}`);
+    });
+    window.addEventListener('unhandledrejection', function (event) {
+        errorEvents.push(`rejectionhandled: ${JSON.stringify(event)}, reason: ${event.reason}, data: ${event.data}`);
+    });
+    window.addEventListener('rejectionhandled', function (event) {
+        errorEvents.push(`rejectionhandled: ${JSON.stringify(event)}, reason: ${event.reason}, data: ${event.data}`);
+    });
+    let tabVisibilityLog = ['Initial state: ' + document.visibilityState];
+
+    function checkTabFocused() {
+        if (document.visibilityState === 'visible') {
+            tabVisibilityLog.push('State change event: browser tab has focus');
+        } else {
+            tabVisibilityLog.push('State change event: browser tab does NOT have focus');
+        }
+    }
+
+    document.addEventListener('visibilitychange', checkTabFocused);
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const challengeForm = document.getElementById("challenge_form");
+        const cancelForm = document.getElementById("cancel_form");
+        const submitButton = document.getElementById("submitButton");
+        const cancelButton = document.getElementById("cancelButton");
+
+        let isSubmitting = false;
+        let intervalId;
+
+        function disableButtons() {
+            if (submitButton) {
+                submitButton.disabled = true;
+                submitButton.style.cursor = "not-allowed";
+            }
+            if (cancelButton) {
+                cancelButton.disabled = true;
+                cancelButton.style.cursor = "not-allowed";
+            }
+        }
+
+        function handleSubmit(event) {
+            if (isSubmitting) {
+                event.preventDefault();
+                return;
+            }
+            isSubmitting = true;
+            disableButtons();
+            if (intervalId) clearInterval(intervalId);
+            // Let the form submit normally
+        }
+
+        if (challengeForm) challengeForm.addEventListener("submit", handleSubmit);
+        if (cancelForm) cancelForm.addEventListener("submit", handleSubmit);
+
+        intervalId = setInterval(async () => {
+            if (isSubmitting) return; // already submitting, do nothing
+
+            try {
+                const res = await fetch('https://acs-challenge.apata.io/v1/PollTransaction', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        pollToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFuc2FjdGlvbklkIjoiODAzZDVlZDItYmMyMy00YmVlLWIxOTgtZGUxMWNmYTdhMDY5IiwiZW5jcnlwdGVkQ29udGVudCI6Ik9VR1BmSERxNXJnb20wZ2tIdGlwNE5aSUZwK0wvVjMyOXJMa0dYM2ZOdm5vejl6ZnVjeTN3c0NqTUQxWHhnelh2d2hVaGJybXZxSG5ZVXI2d1IzU1FabE1xZzh5THFaVGZXSVZDYklNdlVrR3ZGNjFkdEVhZmExcUl5RFRzV2hMYWZDZHhGYnNmclFjZFEzYitiTFo4N0h5SHBONWVZVC9RS0x1b0NzL1RJWXBTS0xBWXZZT2tDVndHNWJkMWR2VGU2d0tSenR2YVJMVStxZXRqMkdaL3doNlhuZ1FXTzVFUzRQZ24rQUE0Wi9OY05kTEJZd1dHeW5JamduTFlYWUM0aEU9IiwiaWF0IjoxNzYzODM3MDU3LCJleHAiOjE3NjM4Mzc2NTd9.XNbh1oQyj_SU0wf-UHkC08AX_VoJZYHDQmDKWRuhEXo"
+                    }),
+                    headers: {
+                        'Content-type': 'application/json; charset=UTF-8',
+                    }
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.state === "COMPLETED" && !isSubmitting) {
+                        isSubmitting = true;
+                        disableButtons();
+                        clearInterval(intervalId);
+                        if (challengeForm) {
+                            challengeForm.submit();
+                        }
+                    }
+                }
+            } catch (e) {
+                await fetch('https://acs.apata.io/v1/LogError', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        errorJson: {
+                            errorMessage: e.message,
+                            errorStack: e.stack,
+                            pollToken: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFuc2FjdGlvbklkIjoiODAzZDVlZDItYmMyMy00YmVlLWIxOTgtZGUxMWNmYTdhMDY5IiwiZW5jcnlwdGVkQ29udGVudCI6Ik9VR1BmSERxNXJnb20wZ2tIdGlwNE5aSUZwK0wvVjMyOXJMa0dYM2ZOdm5vejl6ZnVjeTN3c0NqTUQxWHhnelh2d2hVaGJybXZxSG5ZVXI2d1IzU1FabE1xZzh5THFaVGZXSVZDYklNdlVrR3ZGNjFkdEVhZmExcUl5RFRzV2hMYWZDZHhGYnNmclFjZFEzYitiTFo4N0h5SHBONWVZVC9RS0x1b0NzL1RJWXBTS0xBWXZZT2tDVndHNWJkMWR2VGU2d0tSenR2YVJMVStxZXRqMkdaL3doNlhuZ1FXTzVFUzRQZ24rQUE0Wi9OY05kTEJZd1dHeW5JamduTFlYWUM0aEU9IiwiaWF0IjoxNzYzODM3MDU3LCJleHAiOjE3NjM4Mzc2NTd9.XNbh1oQyj_SU0wf-UHkC08AX_VoJZYHDQmDKWRuhEXo",
+                            financialInstitution: "Wise",
+                            transactionId: "803d5ed2-bc23-4bee-b198-de11cfa7a069",
+                            tabVisibilityLog: tabVisibilityLog,
+                            errorEvents: errorEvents
+                        }
+                    }),
+                    headers: {
+                        'Content-type': 'application/json; charset=UTF-8',
+                    }
+                });
+            }
+        }, 3000);
+    });
+</script>
+
+<style>
+    * {
+        box-sizing: border-box !important; /* Apply to all elements */
+    }
+    /* Set the background of the page to black */
+    body {
+        margin: 0;
+        padding: 0;
+        height: 100vh; /* Full viewport height */
+        background-color: black;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-y: auto;
+    }
+
+    .main {
+        display: flex;
+        overflow-y: auto;
+        width: 100vw;
+        height: 100vh;
+        justify-content: center;
+        align-items: flex-start;
+        background-color: #EEEEEE;
+    }
+    p {
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Style the container */
+    .container {
+        margin-top: min(10vh, 25vh) !important;
+        border: #FFFFFF 10px solid;
+        padding: 5px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        background-color: white !important;
+        width: clamp(234px, 60vw, 500px); /* Expands smoothly from 234px to 500px */
+        height: auto; /* Expands smoothly from scaled height to 600px */
+        border-radius: clamp(16px, 3.2vw, 32px);
+    }
+
+    .header {
+        display: flex;
+        width: 100%;
+        flex-direction: row;
+        padding: clamp(11.23px, 2.24vw, 24px);
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+    }
+
+    .transaction-details {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(3.74px, 0.75vw, 8px); /* Scales from 3.74px to 8px */
+        align-items: center; /* Centers the content */
+        text-align: center; /* Ensures text is also centered */
+        width: 100%; /* Makes sure it spans the full width for proper centering */
+        border-bottom: 1px solid #EEEEEE;
+    }
+
+    .transaction-body {
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: clamp(7.49px, 1.5vw, 16px) clamp(11.23px, 2.24vw, 24px);
+    }
+
+    .authentication-info {
+        display: flex;
+        flex-direction: column;
+        gap: clamp(7.49px, 1.5vw, 16px);
+        align-items: center;
+        padding: 0;
+        margin: 0 !important;
+    }
+
+    /* Logos */
+    .logo-left {
+        height: clamp(14px, 2.8vw, 30px);
+        width: clamp(61px, 12.2vw, 131px);
+    }
+
+    .logo-right-visa {
+        height: clamp(23px, 4.6vw, 50px);
+        width: clamp(42px, 8.4vw, 90px);
+    }
+
+    .logo-right-mastercard {
+        height: clamp(23px, 4.6vw, 50px);
+        width: clamp(71px, 14.2vw, 151px);
+    }
+
+
+    .task-logo{
+        padding: 0;
+        margin: 0;
+        width: clamp(117.94px, 23.6vw, 252px);
+        height: clamp(39.78px, 8vw, 85px);
+    }
+
+    .footer {
+        width: 100%;
+        height: clamp(44.93px, 9vw, 96px);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: clamp(11.23px, 2.24vw, 24px);
+        background-color: transparent;
+        position: relative;
+        gap: 8px;
+    }
+
+    .title-default {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semi Bold */
+        font-size: clamp(10.3px, 2vw, 22px);
+        line-height: 1.25; /* 125% */
+        letter-spacing: -0.018em; /* -1.8% */
+        color: #0E0F0C;
+    }
+
+    .merchant {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semi Bold */
+        font-size: clamp(7.49px, 1.5vw, 16px);
+        line-height: 1.5; /* 150% */
+        letter-spacing: -0.011em; /* -1.1% */
+        color: #0E0F0C;
+    }
+
+    .body-default {
+        font-family: 'Inter', sans-serif;
+        font-weight: 400; /* Regular */
+        font-size: clamp(6.55px, 1.3vw, 14px);
+        line-height: 1.55; /* 155% */
+        letter-spacing: -0.006em; /* -0.6% */
+        color: #0E0F0C;
+    }
+
+    .instructions {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semi Bold */
+        font-size: clamp(12.17px, 2.5vw, 26px);
+        line-height: 1.22; /* 122% */
+        letter-spacing: -0.02em; /* -2% */
+        color: #0E0F0C;
+    }
+
+    .cancel-button {
+        width: clamp(211.54px, 42.3vw, 452px);
+        height: clamp(22.46px, 1.5vh, auto);
+        padding: clamp(5.62px, 1.2vh, 12px) clamp(7.49px, 1.5vw, 16px);
+        font-size: clamp(7.49px, 1.5vw, 16px);
+        display: flex;
+        flex-direction: row; /* Horizontal direction */
+        justify-content: center; /* Center children horizontally */
+        align-items: center; /* Center children vertically */
+        border-radius: 999px; /* Corner radius for a fully rounded button */
+        background-color: #FFFFFF; /* Fill color */
+        color: #163300; /* Default text color */
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semi Bold */
+        text-align: center;
+        border: none;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+
+    .submit-button {
+        width: clamp(211.54px, 42.3vw, 452px);
+        height: clamp(22.46px, 1.5vh, auto);
+        padding: clamp(5.62px, 1.2vh, 12px) clamp(7.49px, 1.5vw, 16px);
+        font-size: clamp(7.49px, 1.5vw, 16px);
+        display: flex;
+        flex-direction: row; /* Horizontal direction */
+        justify-content: center; /* Center children horizontally */
+        align-items: center; /* Center children vertically */
+        border-radius: 999px; /* Corner radius for a fully rounded button */
+        background-color: #FFFFFF; /* Fill color */
+        color: #163300; /* Default text color */
+        font-family: 'Inter', sans-serif;
+        font-weight: 600; /* Semi Bold */
+        text-align: center;
+        border: 1px solid #163300;
+        cursor: pointer;
+    }
+
+    .transaction-details-bottom{
+        margin-bottom: clamp(7.49px, 1.5vw, 16px); /* Scales from 7.49px to 16px */
+    }
+
+    @media (max-width: 316px) {
+        .cancel-button {
+            height: 21px !important;
+        }
+        .submit-button {
+            height: 21px !important;
+        }
+    }
+
+
+    @media (max-width: 599px) and (min-width: 337px) {
+        .main {
+            background-color: #EEEEEE;
+            min-height: 100vh !important; /* Ensure full viewport height */
+            overflow-y: auto; /* Enable scrolling */
+        }
+
+        .container {
+            width: 400px;
+            height: auto;
+            border-radius: 24px; /* Adjusted for proportional scaling */
+        }
+
+        .header {
+            padding: 15px;
+        }
+
+        .logo-left {
+            height: 19px;
+            width: 83px;
+        }
+
+        .logo-right-visa{
+            height: 32px;
+            width: 57px;
+        }
+        .logo-right-mastercard {
+            height: 32px;
+            width: 96px;
+        }
+
+        .transaction-body {
+            padding: 10px 15px;
+        }
+
+        .authentication-info {
+            gap: 10px;
+            align-items: center;
+        }
+
+        .task-logo {
+            width: 159px;
+            height: 53px;
+        }
+
+        .transaction-details {
+            gap: 5px;
+            margin-bottom: 0px;
+        }
+
+        .footer {
+            width: 100%;
+            height: 85px;
+            padding: 10px !important;
+            overflow: hidden;
+            gap: 4px;
+        }
+
+        /* Text styles */
+        .title-default {
+            width: 100%;
+            font-size: 18px;
+            letter-spacing: -0.018em;
+        }
+
+        .merchant {
+            font-size: 14px;
+            letter-spacing: -0.011em;
+        }
+
+        .body-default {
+            font-size: 12px;
+            letter-spacing: -0.006em;
+        }
+
+        .instructions {
+            font-size: 18px;
+            letter-spacing: -0.02em;
+        }
+
+        /* Button */
+        .cancel-button {
+            width: 370px;
+            min-height: 32px;
+            height: auto !important;
+            padding: 7px 10px;
+            font-size: 11px;
+        }
+        .submit-button {
+            width: 370px;
+            min-height: 40px;
+            height: auto !important;
+            padding: 7px 10px;
+            font-size: 11px;
+        }
+
+        .transaction-details-bottom {
+            margin-bottom: 11px;
+        }
+    }
+    /*@media (min-width: 600px) and (max-height: 400px) {*/
+    /*    .main {*/
+    /*        background-color: #EEEEEE;*/
+    /*        align-items: center !important; !* Align to top *!*/
+    /*        height: auto !important; !* Allow it to expand if needed *!*/
+    /*        min-height: 100vh !important; !* Ensure full viewport height *!*/
+    /*        overflow-y: auto; !* Enable scrolling *!*/
+    /*    }*/
+
+    /*    .container {*/
+    /*        width: 317px;*/
+    /*        height: 380px;*/
+    /*        border-radius: 24px; !* Adjusted for proportional scaling *!*/
+    /*    }*/
+
+    /*    .header {*/
+    /*        padding: 15.2px;*/
+    /*    }*/
+
+    /*    .logo-left {*/
+    /*        height: 19.02px;*/
+    /*        width: 83.05px;*/
+    /*    }*/
+
+    /*    .logo-right-visa{*/
+    /*        height: 31.7px;*/
+    /*        width: 57.6px;*/
+    /*    }*/
+    /*    .logo-right-mastercard {*/
+    /*        height: 31.7px;*/
+    /*        width: 95.73px;*/
+    /*    }*/
+
+    /*    .transaction-body {*/
+    /*        padding: 10.11px 15.17px;*/
+    /*    }*/
+
+    /*    .authentication-info {*/
+    /*        gap: 10px;*/
+    /*    }*/
+
+    /*    .task-logo {*/
+    /*        width: 159.77px;*/
+    /*    }*/
+
+    /*    .transaction-details {*/
+    /*        gap: 5px;*/
+    /*        margin-bottom: 0px;*/
+    /*    }*/
+
+    /*    .footer {*/
+    /*        width: 100%;*/
+    /*        height: 68px;*/
+    /*        padding: 15px !important;*/
+    /*    }*/
+
+    /*    !* Text styles *!*/
+    /*    .title-default {*/
+    /*        font-size: 14px;*/
+    /*        letter-spacing: -0.018em;*/
+    /*    }*/
+
+    /*    .merchant {*/
+    /*        font-size: 11px;*/
+    /*        letter-spacing: -0.011em;*/
+    /*    }*/
+
+    /*    .body-default {*/
+    /*        font-size: 11px;*/
+    /*        letter-spacing: -0.006em;*/
+    /*    }*/
+
+    /*    .instructions {*/
+    /*        font-size: 17px;*/
+    /*        letter-spacing: -0.02em;*/
+    /*    }*/
+
+    /*    !* Button *!*/
+    /*    .cancel-button {*/
+    /*        width: 286.57px;*/
+    /*        height: 31px;*/
+    /*        padding: 7.61px 10.14px;*/
+    /*        font-size: 10px;*/
+    /*    }*/
+
+    /*    .transaction-details-bottom {*/
+    /*        margin-bottom: 11px;*/
+    /*    }*/
+    /*}*/
+
+
+</style>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light only">
+    <title>Wise</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<main class="main">
+    <div class="container">
+        <header class="header">
+            <img class="logo-left" src="https://cdn.apata.io/static/wise-black-logo.png" alt="wise"/>
+            <img class="logo-right-visa" src="https://cdn.apata.io/static/visa-logo.png" alt="visa"/>
+
+        </header>
+        <div class="transaction-body">
+            <div class="transaction-details">
+                <p class="title-default"> ... 298.53</p>
+                <p class="merchant">PAYPAL *INSTITCURIE INSTI</p>
+                <div class="transaction-details-bottom">
+                    <p class="body-default">2025-11-22 18:44:12</p>
+                    <p class="body-default">**** 7804</p>
+                </div>
+
+            </div>
+            <div class="authentication-info">
+
+                <p class="instructions">Approuvez ce paiement dans l&#x27;appli Wise ou sur la version web</p>
+                <img class="task-logo" src="https://cdn.apata.io/static/wise-task-image.png" alt="task"/>
+                <p class="body-default">Ouvrez l&#x27;appli Wise ou la version web et suivez les instructions pour approuver la transaction. Cette page se mettra .. jour automatiquement.</p>
+            </div>
+        </div>
+
+        <footer class="footer">
+
+            <div>
+                <form action="https://acs-challenge.apata.io/v1/BrowserCReqAction" method="POST" id="challenge_form">
+                    <input type="hidden" name="transactionId" value="803d5ed2-bc23-4bee-b198-de11cfa7a069"/>
+                    <input type="hidden" name="answer" value="none"/>
+                    <input type="hidden" name="action" value="SUBMIT"/>
+                    <button type="submit" class="submit-button" name="submitButton" id="submitButton">
+                        J&#x27;ai confirm.. dans l&#x27;appli
+                    </button>
+                </form>
+            </div>
+            <div>
+                <form action="https://acs-challenge.apata.io/v1/BrowserCReqAction" method="POST" id="cancel_form">
+                    <input type="hidden" name="transactionId" value="803d5ed2-bc23-4bee-b198-de11cfa7a069"/>
+                    <input type="hidden" name="action" value="CANCEL"/>
+                    <button class="cancel-button" name="cancelButton" id="cancelButton">Annuler</button>
+                </form>
+            </div>
+        </footer>
+    </div>
+</main>
+
+</body>
+</html>
+]]></response>
+    <comment></comment>
+  </item>
+</items>

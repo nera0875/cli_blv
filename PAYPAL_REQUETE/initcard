@@ -1,0 +1,99 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sat Nov 22 19:26:32 CET 2025">
+  <item>
+    <time>Sat Nov 22 19:23:02 CET 2025</time>
+    <url><![CDATA[https://www.paypal.com/payment-authentication/threeds/v1/notify-method-cmpl]]></url>
+    <host ip="151.101.61.21">www.paypal.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/payment-authentication/threeds/v1/notify-method-cmpl]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /payment-authentication/threeds/v1/notify-method-cmpl HTTP/2
+Host: www.paypal.com
+Cookie: l7_az=dcg16.slc; ts=vreXpYrS%3D1795371781%26vteXpYrS%3D1763837581%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; datadome=sRoU7mrdpGhdhr1gPBCc_lN6L0YSANfW7lWKqUmtiHSOurd90SsxziOTuxP_yCT3kJqGdVU3p0_3x~uqCKXbMmeXlUabmT3NfK8GJNFNfA~Jwkw80LVD4Pz06X0v6an3; enforce_policy=ccpa; cookie_check=yes; d_id=581858a6124649c09c5db3e6677221601763835536897; LANG=fr_FR%3BFR; tsrce=authngatewaynodeweb; x-pp-s=eyJ0IjoiMTc2MzgzNTc3OTU1OSIsImwiOiIwIiwibSI6IjAifQ; nsid=s%3A4qvHdnasnDOt-eUh4yTWJr3LYCDZrMD8.qAMf6DnuezdTusvuCrXHGgcxAbKuP3KMSV294Eiekrg; rssk=d%7DC9%40%3C6%3D896%3C%3D%3C%40%3B%3Exqx%3Evii%C2%82%7Doh%3B%3F10; cookie_prefs=T%3D1%2CP%3D1%2CF%3D1%2Ctype%3Dexplicit_banner; sc_f=yb0vq9UhKzfLSRIUzCZXrFn_JAVpjRgxBwemY5OBWa91aohswGcqXbdEccWaRzmzd57PA_IRIA_ZERoeHPX-l-fhq6rG8sTjRgAP7G; KHcl0EuY7AKSMgfvHl7J5E7hPtK=Xe2xbousp0dHr_0JdFLJ4TkXZDSqdlNdQsP8elCAkun79lQ4hM01l7LuY-n31gQiC-qaPPX_fFgsR_3K; ddi=QbkpaESM8b4Es1-8d9e-5OpGSj0NLVm6L17sfCT3v1oKDs5JkN4zJY1AoYxVdan8UaVPIoBZvtbeBNF4T4EAbo4sANJpSf8NXr1YddI6dvgiZEDS; _iidt=6LI06uGoouhW6zBRhpMXIEiBUOCfS/FSWo6oM+XxoRaXFQlMBQYzhT34rorAffUAGFcie9wV4PxU/A==; fn_dt=581858a6124649c09c5db3e667722160; AV894Kt2TSumQQrJwe-8mzmyREO=S23AAO5Ss7jlCKGu8e_x9-vN-7mo3ousWhSB0bHu5ee4XESlenYtti5-Ewh3luiHcqR3gI8ukofXBi06OL0AuJff9xPDTLiIw; DPz73K5mY4nlBaZpzRkjI3ZzAY3QMmrP=S23AAO5Ss7jlCKGu8e_x9-vN-7mo3ousWhSB0bHu5ee4XESlenYtti5-Ewh3luiHcqR3gI8ukofXBi06OL0AuJff9xPDTLiIw; TfXMWj95u2_Zf1Kmv_GCUOjlGG8=abhIlOraNlzC7xxaEh8xVxWFpg3BvI-Kmst4vLwt-rbchZ57VKxfy1JiH0uESVaznc4cgQLzRP_i2wDFIYt6cowsN0uztpj7t4Q96VgSUgkgi36x-_q1ITE03XkGbzXOW7lHleiaqWBENX7Ni3Iu_6_3z6uxEITQHUkuBvA6nVyMxV0TGjEn3dlpX-y; id_token=idtoken0f502026bd1d4be0bf8f215f992b0328; rmuc=atBBEGn63JPIVeXzB1nvVqvToFNCpTGV0KvN0DeF0g6l_i0MJatnWf13u5rTc2ucvhoKVosV2q-KW_SYDsSQlcxrlJuw1chMsv1iq3NwhtLjix-zoUE1vx53votUc0WtPx_ERHscS7yJYYDVFrVYCmV4gZtFI_do-3BIbuofOpzcYaNWBi1JGJ0LoOG2k0yMxJKq9qEHal93_GLV; HaC80bwXscjqZ7KM6VOxULOB534=_uJ_Tk5W8YwepcAG5DJ-t4pdR0pNlpFXdDvGLnWr5lzSKM2X5szbp4RHT_S_XV2fU8XO2IMmz4Kyn9qCB7oAXmv-XM-0vNQTP1Jflagr07Jh9zxEDXPkenoBfseW7_3SGW4jNG; SEGM=bRdV1vB0ebq9RKdAb3xSHowCi6QnnlCiDOLNk8i1mAuLl1vTbzHQwWajSsMe8mvoWiJtY1GnpzN4Y-sixGy7BQ; _gcl_au=1.1.914084791.1763835677; _ga=GA1.1.1934718784.1763835677; _gid=GA1.2.1906158324.1763835677; ddall=1; _ga_FQYH6BLY4K=GS1.1.1763835685.1.1.1763835778.0.0.0; tcs=main%3Axo%3Alite%7CButtons_base_2xi07%20xo-member-c72rwi-button_base-text_button_lg-btn_full_width
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 102
+Origin: https://acs.apata.io
+Referer: https://acs.apata.io/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: iframe
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+Priority: u=4
+Te: trailers
+
+threeDSMethodData=eyJ0aHJlZURTU2VydmVyVHJhbnNJRCI6Ijk5OWVmMDlhLTE1N2ItNGIyZi1iYTFlLTI4MGNlNjg3ZDNlNiJ9]]></request>
+    <status>200</status>
+    <responselength>3648</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+X-Xss-Protection: 1; mode=block
+Content-Type: text/html; charset=utf-8
+Origin-Trial: AmF3SS0NWoXo3HaojgmIVVXavukRnZH597u+xZNXRCiKWzSKzfNPHw9NC32GmblY12+HXpkCEYeYGyvRBNkkJg0AAABbeyJvcmlnaW4iOiJodHRwczovL3BheXBhbC5jb206NDQzIiwiZmVhdHVyZSI6IlRwY2QiLCJleHBpcnkiOjE3MzUzNDM5OTksImlzU3ViZG9tYWluIjp0cnVlfQ==
+Access-Control-Expose-Headers: Server-Timing
+Accept-Ranges: bytes
+Dc: ccg11-origin-www-1.paypal.com
+Via: 1.1 varnish, 1.1 varnish, 1.1 varnish
+Paypal-Debug-Id: f853479f86f63
+Permissions-Policy: ch-ua-platform-version=(self "https://c.paypal.com"),ch-ua-arch=(self "https://c.paypal.com"),ch-ua-wow64=(self "https://c.paypal.com"),ch-ua-model=(self "https://c.paypal.com"),ch-ua-bitness=(self "https://c.paypal.com"),ch-ua-full-version=(self "https://c.paypal.com"),ch-ua-full-version-list=(self "https://c.paypal.com")
+Etag: W/"125-fYIMpgTfio3Ew5NAzZVnOwScJw4"
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Accept-Ch: sec-ch-ua-full, sec-ch-ua-arch, sec-ch-ua-model, sec-ch-ua-platform-version, sec-ch-ua-full-version, sec-ch-ua-full-version-list, sec-ch-ua-bitness, sec-ch-ua-wow64
+Content-Security-Policy: default-src 'self' https://*.paypal.com https://*.paypalobjects.com 'unsafe-inline'; style-src 'self' https://*.paypal.com https://*.paypalobjects.com 'unsafe-inline'; script-src 'nonce-7UtkMIvLSZ73arH2F+DvpMb7BWI53memr1R8TXfRw37Z4UlP' 'self' 'unsafe-inline' https://*.paypal.com https://*.paypalobjects.com; img-src 'self' https: data:; object-src 'none'; font-src 'self' https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://*.paypalobjects.com https://*.paypal.com * https://*.qualtrics.com; connect-src 'self' 'unsafe-inline' https://*.paypal.com https://*.paypalobjects.com https://*.qualtrics.com; form-action 'self' https://*.paypal.com *; base-uri 'self' https://*.paypal.com; upgrade-insecure-requests;; report-uri https://www.paypal.com/csplog/api/log/csp
+X-Content-Type-Options: nosniff
+Set-Cookie: LANG=fr_FR%3BFR; Max-Age=31556; Domain=.paypal.com; Path=/; Expires=Sun, 23 Nov 2025 03:08:59 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: enforce_policy=ccpa; Max-Age=31536000; Domain=.paypal.com; Path=/; Expires=Sun, 22 Nov 2026 18:23:03 GMT; Secure; SameSite=None
+Set-Cookie: x-pp-s=eyJ0IjoiMTc2MzgzNTc4MzIwMyIsImwiOiIwIiwibSI6IjAifQ; Domain=.paypal.com; Path=/; HttpOnly; Secure; SameSite=None
+Set-Cookie: l7_az=dcg16.slc; Path=/; Domain=paypal.com; Expires=Sat, 22 Nov 2025 18:53:03 GMT; HttpOnly; Secure
+Set-Cookie: ts=vreXpYrS%3D1795371783%26vteXpYrS%3D1763837583%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:23:03 GMT; HttpOnly; Secure
+Set-Cookie: ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:23:03 GMT; Secure
+Date: Sat, 22 Nov 2025 18:23:03 GMT
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Served-By: cache-lcy-egml8630066-LCY, cache-lcy-egml8630066-LCY
+X-Cache: MISS, MISS, MISS, MISS
+X-Cache-Hits: 0, 0, 0, 0
+X-Timer: S1763835783.043755,VS0,VE237
+Vary: Accept-Encoding
+Server-Timing: "traceparent;desc="00-0000000000000000000f853479f86f63-151735aa349c8c76-01"";content-encoding;desc="gzip",x-cdn;desc="fastly"
+
+<!DOCTYPE html>
+  <body />
+  <script nonce="7UtkMIvLSZ73arH2F+DvpMb7BWI53memr1R8TXfRw37Z4UlP">
+    ;(function () {
+      window.parent && window.parent.parent && window.parent.parent.postMessage('{"MessageType":"profile.completed","Status":true}', window.origin);
+    })()
+  </script>
+</html>
+]]></response>
+    <comment></comment>
+  </item>
+</items>

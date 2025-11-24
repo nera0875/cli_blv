@@ -1,0 +1,111 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sat Nov 22 19:35:06 CET 2025">
+  <item>
+    <time>Sat Nov 22 19:34:03 CET 2025</time>
+    <url><![CDATA[https://www.paypal.com/myaccount/money/api/cards/confirmation/3ds/update?id=CC-ZJ7GLRHH2WNKG&cId=695523545&rId=22445597936096648&is3DS2=true]]></url>
+    <host ip="151.101.61.21">www.paypal.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/myaccount/money/api/cards/confirmation/3ds/update?id=CC-ZJ7GLRHH2WNKG&cId=695523545&rId=22445597936096648&is3DS2=true]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /myaccount/money/api/cards/confirmation/3ds/update?id=CC-ZJ7GLRHH2WNKG&cId=695523545&rId=22445597936096648&is3DS2=true HTTP/2
+Host: www.paypal.com
+Cookie: l7_az=dcg16.slc; ts=vreXpYrS%3D1795372443%26vteXpYrS%3D1763838243%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; datadome=Yq2o1L9bcghsChGzR~PszB~DfDzwbNb_KmAmPViUz7wKpNASM5LaNyndQYI4MGj4x_5ylWFNa8nUb1bLJpRFuGS5IvjDocohx1NaK_wfmijae6ANypUSYaDEcBOrUpkR; enforce_policy=ccpa; cookie_check=yes; d_id=581858a6124649c09c5db3e6677221601763835536897; LANG=fr_FR%3BFR; tsrce=authngatewaynodeweb; x-pp-s=eyJ0IjoiMTc2MzgzNjQ0MzU4NiIsImwiOiIwIiwibSI6IjAifQ; _dd_s=rum=2&id=87de2c3b-26df-4a29-b40e-84b077ec308e&created=1763835537350&expire=1763837321233; TLTSID=64170049958339588117420657968181; TLTDID=44204597848366435413502890503184; cookie_prefs=T%3D1%2CP%3D1%2CF%3D1%2Ctype%3Dexplicit_banner; sc_f=aRyFBtsfvRr4lJS-wfrcPLwDQ4yCYQdrH42-L-jiWA5899qRPAcmuKDesskqSWl_Yz6n1ExzCqGlgF32C0zc0sySF5gDjPaf2hZB-m; KHcl0EuY7AKSMgfvHl7J5E7hPtK=Xe2xbousp0dHr_0JdFLJ4TkXZDSqdlNdQsP8elCAkun79lQ4hM01l7LuY-n31gQiC-qaPPX_fFgsR_3K; ddi=QbkpaESM8b4Es1-8d9e-5OpGSj0NLVm6L17sfCT3v1oKDs5JkN4zJY1AoYxVdan8UaVPIoBZvtbeBNF4T4EAbo4sANJpSf8NXr1YddI6dvgiZEDS; _iidt=6LI06uGoouhW6zBRhpMXIEiBUOCfS/FSWo6oM+XxoRaXFQlMBQYzhT34rorAffUAGFcie9wV4PxU/A==; fn_dt=fca029e2a6fa4fdfb276a0f441c33c28; AV894Kt2TSumQQrJwe-8mzmyREO=S23AAMzgxLSvJGYpAwPgRoKcI2YRcVHzz200AuLlLzL7l6zOIydk7JCH5bxVeoE-VYQKerpHlmIviiW00qeS1k2fT2NF48jsA; DPz73K5mY4nlBaZpzRkjI3ZzAY3QMmrP=; TfXMWj95u2_Zf1Kmv_GCUOjlGG8=abhIlOraNlzC7xxaEh8xVxWFpg3BvI-Kmst4vLwt-rbchZ57VKxfy1JiH0uESVaznc4cgQLzRP_i2wDFIYt6cowsN0uztpj7t4Q96VgSUgkgi36x-_q1ITE03XkGbzXOW7lHleiaqWBENX7Ni3Iu_6_3z6uxEITQHUkuBvA6nVyMxV0TGjEn3dlpX-y; id_token=idtokend0ae9ef7ab1f4a8291d08299e3d3b496; rmuc=VM1Qye1eI083x3G_8P5Jy4HVasnuB2nX-vlzDaM0vVrX_y6PizvEHiowCoyaR7gslt_rDYCXiNJr8IWMXG9sUIDEGKEKmxuf3dUlsw6tuewxmVg0fr4tCRmo21jhbJpmXZnwoABp_CLfzEtGa8h1UlfNEUvLV37NhIo9JMHcRY0gQVzmCEegWpKdnVLYdJNH-GmJYobunOKd97Ek3_YimNCLToG-E2lOtkMYOyhtG_4WFcKW; HaC80bwXscjqZ7KM6VOxULOB534=qRf6vU4TBlHCT2FW4gXNrVoEXiAgyF0wqAuiR4Lq0gAsvoSsq1YZ0NQtj3KsNoED4HZypZnBbBFMBKTq5xk8Zy94kQxUdJD-Oci0GEj69HN1TC4yAHge4EUuiY9K7K48ul9oxW; SEGM=bRdV1vB0ebq9RKdAb3xSHowCi6QnnlCiDOLNk8i1mAuLl1vTbzHQwWajSsMe8mvoWiJtY1GnpzN4Y-sixGy7BQ; _gcl_au=1.1.914084791.1763835677; _ga=GA1.1.1934718784.1763835677; _gid=GA1.2.1906158324.1763835677; ddall=1; _ga_FQYH6BLY4K=GS1.1.1763835685.1.1.1763836425.0.0.0; nsid=s%3AvkSu302oXL035_E0rRZkaWpYlh5EdSt_.oGg9TohSH2sNM4%2B76H3sogFJqgyNMXNvfHtciV6anWw; pi_opt_in925803=true; visitor_id925803-hash=90264565fe6a1cfefd1bc77df6f8a1c149e0c9bbddc6bbc1cd91a93df0080bf42bb0db036acabd32f1cbea7ee8037842f85cebdc; lpv925803=aHR0cHM6Ly93d3cucGF5cGFsLmNvbS9mci9ob21l; visitor_id925803=3849430704; ui_experience=did_set%3Dtrue%26login_type%3DEMAIL_PASSWORD%26home%3D2; login_email=martintobias35%40outlook.fr; X-PP-ADS=AToBvQEiabHugzTF5flytEfTC.OSCo4; _gat_gtag_UA_53389718_12=1
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 305
+Origin: https://www.paypal.com
+Referer: https://www.paypal.com/payment-authentication/threeds/v1/init-challenge
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: iframe
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Priority: u=4
+Te: trailers
+
+tenantId=PYPL&threedsServerTransactionId=62e524fb-baca-4713-9fd6-ecf3a5a3c42d&tenantThreedsReferenceId=22445597936096648&status=SUCCESS&errorCode=0&TransactionId=62e524fb-baca-4713-9fd6-ecf3a5a3c42d&acsTransactionId=06dd663a-abd7-40c1-bd7c-73fa5785307b&dsTransactionId=0c058e91-a525-4ebd-a33d-fc0ae985d546]]></request>
+    <status>200</status>
+    <responselength>4812</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Content-Type: text/html; charset=utf-8
+Cache-Control: max-age=0, no-cache, no-store, must-revalidate
+Via: 1.1 varnish, 1.1 varnish, 1.1 varnish
+Accept-Ranges: bytes
+Dc: ccg11-origin-www-1.paypal.com
+Accept-Ch: sec-ch-ua-full, sec-ch-ua-arch, sec-ch-ua-model, sec-ch-ua-platform-version, sec-ch-ua-full-version, sec-ch-ua-full-version-list, sec-ch-ua-bitness, sec-ch-ua-wow64
+X-Frame-Options: SAMEORIGIN
+X-Content-Type-Options: nosniff
+Content-Security-Policy: base-uri 'self' https://*.paypal.com; child-src 'self' https://*.paypal.com https://*.paypalobjects.com https://*.cardinalcommerce.com; connect-src 'self' https://*.paypal.com https://*.paypalobjects.com https://nexus.ensighten.com https://*.qualtrics.com https://www.google-analytics.com https://www.analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com https://browser-intake-us5-datadoghq.com; default-src 'self' https://*.paypal.com https://*.paypalobjects.com; font-src 'self' https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://*.paypal.com https://*.paypalobjects.com https://*.yodlee.com https://*.tink.com https://*.cardinalcommerce.com https://*.qualtrics.com https://connect2.finicity.com https://cdn.plaid.com; img-src 'self' https: data: https://www.google-analytics.com https://www.analytics.google.com https://region1.google-analytics.com https://region1.analytics.google.com; object-src 'none'; script-src 'nonce-+VkdjJWi9SA3xsE2hyT93roY5tZHTxbExli24FgFbpimPve3' 'self' 'unsafe-inline' https://*.paypal.com https://*.paypalobjects.com; style-src 'self' 'unsafe-inline' https://*.paypal.com https://*.paypalobjects.com; upgrade-insecure-requests;; report-uri https://www.paypal.com/csplog/api/log/csp
+Access-Control-Expose-Headers: Server-Timing
+Origin-Trial: AmF3SS0NWoXo3HaojgmIVVXavukRnZH597u+xZNXRCiKWzSKzfNPHw9NC32GmblY12+HXpkCEYeYGyvRBNkkJg0AAABbeyJvcmlnaW4iOiJodHRwczovL3BheXBhbC5jb206NDQzIiwiZmVhdHVyZSI6IlRwY2QiLCJleHBpcnkiOjE3MzUzNDM5OTksImlzU3ViZG9tYWluIjp0cnVlfQ==
+Etag: W/"1f4-fLbGvH3edJZgWBgUEg2YIoMcA/E"
+Set-Cookie: enforce_policy=ccpa; Max-Age=31536000; Domain=.paypal.com; Path=/; Expires=Sun, 22 Nov 2026 18:34:25 GMT; Secure; SameSite=None
+Set-Cookie: LANG=fr_FR%3BFR; Max-Age=31556; Domain=.paypal.com; Path=/; Expires=Sun, 23 Nov 2025 03:20:21 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: TLTSID=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT; HttpOnly; Secure
+Set-Cookie: x-pp-s=eyJ0IjoiMTc2MzgzNjQ2NTY3MiIsImwiOiIwIiwibSI6IjAifQ; Domain=.paypal.com; Path=/; HttpOnly; Secure; SameSite=None
+Set-Cookie: tsrce=moneynodeweb; Domain=.paypal.com; Path=/; Expires=Tue, 25 Nov 2025 18:34:25 GMT; HttpOnly; Secure; SameSite=None
+Set-Cookie: l7_az=dcg16.slc; Path=/; Domain=paypal.com; Expires=Sat, 22 Nov 2025 19:04:25 GMT; HttpOnly; Secure
+Set-Cookie: ts=vreXpYrS%3D1795372464%26vteXpYrS%3D1763838264%26vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960%26vtyp%3Dnew; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:34:25 GMT; HttpOnly; Secure
+Set-Cookie: ts_c=vr%3Dacca369f19a0ad119cec1599fe92e961%26vt%3Dacca369f19a0ad119cec1599fe92e960; Path=/; Domain=paypal.com; Expires=Sun, 22 Nov 2026 18:34:25 GMT; Secure
+X-Xss-Protection: 1; mode=block
+Permissions-Policy: ch-ua-platform-version=(self "https://c.paypal.com"),ch-ua-arch=(self "https://c.paypal.com"),ch-ua-wow64=(self "https://c.paypal.com"),ch-ua-model=(self "https://c.paypal.com"),ch-ua-bitness=(self "https://c.paypal.com"),ch-ua-full-version=(self "https://c.paypal.com"),ch-ua-full-version-list=(self "https://c.paypal.com")
+Paypal-Debug-Id: f161940f6c1bd
+Date: Sat, 22 Nov 2025 18:34:25 GMT
+Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+X-Served-By: cache-lcy-egml8630055-LCY, cache-lcy-egml8630055-LCY
+X-Cache: MISS, MISS, MISS, MISS
+X-Cache-Hits: 0, 0, 0, 0
+X-Timer: S1763836465.534817,VS0,VE1258
+Vary: Accept-Encoding
+Server-Timing: "traceparent;desc="00-0000000000000000000f161940f6c1bd-9a39e3403b4f288d-01"";content-encoding;desc="gzip",x-cdn;desc="fastly"
+
+
+<!DOCTYPE html>
+<html lang="">
+	<head><script async src="https://www.paypalobjects.com/webcaptcha/ngrlCaptcha.min.js"></script>
+ 	<meta charset="utf-8">
+ 	<title> Three DS Confirmation Page</title>
+	</head>
+	<body>
+		<div id="app"></div>
+	<script async src="/auth/createchallenge/0cdfb080f351dde1/recaptchav3.js?_sessionID=vkSu302oXL035_E0rRZkaWpYlh5EdSt_"></script></body>
+  	<script nonce="+VkdjJWi9SA3xsE2hyT93roY5tZHTxbExli24FgFbpimPve3">
+          (function() {
+             const confirmationStatus = "SUCCESS";
+             /* signal confirmation success/failure to parent */
+             parent.postMessage('threeDS:' + confirmationStatus , window.location.origin)
+           })()
+         </script>
+</html>]]></response>
+    <comment></comment>
+  </item>
+</items>
