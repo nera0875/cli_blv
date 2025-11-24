@@ -322,7 +322,7 @@ def cmd_chat():
                         choices=[
                             "📝 Analyser les requêtes",
                             "🎯 Proposer des tests",
-                            "📊 Voir findings",
+                            "📊 Voir events",
                             "🔍 Chercher pattern",
                             "← Retour"
                         ],
@@ -337,29 +337,29 @@ def cmd_chat():
                         msg = "propose moi des tests BLV à faire sur ce flow"
                         console.print(f"\n[dim]Auto: {msg}[/]\n")
                         # Sortir du if pour relancer stream
-                    elif action and "findings" in action:
-                        findings = db.get_findings(limit=50)
-                        if findings:
-                            table = Table(title="Findings", border_style="cyan")
+                    elif action and "events" in action:
+                        events = db.get_events(limit=50)
+                        if events:
+                            table = Table(title="Events", border_style="cyan")
                             table.add_column("ID", width=5)
                             table.add_column("Pattern", style="yellow")
                             table.add_column("Status", width=8)
                             table.add_column("Target")
-                            for f in findings:
-                                status = "[green]✓[/]" if f['worked'] else "[red]✗[/]"
-                                table.add_row(str(f['id']), f['pattern'], status, f.get('target', '-'))
+                            for e in events:
+                                status = "[green]✓[/]" if e['worked'] else "[red]✗[/]"
+                                table.add_row(str(e['id']), e['pattern'], status, e.get('target', '-'))
                             console.print(table)
                         else:
-                            console.print("[yellow]Aucun finding[/]")
+                            console.print("[yellow]Aucun event[/]")
                         continue
                     elif action and "Chercher" in action:
                         keyword = questionary.text("Chercher :").ask()
                         if keyword:
-                            findings = db.search_findings(keyword)
-                            if findings:
-                                for f in findings:
-                                    status = "✓" if f['worked'] else "✗"
-                                    console.print(f"[cyan]{status}[/] {f['pattern']} ({f.get('target', '-')})")
+                            events = db.search_events(keyword)
+                            if events:
+                                for e in events:
+                                    status = "✓" if e['worked'] else "✗"
+                                    console.print(f"[cyan]{status}[/] {e['pattern']} ({e.get('target', '-')})")
                             else:
                                 console.print("[yellow]Aucun résultat[/]")
                         continue
@@ -1587,8 +1587,8 @@ def main():
                     "Menu BLV",
                     choices=[
                         "💬 Ouvrir chat",
-                        "📊 Voir findings",
-                        "🔍 Chercher finding",
+                        "📊 Voir events",
+                        "🔍 Chercher event",
                         "📋 Voir rules",
                         "⚡ Voir triggers",
                         "← Retour"
@@ -1597,28 +1597,28 @@ def main():
 
                 if action and "chat" in action:
                     cmd_chat()
-                elif action and "findings" in action:
-                    findings = db.get_findings(limit=50)
-                    if findings:
-                        table = Table(title="Findings", border_style="cyan")
+                elif action and "events" in action:
+                    events = db.get_events(limit=50)
+                    if events:
+                        table = Table(title="Events", border_style="cyan")
                         table.add_column("ID", width=5)
                         table.add_column("Pattern", style="yellow")
                         table.add_column("Status", width=8)
                         table.add_column("Target")
-                        for f in findings:
-                            status = "[green]✓[/]" if f['worked'] else "[red]✗[/]"
-                            table.add_row(str(f['id']), f['pattern'], status, f.get('target', '-'))
+                        for e in events:
+                            status = "[green]✓[/]" if e['worked'] else "[red]✗[/]"
+                            table.add_row(str(e['id']), e['pattern'], status, e.get('target', '-'))
                         console.print(table)
                     else:
-                        console.print("[yellow]Aucun finding[/]")
+                        console.print("[yellow]Aucun event[/]")
                 elif action and "Chercher" in action:
                     keyword = questionary.text("Mot-clé :").ask()
                     if keyword:
-                        findings = db.search_findings(keyword)
-                        if findings:
-                            for f in findings:
-                                status = "✓" if f['worked'] else "✗"
-                                console.print(f"[cyan]{status}[/] {f['pattern']} ({f.get('target', '-')})")
+                        events = db.search_events(keyword)
+                        if events:
+                            for e in events:
+                                status = "✓" if e['worked'] else "✗"
+                                console.print(f"[cyan]{status}[/] {e['pattern']} ({e.get('target', '-')})")
                         else:
                             console.print("[yellow]Aucun résultat[/]")
                 elif action and "rules" in action:
