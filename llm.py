@@ -161,7 +161,7 @@ def chat_stream(msg, history, thinking_enabled=False):
         "api_base": API_BASE,
         "api_key": API_KEY,
         "timeout": 60,
-        # Tools désactivés - on parse le texte à la place
+        "tools": BLV_TOOLS,
     }
 
     # Add thinking parameter if enabled (only for Anthropic models)
