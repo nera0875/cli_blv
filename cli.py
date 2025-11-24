@@ -688,61 +688,6 @@ def cmd_model():
     # Extract model name (remove ✓ if present)
     selected_model = result.replace(" ✓", "").strip()
 
-    # Auto-fix OpenRouter models if needed
-    if selected_model.startswith("openrouter/"):
-        status_spinner = None
-        try:
-            import requests
-            API_BASE = os.getenv("LITELLM_API_BASE")
-            API_KEY = os.getenv("LITELLM_API_KEY")
-
-            if API_BASE and API_KEY:
-                headers = {"Authorization": f"Bearer {API_KEY}"}
-                response = requests.get(f"{API_BASE}/model/info", headers=headers, timeout=5)
-
-                if response.status_code == 200:
-                    models = response.json().get("data", [])
-
-                    # Find selected model and check if needs fix
-                    for model in models:
-                        if model.get("model_name") == selected_model:
-                            litellm_params = model.get("litellm_params", {})
-                            internal_model = litellm_params.get("model", "")
-
-                            # If has openrouter/ prefix, fix it
-                            if internal_model.startswith("openrouter/"):
-                                status_spinner = console.status("[cyan]🔧 Fixing model config...", spinner="dots")
-                                status_spinner.start()
-
-                                fixed_model = internal_model.replace("openrouter/", "", 1)
-                                fixed_params = litellm_params.copy()
-                                fixed_params["model"] = fixed_model
-
-                                update_data = {
-                                    "model_info": model.get("model_info"),
-                                    "litellm_params": fixed_params
-                                }
-
-                                fix_response = requests.post(
-                                    f"{API_BASE}/model/update",
-                                    headers={**headers, "Content-Type": "application/json"},
-                                    json=update_data,
-                                    timeout=5
-                                )
-
-                                if status_spinner:
-                                    status_spinner.stop()
-
-                                if fix_response.status_code == 200:
-                                    console.print(f"[green]✓ Model config fixed[/]")
-                                else:
-                                    console.print(f"[yellow]⚠ Fix failed, model may not work[/]")
-                            break
-        except Exception:
-            if status_spinner:
-                status_spinner.stop()
-            pass  # Silent fail, don't block model switch
-
     env_path = Path(".env")
     lines = env_path.read_text().splitlines()
     updated = []
