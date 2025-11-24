@@ -638,9 +638,20 @@ def cmd_import():
 
     try:
         requests = parse_burp_xml(path)
+        added = 0
+        skipped = 0
         for req in requests:
-            db.add_request(req['url'], req['method'], req['headers'], req['body'], req['response'])
-        console.print(f"[green]✓ Imported {len(requests)} request(s) from {Path(path).name}[/]")
+            result = db.add_request(req['url'], req['method'], req['headers'], req['body'], req['response'])
+            if result:
+                added += 1
+            else:
+                skipped += 1
+
+        msg = f"[green]✓ Imported {added} request(s)[/]"
+        if skipped > 0:
+            msg += f" [yellow]({skipped} duplicates skipped)[/]"
+        msg += f" from {Path(path).name}"
+        console.print(msg)
     except Exception as e:
         console.print(f"[red]✗ Error importing: {e}[/]")
 

@@ -111,11 +111,12 @@ def add_request(url, method, headers, body, response):
         # Check if hash exists (duplicate)
         existing = c.execute("SELECT id FROM requests WHERE hash=?", (request_hash,)).fetchone()
         if existing:
-            return  # Skip duplicate
+            return False  # Duplicate skipped
 
         c.execute("INSERT INTO requests (url, method, headers, body, response, hash) VALUES (?,?,?,?,?,?)",
                   (url, method, headers, body, response, request_hash))
         c.commit()
+        return True  # Successfully added
 
 def get_requests():
     with conn() as c:
