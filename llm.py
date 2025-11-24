@@ -161,8 +161,8 @@ def chat_stream(msg, history, thinking_enabled=False):
         # Tools désactivés - on parse le texte à la place
     }
 
-    # Add thinking parameter if enabled
-    if thinking_enabled:
+    # Add thinking parameter if enabled (only for Anthropic models)
+    if thinking_enabled and "claude" in model.lower():
         kwargs["thinking"] = {"type": "enabled", "budget_tokens": 4096}
 
     response = completion(**kwargs)
