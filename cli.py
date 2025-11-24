@@ -1443,7 +1443,7 @@ def main():
     ]
 
     console.print(Columns(panels, equal=True, expand=True))
-    console.print("\n[dim]💡 Shortcuts: /c /p /i /s /h /q | TAB for autocomplete[/]\n", justify="center")
+    console.print("\n[bold yellow]💡 Shortcuts:[/] [cyan]/c /p /i /s /h /q[/] [dim]|[/] [green]TAB[/] autocomplete\n", justify="center")
 
     while True:
         try:
