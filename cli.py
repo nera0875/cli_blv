@@ -796,41 +796,52 @@ def cmd_model():
     """Switch LLM model."""
     current = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
 
-    # Model descriptions
-    model_choices = {
-        "Sonnet 4.5 (Balanced - default)": "claude-sonnet-4-5-20250929",
-        "Opus 4.5 (Most Intelligent - NEW!)": "claude-opus-4-5-20251101",
-        "Opus 4.1 (Advanced Reasoning)": "claude-opus-4-1-20250805",
-        "Haiku 4.5 (Fast & Cheap)": "claude-haiku-4-5-20251001",
-    }
+    # Model descriptions (Claude Code style)
+    models = [
+        {
+            "label": "1. Opus (recommended)",
+            "desc": "Opus 4.5 · Most capable for complex work",
+            "id": "claude-opus-4-5-20251101",
+            "price": "$5/$25 per M tokens"
+        },
+        {
+            "label": "2. Sonnet",
+            "desc": "Sonnet 4.5 · Best for everyday tasks",
+            "id": "claude-sonnet-4-5-20250929",
+            "price": "$3/$15 per M tokens"
+        },
+        {
+            "label": "3. Haiku",
+            "desc": "Haiku 4.5 · Fastest for quick answers",
+            "id": "claude-haiku-4-5-20251001",
+            "price": "$0.25/$1.25 per M tokens"
+        }
+    ]
 
     # Build choices with current marker
     choices = []
-    for desc, model_id in model_choices.items():
-        marker = " ✓" if model_id == current else ""
-        choices.append(f"{desc}{marker}")
+    for m in models:
+        marker = " ✔" if m["id"] == current else ""
+        full_text = f"{m['label']:25} {m['desc']}{marker}"
+        choices.append(full_text)
 
     try:
         result = questionary.select(
-            "Select LLM Model:",
+            "Select model:",
             choices=choices,
             style=custom_style
         ).ask()
     except (EOFError, KeyboardInterrupt):
-        console.print("\n[yellow]Back to main[/]")
+        console.print("\n[yellow]Cancelled[/]")
         return
 
     if not result:
-        console.print("[yellow]Back to main[/]")
         return
 
-    # Extract model ID from description
-    selected_desc = result.replace(" ✓", "").strip()
-    selected_model = model_choices.get(selected_desc)
-
-    if not selected_model:
-        console.print("[red]Invalid model selection[/]")
-        return
+    # Extract model index from choice
+    selected_idx = int(result[0]) - 1  # "1. Opus..." → index 0
+    selected_model_info = models[selected_idx]
+    selected_model = selected_model_info["id"]
 
     # Update .env
     env_path = Path(".env")
@@ -852,16 +863,10 @@ def cmd_model():
 
     os.environ["LITELLM_MODEL"] = selected_model
 
-    # Show pricing info
-    prices = {
-        "claude-opus-4-5-20251101": "$5/$25 per M tokens",
-        "claude-opus-4-1-20250805": "$15/$75 per M tokens",
-        "claude-sonnet-4-5-20250929": "$3/$15 per M tokens",
-        "claude-haiku-4-5-20251001": "$0.25/$1.25 per M tokens",
-    }
-    price = prices.get(selected_model, "N/A")
-    console.print(f"[green]✓ Switched to {selected_desc.split('(')[0].strip()}[/]")
-    console.print(f"[dim]  Pricing: {price}[/]")
+    # Show confirmation
+    name = selected_model_info["label"].split(".")[1].strip().split("(")[0].strip()
+    console.print(f"[green]✓ Switched to {name}[/]")
+    console.print(f"[dim]  {selected_model_info['price']}[/]")
 
 def cmd_thinking():
     """Configure thinking mode budget."""
