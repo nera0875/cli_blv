@@ -1235,6 +1235,10 @@ def cmd_tables(table_name=None):
                 if rows:
                     menu_choices.extend(["🔍 Voir détails row", "🗑️  Supprimer lignes"])
 
+                    # Special: Delete all for conversations
+                    if table_name == "conversations":
+                        menu_choices.append("🗑️  Supprimer TOUT")
+
                 # Special action for requests table: import XML
                 if table_name == "requests":
                     menu_choices.insert(1, "📥 Importer Burp XML")
@@ -1319,6 +1323,16 @@ def cmd_tables(table_name=None):
                             c.commit()
                             console.print(f"[green]✓ {len(selected)} ligne(s) supprimée(s)[/]")
                             cmd_tables(table_name)
+
+                elif action and "TOUT" in action:
+                    # Delete all rows in table
+                    total = c.execute(f"SELECT COUNT(*) as cnt FROM {table_name}").fetchone()['cnt']
+                    confirm = questionary.confirm(f"[red]Supprimer TOUTES les {total} lignes de '{table_name}' ?[/]").ask()
+                    if confirm:
+                        c.execute(f"DELETE FROM {table_name}")
+                        c.commit()
+                        console.print(f"[green]✓ {total} ligne(s) supprimée(s)[/]")
+                        cmd_tables(table_name)
 
                 elif action and "Importer" in action:
                     cmd_import()
