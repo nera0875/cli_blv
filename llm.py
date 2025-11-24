@@ -164,6 +164,10 @@ def chat_stream(msg, history, thinking_enabled=False):
         # Tools désactivés - on parse le texte à la place
     }
 
+    # Enable usage tracking for OpenRouter cache info
+    if model.startswith("openrouter/"):
+        kwargs["extra_body"] = {"usage": {"include": True}}
+
     # Add thinking parameter if enabled (only for Anthropic models)
     if thinking_enabled and "claude" in model.lower():
         kwargs["thinking"] = {"type": "enabled", "budget_tokens": 4096}
@@ -218,8 +222,15 @@ def chat_stream(msg, history, thinking_enabled=False):
     global LAST_CACHE_READ_TOKENS
     if last_chunk and hasattr(last_chunk, 'usage'):
         usage = last_chunk.usage
+
+        # Try multiple cache token formats
+        # Anthropic direct: cache_read_input_tokens
         if hasattr(usage, 'cache_read_input_tokens'):
             LAST_CACHE_READ_TOKENS = usage.cache_read_input_tokens
+        # OpenRouter: cached_tokens in usage
+        elif hasattr(usage, 'cached_tokens'):
+            LAST_CACHE_READ_TOKENS = usage.cached_tokens
+        # Some providers: prompt_tokens_details.cached_tokens
         elif hasattr(usage, 'prompt_tokens_details'):
             details = usage.prompt_tokens_details
             if hasattr(details, 'cached_tokens'):
