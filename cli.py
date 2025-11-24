@@ -1394,7 +1394,7 @@ def main():
                 console.print("\n[cyan]Commandes disponibles:[/]")
                 for c in sorted(COMMANDS):
                     console.print(f"  {c}", style="yellow")
-                console.print()
+                console.print("\n[dim]💡 Tapez TAB pour autocomplete interactif[/]\n")
                 continue
 
             # Single letter + long commands
