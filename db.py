@@ -46,10 +46,6 @@ def init():
         c.execute("""CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY, url TEXT, method TEXT,
             headers TEXT, body TEXT, response TEXT)""")
-        c.execute("""CREATE TABLE IF NOT EXISTS findings (
-            id INTEGER PRIMARY KEY, pattern TEXT,
-            worked INTEGER, target TEXT, context TEXT,
-            request_id INTEGER, created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
         c.execute("""CREATE TABLE IF NOT EXISTS conversations (
             id INTEGER PRIMARY KEY, name TEXT,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
