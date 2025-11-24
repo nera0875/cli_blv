@@ -7,10 +7,10 @@ API_BASE = os.getenv("LITELLM_API_BASE")
 API_KEY = os.getenv("LITELLM_API_KEY")
 MODEL = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
 
-# Available models
+# Available models (match LiteLLM config names exactly)
 MODELS = {
     "sonnet-4.5": "claude-sonnet-4-5-20250929",
-    "opus-4.5": "claude-opus-4-5-20251101",
+    "opus-4.5": "anthropic/claude-opus-4-5-20251101",  # Prefix required in LiteLLM
     "opus-4.1": "claude-opus-4-1-20250805",
     "haiku-4.5": "claude-haiku-4-5-20251001",
 }

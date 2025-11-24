@@ -220,7 +220,10 @@ def cmd_chat():
         if "haiku" in model_name:
             input_price_per_m = 0.25
         elif "opus" in model_name:
-            input_price_per_m = 15.0
+            if "20251101" in model_name:  # Opus 4.5
+                input_price_per_m = 5.0
+            else:  # Opus 4.1
+                input_price_per_m = 15.0
         else:  # sonnet
             input_price_per_m = 3.0
 
@@ -561,9 +564,17 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
 
                 # Get model price
                 model_name = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929").lower()
-                prices = {"haiku": 0.25, "sonnet": 3.0, "opus": 15.0}
-                model_key = "haiku" if "haiku" in model_name else "sonnet" if "sonnet" in model_name else "opus"
-                price = prices[model_key]
+                if "haiku" in model_name:
+                    price = 0.25
+                elif "sonnet" in model_name:
+                    price = 3.0
+                elif "opus" in model_name:
+                    if "20251101" in model_name:  # Opus 4.5
+                        price = 5.0
+                    else:  # Opus 4.1
+                        price = 15.0
+                else:
+                    price = 3.0  # Default to Sonnet
 
                 # Coût avec cache (cached = 10% du prix)
                 cached_tokens = llm.LAST_CACHE_READ_TOKENS
@@ -796,12 +807,12 @@ def cmd_model():
     """Switch LLM model."""
     current = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
 
-    # Model descriptions (Claude Code style)
+    # Model descriptions (Claude Code style) - IDs must match LiteLLM config
     models = [
         {
             "label": "1. Opus (recommended)",
             "desc": "Opus 4.5 · Most capable for complex work",
-            "id": "claude-opus-4-5-20251101",
+            "id": "anthropic/claude-opus-4-5-20251101",  # LiteLLM requires anthropic/ prefix
             "price": "$5/$25 per M tokens"
         },
         {
@@ -1119,12 +1130,17 @@ def cmd_prune():
 
 def format_model(name):
     """Format model name for display."""
-    if "sonnet" in name.lower() or "20250929" in name:
+    name_lower = name.lower()
+    if "sonnet" in name_lower or "20250929" in name:
         return "Sonnet 4.5"
-    if "haiku" in name.lower() or "20251001" in name:
+    if "haiku" in name_lower or "20251001" in name:
         return "Haiku 4.5"
-    if "opus" in name.lower():
-        return "Opus 4.1"
+    if "opus" in name_lower:
+        if "20251101" in name:
+            return "Opus 4.5"
+        elif "20250805" in name:
+            return "Opus 4.1"
+        return "Opus"
     return name
 
 def cmd_cost():
