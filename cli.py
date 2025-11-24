@@ -160,27 +160,35 @@ def safe_prompt(prompt_text, style_str="", **kwargs):
         return None
 
 def cmd_help():
-    console.print(Panel(
-        "[cyan]/chat[/] [dim]or[/] [yellow]/c[/]     - Stream chat with LLM\n"
-        "[cyan]/prompt[/] [dim]or[/] [yellow]/p[/]   - Manage system prompts\n"
-        "[cyan]/rules[/]                   - Manage behavioral rules\n"
-        "[cyan]/trigger[/]                 - Manage BLV triggers\n"
-        "[cyan]/import[/] [dim]or[/] [yellow]/i[/]   - Import Burp XML requests\n"
-        "[cyan]/tables[/] [table]          - Show DB tables (interactive)\n"
-        "[cyan]/model[/]                   - Switch LLM model\n"
-        "[cyan]/clear[/]                   - Start new conversation\n"
-        "[cyan]/resume[/]                  - Switch to previous conversation\n"
-        "[cyan]/prune[/]                   - Delete empty conversations\n"
-        "[cyan]/cost[/]                    - Display LiteLLM cost analytics\n"
-        "[cyan]/stats[/] [dim]or[/] [yellow]/s[/]    - Display usage stats\n"
-        "[cyan]/cls[/]                     - Clear screen\n"
-        "[cyan]/menu[/]                    - Interactive menu (findings)\n"
-        "[cyan]/help[/] [dim]or[/] [yellow]/h[/]     - Show this help\n"
-        "[cyan]/quit[/] [dim]or[/] [yellow]/q[/]     - Exit CLI\n\n"
-        "[dim]💡 Press Shift+TAB for autocomplete | TAB to toggle thinking[/]",
-        title="[bold green]BLV Commands[/]",
-        border_style="cyan"
-    ))
+    from rich.table import Table
+
+    table = Table(title="[bold cyan]BLV Commands[/]", border_style="cyan", show_header=False, padding=(0, 2))
+    table.add_column("Command", style="cyan", width=15)
+    table.add_column("Description", style="white")
+    table.add_column("Shortcut", style="yellow", justify="center", width=8)
+
+    commands = [
+        ("/chat", "Stream chat with AI", "/c"),
+        ("/prompt", "Manage system prompts", "/p"),
+        ("/import", "Import Burp XML requests", "/i"),
+        ("/rules", "Manage behavioral rules", ""),
+        ("/trigger", "Manage BLV triggers", ""),
+        ("/tables", "Browse database tables", ""),
+        ("/model", "Switch LLM model", ""),
+        ("/clear", "Start new conversation", ""),
+        ("/resume", "Switch conversation", ""),
+        ("/prune", "Delete empty chats", ""),
+        ("/cost", "LiteLLM cost analytics", ""),
+        ("/stats", "Display usage stats", "/s"),
+        ("/help", "Show this help", "/h"),
+        ("/quit", "Exit CLI", "/q"),
+    ]
+
+    for cmd, desc, shortcut in commands:
+        table.add_row(cmd, desc, shortcut)
+
+    console.print(table)
+    console.print("\n[dim]💡 TAB: autocomplete | Shift+TAB: thinking toggle | ESC: cancel[/]\n")
 
 def cmd_chat():
     console.clear()
@@ -1400,25 +1408,42 @@ def get_footer():
     )
 
 def main():
-    console.print(Panel(
-        "[bold cyan]BLV CLI[/] - Pentest Copilot\n\n"
-        "[cyan]/c[/] or [cyan]/chat[/]     - Stream chat with LLM\n"
-        "[cyan]/p[/] or [cyan]/prompt[/]   - Manage system prompts\n"
-        "[cyan]/i[/] or [cyan]/import[/]   - Import Burp XML requests\n"
-        "[cyan]/model[/]                   - Switch LLM model\n"
-        "[cyan]/cls[/]                     - Clear screen (visual only)\n"
-        "[cyan]/clear[/]                   - Start new conversation\n"
-        "[cyan]/resume[/]                  - Switch to previous conversation\n"
-        "[cyan]/prune[/]                   - Delete all empty conversations\n"
-        "[cyan]/cost[/]                    - Display LiteLLM cost analytics\n"
-        "[cyan]/s[/] or [cyan]/stats[/]    - Display usage stats\n"
-        "[cyan]/h[/] or [cyan]/help[/]     - Show help\n"
-        "[cyan]/q[/] or [cyan]/quit[/]     - Exit CLI\n\n"
-        "[dim]💡 Press TAB for autocomplete | /back in chat[/]",
-        title="[bold green]Welcome[/]",
-        border_style="green"
-    ))
-    console.print()
+    from rich.columns import Columns
+    from rich.panel import Panel
+
+    # Header
+    console.print("\n[bold cyan]BLV CLI[/] - AI Pentest Assistant\n", justify="center")
+
+    # Commands in 3 columns
+    cmds_col1 = [
+        "[cyan]/chat[/]     Chat with AI",
+        "[cyan]/import[/]   Import Burp XML",
+        "[cyan]/model[/]    Switch model",
+        "[cyan]/tables[/]   Browse data"
+    ]
+
+    cmds_col2 = [
+        "[cyan]/prompt[/]   Manage prompts",
+        "[cyan]/rules[/]    Manage rules",
+        "[cyan]/resume[/]   Switch chat",
+        "[cyan]/cost[/]     View analytics"
+    ]
+
+    cmds_col3 = [
+        "[cyan]/clear[/]    New chat",
+        "[cyan]/prune[/]    Clean empty",
+        "[cyan]/help[/]     Show help",
+        "[cyan]/quit[/]     Exit"
+    ]
+
+    panels = [
+        Panel("\n".join(cmds_col1), border_style="cyan", padding=(0, 1)),
+        Panel("\n".join(cmds_col2), border_style="cyan", padding=(0, 1)),
+        Panel("\n".join(cmds_col3), border_style="cyan", padding=(0, 1))
+    ]
+
+    console.print(Columns(panels, equal=True, expand=True))
+    console.print("\n[dim]💡 Shortcuts: /c /p /i /s /h /q | TAB for autocomplete[/]\n", justify="center")
 
     while True:
         try:
