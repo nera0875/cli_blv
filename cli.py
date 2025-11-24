@@ -448,29 +448,8 @@ def cmd_chat():
 
             console.print(f"Model: [cyan]{current_model}[/] | {prompt_info}Tokens: {new_tokens:,}/200,000 [{bar}] {percentage:.1f}% | €{cost_eur:.4f}")
 
-            # Menu auto après détection liste tests
-            tests = detect_test_list(response)
-            if tests:
-                # Format choices with proper spacing
-                choices = []
-                for t in tests:
-                    choices.append(f"  {t['id']}. {t['desc']}")
-                choices.append("  → Continuer en chat")
-
-                selected = questionary.select(
-                    "Quel test ?",
-                    choices=choices,
-                    style=custom_style
-                ).ask()
-
-                if selected and "Continuer" not in selected:
-                    test_id = selected.strip().split(".")[0].strip()
-                    msg = f"montre le payload complet pour le test {test_id}"
-                    console.print(f"\n[dim]Auto: {msg}[/]\n")
-                    continue  # Relance loop avec msg
-
             # Menu résultat après payload
-            elif detect_payload_shown(response):
+            if detect_payload_shown(response):
                 result = questionary.select(
                     "Résultat du test ?",
                     choices=["✓ Bypass (vulnérable)", "✗ Bloqué", "⏭ Skip"],
