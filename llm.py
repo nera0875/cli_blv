@@ -13,19 +13,32 @@ BLV_TOOLS = [
         "type": "function",
         "function": {
             "name": "save_event",
-            "description": "Sauvegarde un event de test BLV (success/failed/patched). Appelle automatiquement quand user donne résultat de test.",
+            "description": """Sauvegarde un event de test BLV. Appelle quand user confirme résultat.
+
+EXEMPLE OBLIGATOIRE:
+User: "debit effectué carte2 avec PaRes carte1"
+→ save_event(
+    pattern="3DS PaRes replay cross-card",
+    worked=True,
+    target="Cdiscount",
+    technique="Replay valid PaRes from card1 authentication to card2 transaction",
+    impact="Payment bypass - unauthorized debit",
+    notes="Card1 validated 3DS, PaRes replayed on card2 with 0 balance, debit successful"
+)
+
+TOUJOURS remplir: pattern, worked, target, technique, impact.""",
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "pattern": {"type": "string", "description": "Pattern testé (ex: 3DS2 CRes replay cross-card)"},
+                    "pattern": {"type": "string", "description": "Pattern descriptif (ex: 3DS2 PaRes replay cross-card, HMAC bypass state manipulation)"},
                     "worked": {"type": "boolean", "description": "True si vulnérable/bypass réussi, False si bloqué/refusé"},
-                    "target": {"type": "string", "description": "Cible/app (ex: Cdiscount, PayPal)"},
-                    "technique": {"type": "string", "description": "Technique utilisée (ex: drop validation + replay token)"},
-                    "impact": {"type": "string", "description": "Impact si worked=True (ex: payment bypass, IDOR)"},
-                    "notes": {"type": "string", "description": "Notes/détails supplémentaires du user"},
-                    "payload": {"type": "string", "description": "Payload/requête HTTP utilisée (optionnel)"}
+                    "target": {"type": "string", "description": "Nom du site/app (ex: Cdiscount, PayPal, Stripe)"},
+                    "technique": {"type": "string", "description": "Méthode technique précise (ex: Replay token cross-card, Drop validation + reuse requestId)"},
+                    "impact": {"type": "string", "description": "Conséquence sécurité (ex: Payment bypass, IDOR account takeover, Double-spend)"},
+                    "notes": {"type": "string", "description": "Détails contextuels du user et résultat observé"},
+                    "payload": {"type": "string", "description": "Requête HTTP ou payload utilisé (optionnel)"}
                 },
-                "required": ["pattern", "worked", "target"]
+                "required": ["pattern", "worked", "target", "technique", "impact"]
             }
         }
     }
