@@ -16,13 +16,13 @@ MODELS = {
     "haiku-4.5": "claude-haiku-4-5-20251001",
 }
 
-# Thinking budgets
+# Thinking budgets (max 60K to leave room for response, API limit 64K)
 THINKING_BUDGETS = {
     "none": 0,
     "quick": 4000,
     "normal": 16000,
     "deep": 32000,
-    "ultra": 64000
+    "ultra": 60000  # Not 64K to satisfy max_tokens > budget
 }
 
 # Global thinking config
@@ -662,7 +662,13 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
         )
         yield ("tool", f"save_finding({pat.strip()}, worked={worked.strip()}, target={target.strip()})")
 
-def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
+def chat_stream(msg, history, thinking_enabled=None, use_tools=True):
+    """
+    thinking_enabled:
+      - None = use THINKING_MODE from .env (default)
+      - True = force enable (use .env budget or normal)
+      - False = force disable (for /idea, etc.)
+    """
     # Get current model from env (may have changed via /model)
     model = os.getenv("LITELLM_MODEL", MODEL)
 
@@ -671,12 +677,14 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
     thinking_mode = os.getenv("THINKING_MODE", THINKING_MODE)
     budget = THINKING_BUDGETS.get(thinking_mode, 0)
 
-    # Override if thinking_enabled explicitly passed
-    if thinking_enabled and budget == 0:
+    # Override based on explicit thinking_enabled parameter
+    if thinking_enabled is True and budget == 0:
+        # Force enable with default budget
         budget = THINKING_BUDGETS["normal"]
-    elif not thinking_enabled:
-        # Force disable thinking if explicitly False (e.g., /idea)
+    elif thinking_enabled is False:
+        # Force disable (e.g., /idea)
         budget = 0
+    # else: thinking_enabled is None, use .env config (budget already set)
 
     # Route to Anthropic SDK if Opus 4.5 (always, thinking or not)
     # Reason: LiteLLM doesn't support thinking, and consistent routing
