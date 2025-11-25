@@ -1,0 +1,88 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.6" exportTime="Mon Nov 24 18:18:15 CET 2025">
+  <item>
+    <time>Mon Nov 24 18:06:17 CET 2025</time>
+    <url><![CDATA[https://acs-challenge.apata.io/v1/BrowserCReqAction]]></url>
+    <host ip="52.57.149.131">acs-challenge.apata.io</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/v1/BrowserCReqAction]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /v1/BrowserCReqAction HTTP/2
+Host: acs-challenge.apata.io
+Cookie: AWSALB=CUwlDRyDXk/ngWwB/F/NWUQM4i6tUafxge3UvBbtE1fr3p/VpvMA5Cp8Jaxdyp8I82MYF4GO9rCkfzNWzKr6EYGEkq11zonqFcOal3Q6DGb6+QMFZQsAul7XEcKj; AWSALBCORS=CUwlDRyDXk/ngWwB/F/NWUQM4i6tUafxge3UvBbtE1fr3p/VpvMA5Cp8Jaxdyp8I82MYF4GO9rCkfzNWzKr6EYGEkq11zonqFcOal3Q6DGb6+QMFZQsAul7XEcKj
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 76
+Origin: https://acs-challenge.apata.io
+Referer: https://acs-challenge.apata.io/v1/BrowserCReq
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Priority: u=0, i
+Te: trailers
+
+transactionId=e85d97a1-726c-43d3-b8d5-c0036f747376&answer=none&action=SUBMIT]]></request>
+    <status>200</status>
+    <responselength>1517</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Date: Mon, 24 Nov 2025 17:06:23 GMT
+Content-Type: text/html; charset=utf-8
+Content-Length: 843
+Set-Cookie: AWSALB=Mu1XgTqubW6aP2OirnBdAcCJayB0r0OlND2D8ykUq+PAP+pFS3Glyc5caXUgsFnT38MKj029L8B/V7syWEqE9fuE+wwpXROpfd2cZV3+2imQwphJM51yUkmRTHeS; Expires=Mon, 01 Dec 2025 17:06:23 GMT; Path=/
+Set-Cookie: AWSALBCORS=Mu1XgTqubW6aP2OirnBdAcCJayB0r0OlND2D8ykUq+PAP+pFS3Glyc5caXUgsFnT38MKj029L8B/V7syWEqE9fuE+wwpXROpfd2cZV3+2imQwphJM51yUkmRTHeS; Expires=Mon, 01 Dec 2025 17:06:23 GMT; Path=/; SameSite=None; Secure
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Access-Control-Allow-Origin: *
+Etag: W/"34b-1PwnWs5ga+RXaYJ1WRftksUSnow"
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>Apata Redirect</title>
+  </head>
+  <body>
+    <form action="https://office-web.sips-services.com/paymentprovider/threeds/processcres;kiw_sessionid=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s" method="POST" id="redirect-form">
+      <input type="hidden" name="cres" value="eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiYWNzVHJhbnNJRCI6ImU4NWQ5N2ExLTcyNmMtNDNkMy1iOGQ1LWMwMDM2Zjc0NzM3NiIsInRocmVlRFNTZXJ2ZXJUcmFuc0lEIjoiYzZiNGRlYWUtYzc2Mi00N2UwLWIwNWItNWFjOTMwZTkxZjkzIiwidHJhbnNTdGF0dXMiOiJZIiwiY2hhbGxlbmdlQ29tcGxldGlvbkluZCI6IlkifQ" />
+      <noscript><input type="submit" /></noscript>
+    </form>
+  </body>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      document.getElementById("redirect-form").submit();
+    });
+  </script>
+</html>]]></response>
+    <comment></comment>
+  </item>
+</items>

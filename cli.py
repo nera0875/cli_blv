@@ -159,7 +159,7 @@ def bottom_toolbar():
         route = '<ansicyan>⚡ routing:</ansicyan> <ansibrightgreen>AUTO</ansibrightgreen>'
     else:
         # Show current model when manual
-        model_name = os.getenv("LITELLM_MODEL", "sonnet").split("/")[-1][:12]
+        model_name = os.getenv("CLAUDE_MODEL", "sonnet").split("/")[-1][:12]
         route = f'<ansibrightblack>📌 model:</ansibrightblack> <ansibrightyellow>{model_name}</ansibrightyellow>'
 
     # Bypass status (orange ON, red OFF)
@@ -256,13 +256,13 @@ def cmd_chat():
     cost_eur = cost_usd * 0.95  # ~1 USD = 0.95 EUR
 
     # Get current model
-    current_model = format_model(os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929"))
+    current_model = format_model(os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929"))
 
     # Show prompt tokens with cost estimate
     prompt_info = ""
     if llm.LAST_PROMPT_TOKENS > 0:
         # Get input price based on model
-        model_name = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929").lower()
+        model_name = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929").lower()
         if "haiku" in model_name:
             input_price_per_m = 0.25
         elif "opus" in model_name:
@@ -334,7 +334,7 @@ def cmd_chat():
                         idea_status.start()
 
                         try:
-                            for chunk_type, chunk_content in chat_stream(idea_prompt, [], thinking_enabled=False, use_tools=True):
+                            for chunk_type, chunk_content in chat_stream(idea_prompt, [], thinking_budget=0, use_tools=True):
                                 if chunk_type == "tool_ready":
                                     tool_info = chunk_content
                                     if tool_info["name"] == "suggest_test":
@@ -741,7 +741,7 @@ def cmd_chat():
                                     for resp_type, resp_content in llm.chat_stream(
                                         response_text.strip(),
                                         [{"role": h["role"], "content": h["content"]} for h in db.get_history()[:-1]],
-                                        thinking_enabled=THINKING_ENABLED
+                                        thinking_budget=llm.THINKING_BUDGETS["normal"] if THINKING_ENABLED else 0
                                     ):
                                         if resp_type == "content":
                                             console.print(resp_content, end="")
@@ -828,7 +828,7 @@ def cmd_chat():
             cost_eur = cost_usd * 0.95
 
             # Get current model
-            current_model = format_model(os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929"))
+            current_model = format_model(os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929"))
 
             # Show prompt tokens with cost estimate
             prompt_info = ""
@@ -837,7 +837,7 @@ def cmd_chat():
                 cache_pct = (llm.LAST_CACHE_READ_TOKENS / llm.LAST_PROMPT_TOKENS * 100) if llm.LAST_PROMPT_TOKENS > 0 else 0
 
                 # Get model price
-                model_name = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929").lower()
+                model_name = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929").lower()
                 if "haiku" in model_name:
                     price = 0.25
                 elif "sonnet" in model_name:
@@ -1065,45 +1065,31 @@ def cmd_import():
         console.print(f"[red]✗ Error importing: {e}[/]")
 
 def fetch_available_models():
-    """Fetch models from LiteLLM proxy."""
-    import requests
-    api_base = os.getenv("LITELLM_API_BASE")
-    api_key = os.getenv("LITELLM_API_KEY")
-
-    try:
-        resp = requests.get(
-            f"{api_base}/v1/models",
-            headers={"Authorization": f"Bearer {api_key}"},
-            timeout=5
-        )
-        if resp.status_code == 200:
-            return [m["id"] for m in resp.json().get("data", [])]
-    except:
-        pass
-    return []
+    """Return available Claude models."""
+    return list(llm.MODELS.values())
 
 def cmd_model():
     """Switch LLM model with configuration submenu."""
-    current_model = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
+    current_model = os.getenv("CLAUDE_MODEL", "claude-sonnet-4-5-20250929")
 
-    # Model descriptions (Claude Code style) - IDs must match LiteLLM config
+    # Model descriptions - IDs match llm.MODELS
     models = [
         {
             "label": "1. Opus (recommended)",
             "desc": "Opus 4.5 · Most capable for complex work",
-            "id": "anthropic/claude-opus-4-5-20251101",
+            "id": llm.MODELS["opus"],
             "price": "$5/$25 per M tokens"
         },
         {
             "label": "2. Sonnet",
             "desc": "Sonnet 4.5 · Best for everyday tasks",
-            "id": "claude-sonnet-4-5-20250929",
+            "id": llm.MODELS["sonnet"],
             "price": "$3/$15 per M tokens"
         },
         {
             "label": "3. Haiku",
             "desc": "Haiku 4.5 · Fastest for quick answers",
-            "id": "claude-haiku-4-5-20251001",
+            "id": llm.MODELS["haiku"],
             "price": "$0.25/$1.25 per M tokens"
         }
     ]
@@ -1139,17 +1125,17 @@ def cmd_model():
     updated = []
     model_found = False
     for line in lines:
-        if line.startswith("LITELLM_MODEL="):
-            updated.append(f"LITELLM_MODEL={selected_model}")
+        if line.startswith("CLAUDE_MODEL="):
+            updated.append(f"CLAUDE_MODEL={selected_model}")
             model_found = True
         else:
             updated.append(line)
 
     if not model_found:
-        updated.append(f"LITELLM_MODEL={selected_model}")
+        updated.append(f"CLAUDE_MODEL={selected_model}")
 
     env_path.write_text("\n".join(updated) + "\n")
-    os.environ["LITELLM_MODEL"] = selected_model
+    os.environ["CLAUDE_MODEL"] = selected_model
 
     # Show confirmation
     name = selected_model_info["label"].split(".")[1].strip().split("(")[0].strip()
@@ -1509,126 +1495,27 @@ def format_model(name):
     return name
 
 def cmd_cost():
-    """Display LiteLLM cost analytics with Rich layout."""
-    api_base = os.getenv("LITELLM_API_BASE", "http://89.116.27.88:5000")
-    api_key = os.getenv("LITELLM_API_KEY", "sk-admin-key-2024")
-    headers = {"Authorization": f"Bearer {api_key}"}
-
+    """Display local token usage stats from DB."""
     try:
-        # Calculate dates
-        today = datetime.now().strftime("%Y-%m-%d")
-        week_ago = (datetime.now() - timedelta(days=7)).strftime("%Y-%m-%d")
+        stats = db.get_stats()
 
-        # Fetch data
-        spend_logs = requests.get(f"{api_base}/spend/logs?limit=10", headers=headers, timeout=5).json()
+        # Token stats from chat table
+        table = Table(title="Token Usage (Local Stats)", border_style="cyan")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green", justify="right")
 
-        # Calculate stats
-        total_spend = sum(log.get("spend", 0) for log in spend_logs)
-        today_spend = sum(log.get("spend", 0) for log in spend_logs if log.get("startTime", "").startswith(today))
-        week_spend = sum(log.get("spend", 0) for log in spend_logs)
+        table.add_row("Total Messages", f"{stats.get('total_messages', 0):,}")
+        table.add_row("Total Tokens", f"{stats.get('total_tokens', 0):,}")
+        table.add_row("Conversations", f"{stats.get('conversations', 0):,}")
+        table.add_row("Cache Read Tokens", f"{llm.LAST_CACHE_READ_TOKENS:,}")
 
-        # By model stats
-        model_stats = {}
-        cache_total_tokens = 0
-        cache_read_tokens = 0
+        # Estimate cost (rough)
+        tokens = stats.get('total_tokens', 0)
+        estimated_cost = (tokens / 1_000_000) * 3  # ~$3/M for Sonnet
+        table.add_row("Est. Cost (Sonnet)", f"${estimated_cost:.4f}")
 
-        for log in spend_logs:
-            model = log.get("model", "unknown")
-            spend = log.get("spend", 0)
-            tokens = log.get("total_tokens", 0)
-            cached = log.get("metadata", {}).get("additional_usage_values", {}).get("cache_read_input_tokens", 0)
+        console.print(table)
 
-            if model not in model_stats:
-                model_stats[model] = {"spend": 0, "tokens": 0}
-            model_stats[model]["spend"] += spend
-            model_stats[model]["tokens"] += tokens
-
-            cache_total_tokens += tokens
-            cache_read_tokens += cached
-
-        # === HEADER ROW ===
-        total_panel = Panel(
-            f"[bold green]${total_spend:.4f}[/]",
-            title="Total (Last 10)",
-            border_style="green"
-        )
-
-        today_panel = Panel(
-            f"[bold cyan]${today_spend:.4f}[/]",
-            title="Today",
-            border_style="cyan"
-        )
-
-        week_panel = Panel(
-            f"[bold yellow]${week_spend:.4f}[/]",
-            title="This Week (Last 10)",
-            border_style="yellow"
-        )
-
-        header_row = Columns([total_panel, today_panel, week_panel], equal=True)
-
-        # === MIDDLE ROW ===
-        # By Model Table
-        model_table = Table(title="By Model", border_style="cyan")
-        model_table.add_column("Model", style="cyan")
-        model_table.add_column("Cost", style="green", justify="right")
-        model_table.add_column("Tokens", style="yellow", justify="right")
-
-        for model, stats in sorted(model_stats.items(), key=lambda x: x[1]["spend"], reverse=True):
-            model_table.add_row(
-                format_model(model),
-                f"${stats['spend']:.6f}",
-                f"{stats['tokens']:,}"
-            )
-
-        # Cache Stats Table
-        cache_table = Table(title="Cache Stats", border_style="magenta")
-        cache_table.add_column("Metric", style="magenta")
-        cache_table.add_column("Value", style="green", justify="right")
-
-        cache_percent = (cache_read_tokens / cache_total_tokens * 100) if cache_total_tokens > 0 else 0
-        cache_table.add_row("Cached Tokens", f"{cache_read_tokens:,}")
-        cache_table.add_row("Total Tokens", f"{cache_total_tokens:,}")
-        cache_table.add_row("% Cached", f"{cache_percent:.1f}%")
-
-        middle_row = Columns([Panel(model_table), Panel(cache_table)], equal=True)
-
-        # === BOTTOM ROW ===
-        requests_table = Table(title="Last 10 Requests", border_style="blue")
-        requests_table.add_column("Time", style="dim")
-        requests_table.add_column("Model", style="cyan")
-        requests_table.add_column("Tokens", style="yellow", justify="right")
-        requests_table.add_column("Cached", style="magenta", justify="right")
-        requests_table.add_column("Cost", style="green", justify="right")
-
-        for log in spend_logs[:10]:
-            time = log.get("startTime", "")[:16].replace("T", " ")
-            model = format_model(log.get("model", "unknown"))
-            tokens = log.get("total_tokens", 0)
-            cached = log.get("metadata", {}).get("additional_usage_values", {}).get("cache_read_input_tokens", 0)
-            cost = log.get("spend", 0)
-
-            requests_table.add_row(
-                time,
-                model,
-                f"{tokens:,}",
-                f"{cached:,}",
-                f"${cost:.6f}"
-            )
-
-        bottom_row = Panel(requests_table, border_style="blue")
-
-        # Display layout
-        console.print()
-        console.print(header_row)
-        console.print()
-        console.print(middle_row)
-        console.print()
-        console.print(bottom_row)
-        console.print()
-
-    except requests.exceptions.RequestException as e:
-        console.print(f"[red]✗ Failed to fetch cost data: {e}[/]")
     except Exception as e:
         console.print(f"[red]✗ Error: {e}[/]")
 

@@ -1,0 +1,163 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.6" exportTime="Mon Nov 24 18:18:28 CET 2025">
+  <item>
+    <time>Mon Nov 24 18:06:18 CET 2025</time>
+    <url><![CDATA[https://office-web.sips-services.com/paymentprovider/threeds/processcres;kiw_sessionid=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s]]></url>
+    <host ip="185.8.53.111">office-web.sips-services.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/paymentprovider/threeds/processcres;kiw_sessionid=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s]]></path>
+    <extension>705s</extension>
+    <request base64="false"><![CDATA[POST /paymentprovider/threeds/processcres;kiw_sessionid=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s HTTP/2
+Host: office-web.sips-services.com
+Cookie: TS014c2865=01500b242d3fdf3cb460e1ebdc56d0b685748caef03dadb6870090199681f326025b9eda05bf306c08651141cbdc8f0bdb0c3a1031; KIW_SESSIONID=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s; TS01af447f=01500b242d2e04134a275112209d9694ca7fe641084d55972e928dc341e01bcd81b2de15956678c68444e3bb46cc6f299bc4496581
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 283
+Origin: https://acs-challenge.apata.io
+Referer: https://acs-challenge.apata.io/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+Priority: u=0, i
+Te: trailers
+
+cres=eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiYWNzVHJhbnNJRCI6ImU4NWQ5N2ExLTcyNmMtNDNkMy1iOGQ1LWMwMDM2Zjc0NzM3NiIsInRocmVlRFNTZXJ2ZXJUcmFuc0lEIjoiYzZiNGRlYWUtYzc2Mi00N2UwLWIwNWItNWFjOTMwZTkxZjkzIiwidHJhbnNTdGF0dXMiOiJZIiwiY2hhbGxlbmdlQ29tcGxldGlvbkluZCI6IlkifQ]]></request>
+    <status>200</status>
+    <responselength>6391</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Date: Mon, 24 Nov 2025 17:06:34 GMT
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Content-Type: text/html;charset=UTF-8
+Content-Security-Policy: default-src https: 'unsafe-eval' 'unsafe-inline'; img-src 'self' data:; object-src 'none'
+Application-Dc: SCL
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload;
+
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+<html>
+    <head>
+       <title></title>
+       <script type="text/javascript" src="../scripts/session-storage.js"></script>
+       <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+       <style>
+                .loading {
+                         padding: 10em 0;
+                          text-align: center;
+                }
+
+                @media screen and (max-width:475px){
+                  .loading {
+                    padding: 1.5em 0;
+                  }
+                }
+
+                .colorLoading {
+                        fill:#BBB;
+                        color: #BBB;
+                }
+        </style>
+    </head>
+
+    <script type="text/javascript">
+        window.onload = function () {
+            var domsessionStorageToken = document.getElementById("sessionStorageToken");
+            const storage = readValue('sessionStorageToken');
+            if (storage.success === true) {
+                if (storage.sessionStorageToken != null) {
+                    domsessionStorageToken.value = storage.sessionStorageToken;
+                }
+            } else {
+                domsessionStorageToken.value = 'disabled';
+            }
+            document.formReturnWL.submit();
+        }
+    </script>
+
+    <body>
+        <form method="POST" Action="https://office-web.sips-services.com/paymentprovider/threeds/processcres" name="formReturnWL">
+
+            <input type="hidden" name="sessionStorageToken" id="sessionStorageToken" value="">
+            <input type="hidden" name="cres" id="cres" value="eyJtZXNzYWdlVHlwZSI6IkNSZXMiLCJtZXNzYWdlVmVyc2lvbiI6IjIuMi4wIiwiYWNzVHJhbnNJRCI6ImU4NWQ5N2ExLTcyNmMtNDNkMy1iOGQ1LWMwMDM2Zjc0NzM3NiIsInRocmVlRFNTZXJ2ZXJUcmFuc0lEIjoiYzZiNGRlYWUtYzc2Mi00N2UwLWIwNWItNWFjOTMwZTkxZjkzIiwidHJhbnNTdGF0dXMiOiJZIiwiY2hhbGxlbmdlQ29tcGxldGlvbkluZCI6IlkifQ">
+            <input type="hidden" name="formFilled" id="formFilled" value="true">
+            
+            <div class="main_content">
+
+
+                <!-- Spinner -->
+                <main class="loading">
+                    <svg class="lds-spinner" width="200px" height="200px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="background: none;"><g transform="rotate(0 50 50)">
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.375s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(30 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.25s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(60 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.125s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(90 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(120 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.875s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(150 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.75s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(180 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.625s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(210 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.5s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(240 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.375s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(270 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.25s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(300 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.125s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(330 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="0s" repeatCount="indefinite"/></rect>
+                        </svg>
+
+                    <h2 class="colorLoading">You will be redirected in a moment.</h2>
+                    <noscript>
+                        <div class="main_content">
+                            JavaScript is required to authenticate your payment. Please enable Javascript in your browser before clicking on the "Continue" button.
+                            <br/>
+                            <br/>
+
+                            <input type="submit" value=Continue />
+                        </div>
+                    </noscript>
+                </main>
+            </div>
+        </form>
+    </body>
+</html>
+]]></response>
+    <comment></comment>
+  </item>
+</items>

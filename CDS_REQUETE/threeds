@@ -1,0 +1,187 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.6" exportTime="Mon Nov 24 18:17:43 CET 2025">
+  <item>
+    <time>Mon Nov 24 18:05:57 CET 2025</time>
+    <url><![CDATA[https://office-web.sips-services.com/paymentprovider/threeds/init?threedsKeyRequest=f0089cfd-8776-4314-9c4f-d66f5026a931&pid=ab4e3f37af5f4c60a0fda56c78674aa5]]></url>
+    <host ip="185.8.53.111">office-web.sips-services.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/paymentprovider/threeds/init?threedsKeyRequest=f0089cfd-8776-4314-9c4f-d66f5026a931&pid=ab4e3f37af5f4c60a0fda56c78674aa5]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /paymentprovider/threeds/init?threedsKeyRequest=f0089cfd-8776-4314-9c4f-d66f5026a931&pid=ab4e3f37af5f4c60a0fda56c78674aa5 HTTP/1.1
+Host: office-web.sips-services.com
+Cookie: TS014c2865=01500b242d3fdf3cb460e1ebdc56d0b685748caef03dadb6870090199681f326025b9eda05bf306c08651141cbdc8f0bdb0c3a1031; TS01af447f=01500b242d12866e57e1922049c6144f76d91e604123aa7286fcea3344e62f44ec6d3849a4947698df859d5489b7536ee5daec60d7
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 4805
+Origin: https://payment.cdiscount.com
+Referer: https://payment.cdiscount.com/
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: cross-site
+Priority: u=0, i
+Te: trailers
+Connection: keep-alive
+
+PaReq=eCfQQTMGXPb7Igl94gmaaemZVnE2iIbBjBWzFaQzD0bZIZrmum3tElKuq1uH3KnyfKa3lRQS%2F80lHdGj3T9TbzXmfkEDKi72R6vV6w4Hns20LV67Kqyc2%2F%2BAkyDRUziN26oh2CiA0%2Fw1MlmPXO04PIl1tHw47%2B3ub6Ej1p%2F3116%2Bxv6D4gvZwadiHGCzJ2tinnPDuH%2FdB9XcoWRRIqisRvY5iWBkLniIhi73w6rKtsBMMoiKJEpad9W5G3OSeVQFp18uQ%2FA4kfnRxPguYuEsmu3vtiH0fWqoRIeLZZcJYL3XGcIfBZeTWY53VibdO6UV0C6hkxEqwfoQy6m04JMDLmgdJ6klEqvVjxDUa8Wsp9u4kpWWNONi0kJd3c%2FBUcD4wmLid3XD1SDlOPTv3m7eU3MUwXlVf2%2FmFjGAoaQe7kVke4tiI5iy2%2BAzgemejbN5fEGY87anPxEFJBJdomIgYOQo0vWZi5UIpGpKED19j%2BxYtRQ49ZoAcmtv7yTkvza9TscobATLrE9ahBTUlW6HI1ISAITxWZ8rm3Lon1xYeBL1sSgdOo8owqN4aCDIwoR%2FHrOO%2B327ZtUq%2B3pn3JvwV5R8j0EOyFRkY9B%2FwHS8r6dbX28ZtwHLDy8XgSwyAB7ZnzV6yJRq2UOTYPSiuHhziyGvBqlXGquYo4qXvHbmD6VqIroAxcTTpouUntrqOvxntnGYvxsFDm8vxL%2FK%2BtZqjjMojErYmtXhEOMIkn6YHa1pI0c%2FDurSADZcDlOhJsYe%2FXYkrB4j91cgsKPIXNagyS4NK82Urj3dJ2ioDXa2woyiwiT2Eqxjc4sfcOBLcUntQwONKlT1RpT5UDxR76SfzBsIW52dpbS0EQS68VnsgSX8z2%2F%2FkgkQMaIh688ASj%2BOK93HnjqBGa4%2BbpVEdW%2FtUVFTHNZ8%2BSBmLyrhYQphy42vXSaEyJjksocFR3M2Cn4xBCRYW%2FF8%2BoM74Ym%2BMwqZF3e2aSf4dToVzBH1MKEbjBPF4pPSsB50TVGSiS0dlGEWOMnJlLLnpy%2FaHRCb%2FWDFa0oaPkjIsHHCyTLKugDX7W1LjDc%2B7j7sJ8QQI4teEIzJ96KKBMnACcuyOgiF%2FWxmOXr%2FZhCIj26lX2bByUMGrldgbBdmu9Z7TUR1EbNJ9aaiApokzHtaJOGQBoWjgSx%2FuME7Ri7Bk2%2FSCtn8ucxxhJmlgPEwKLX7bvtxyrJK%2BF3tNIkaumib7Hu1KRlyWa1ApquDUm1hn5ucJFptgbwdVDOVrvUNIKrmvOJcviQ3B4u0dloQ5hH1nR%2FCncuQPZcldBUMwC2q6ZjQKIPrvwd3gHm9fw5xC5jTYqO%2BuTfPMdoqhaes0hx9goKdYUDh1%2FgHQ2Zan5JSvkXuaYRHiLoyBBSCDXYZndvmVVoHY%2FvAkSlqh1sVqLsHKdJ8Df6EzW00VsWLrmFObw3DPhnEaZYBM8cU5qEl8pZ8gLKNgf0bYmX16F4Uj6a4hRo6SUwU%2BsUoIBaEM9bP5KXrItGH%2F5FfJY6OHjgYJYmdO7uyQlCZcrTgOGA1ZW5ZePXrLCIfCa5pkNnN0ReypE%2Fn1NJrxn9qY99n1sqy3G4yFkI54ggJt%2F%2BavLsbmNu7DuC43onAuRXxOejvwgytAVK%2F21%2F1dgioUhGIOGTsQCWGWnPhSZ8TBZbX34cAqPFc4on9V8PbbDmfOPMlVpSMlm2Q4Y2UjkjKDXaBlndNiq2aghuS%2F2Tc%2Fsl%2BF%2BZkBcDtmEn4aLV9sIjbVhF3uNiQi5D8XR%2B253o9GtoaCCo1RFdoLKCOqRiisrZyacCLS7lsRHCNsDtTiWUukFmJKzaVxUrpdIyvy%2FpggtR6IDlZyfvTwq4v8IFBrzPgu2On9oNHO%2B0kqD9gd%2F%2FVYZzd%2B%2Bb%2FW3%2BqJIlAlhTR4MLQgCoEStq1jvq3LfS4va1JwswF9A0E2qAFTZ0B0WS%2FJyyaMTXHC7HkQ%2Fve%2FIZ7eHdhFJiYF1BvAi56RlAPHfPuTAcBdXwW%2B5l4AMeDo9WxLHd1N6IDp9bhLl0EGPBS%2B8jdGZBegzdNxJxQix5S9%2B%2BBZyGR8p0lvjioiXwvOUyWl1CsO4VnZaogsS%2Bnw4sMFemDCu4V6A0QLlqIbCIKAZqGXTrN4HS7nQd5W%2Bn%2FVRxsZN2evtx9NP2SSO8jVGwfjHv6f%2BVzzf1BPO13fTXAzUFRBYyQuP5mlOk64Mha%2BdY4yhWx7EhqGserRTdUCcZ7iM%2FnIRn2ABF2TBngA0qF7agVhn0bKedv6XuIdxPBX2gdBUAUB7yuOBuOgwXMO19zmg4m2v3KffCSw7aqU3i%2BYDmiOLxtSUUGEtcqEyZ8qyq0NnYs6%2FPzRkaZHr1ZIwbolSCqxooohPU1KV%2B1v7FDZUUJ1iCqAmbEHnAeWjAvo%2BX6PHK1efoQ4M8J7PbirXR09ggpIhS3vgY20oYjCz9RCDs%2B24itCUyG7HlW6WMPDdIGv%2Bdi4QtAWtXWUQE%2Fkn89BBbxUbK75AM%2BEFn1hgHYwF7oMvJAGqf8DF0Oo3mnlWTckiNWHm4zFDpa5%2BaNDYbDvKYLI0RJvu1pYf%2FarnH8VWGx2piCl7htUtJbeu3Q8np%2B8u54LlWmrJ83rgQVBMi%2BAIJLJBYhUwtqHBA87Efu%2BlQ7RD2BBcMfK8mYXAsJEaDDS3duXCuCWYtahpfUHrhTVIciKNiPIaGwu6i9SBI7WqGBcNf57WdITOWRcfxSUNCW%2FkZJAR8qegIQDosK9I%2FQSYOU0j4B6MRCDR6Jq4Iy7OUmfYgHD8Z0omL7%2FmXDf9Cy1ptJ%2BM2SmcsQK95zHAecdreFCj5BBbcGz%2FPLsE8979tjtk77AY9VU0PUDvcXoM6wNtmHuVaPdCFBppViQYTrf6gzbyqhrdju5QQ8bPC1TKCUOhlOWwSdvm6KdrnpP3wrWXCGWjwqPIKM8bPAnjksNwuD1OR0WvMb05V5QlzvJ0ENxfVtT%2BE9eVgDqslWa6lECxDLXHjTYlYbhe5YQesIqRbfBjUUx%2BeB7TEyQdxaLd9m%2FS0wv6enatUrmO0IIASJMuEXv1o4RUUgHZHXl1lVbYgZBE8rFTwLrov3EI6gXPmgPanhtqz4ne9cmkpw5K3NxciOieuauxwxkUHbSC4C62npMUbyyoSNsQgg25pixvhTT%2F0ExDdcRxH8hOO07BMVCtCo50PqSEBgv77vGpT5CvmvoR1vBVQyxpzCqxu5%2FO2pUgL7k4kypq7HYhrmpEnd87wiRM7IQo2j8CorEOYUyphTLQ6ejNH48k4XcZdTzmPFlmeYPoseGE%2BYadKnKamAZQVl6Gq0UHI57gJIQzUT2k607AXrBAhkCHXF63kaepYkZtUJuojZ3eR%2FbwHkPprrE1NATEFNQsxn9YB9GdGf9lazEa%2BiFSAZJjqeegkf1Hqf3QZWmz%2BIGjR3XzW1Wi2GY%2F0PFDqhGHHnoWlETtv2PE0i01ovSSK4qe1InbsBdbOKIeUh%2BI0FdAGEImusgdb0GqtR0XWPq9aESDUTHZasVFBIdhxsXipuwUIiG8hliZnmqe2lbBRb1cPPzMFp3qREVjICcd%2B54b7%2BN7vWvieEFEK%2F0u3PABBinCHN8JZYnynha3Vat4qILEDHoQ1vJXRjAyNfp%2BIr2hVSLfp0Bd0B1lRewCV3uwSPuICmli5OfyT%2BHN9tqiEXBOHNAU1wQKRI2OCqX5ca5VM05ej2uZc2FKAbgjbjB%2FBpn80z8%2Bh%2FjydJ02dhP6nhxSpBQmarY1m8e1oK8ZiMck6fkTYxPc2yhyBKtYyxmgkOcCvEjF4CM2DMoquL7606zaQgXuUqP5Hky0bU%2FQx%2BsP2uS9Bb7RqwnNLV2vZJ2rxPD1APJmYBIJkDSyueTwQ7Ejns9Ebm3%2FvXBo9w%2BCUIMifpkzbu4rWOATflDe9ABZdRE6RqVA3nsrM5fRN34p4canfxjMNctHGPnj4ykoWmEaoEdvqp6zUXkyVthWpGd8JOlXwhvB9XAxC%2Bz5RAPVha%2BGO%2B8QH9Uu2SgIczKVdSAYxDhpTns9K7GS5ZRMjSk01VoMIiuZdthK4lwoSIzJAw0dSrImhQ6iohmFPcM%2BOxUNGK%2B%2BIiKSYLDvIMz%2FD6SeTTVKISiHo4B28zgplQQSjPywKmeDZDmo0oj%2Bx21FPudP5Ft4SkATtjDF6tV3N1MXi6r2F88LbaFL6%2BUTpiJ2Jx9cevRMhcrFWh7N0Dk%2B0RJfxcUVINTYC8btQvIoBm6vBsG3GGNLBBl1Y%2FHQo8O%2FpMgmPD06mb74VxBaOBw15CaUVwflLsRTosisUnizawQmb7DVHGoQxZrVQ18PHGrcefoudliCspRvy74f9R%2BcfL3Twb1N29gT4Rb1PUzQprObMt1Cnv0Ktvc%2Fyh&TermUrl=https%3A%2F%2Fpayment.cdiscount.com%2FCdiscount%2FCardPayment%2FReturn%3FrequestId%3D2b1b2516-19e4-4d4b-82b1-e4dc94b3c422%26hmacPay%3D013639807C8F735BB04E30C5FFC949B9E47ABCFD&MD=]]></request>
+    <status>200</status>
+    <responselength>17360</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Date: Mon, 24 Nov 2025 17:06:03 GMT
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Set-Cookie: KIW_SESSIONID=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s; path=/paymentprovider; secure; HttpOnly; SameSite=None
+Content-Type: text/html;charset=UTF-8
+Content-Security-Policy: default-src https: 'unsafe-eval' 'unsafe-inline'; img-src 'self' data:; object-src 'none'
+Application-Dc: SCL
+Set-Cookie: TS01af447f=01500b242d2e04134a275112209d9694ca7fe641084d55972e928dc341e01bcd81b2de15956678c68444e3bb46cc6f299bc4496581; Path=/; Secure; HttpOnly
+Set-Cookie: TS014c2865=01500b242d3fdf3cb460e1ebdc56d0b685748caef03dadb6870090199681f326025b9eda05bf306c08651141cbdc8f0bdb0c3a1031; path=/paymentprovider; HttpOnly; Secure
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload;
+
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<html>
+    <head>
+       <title></title>
+       <meta http-equiv=Content-Type content="text/html; charset=UTF-8">
+       <style>
+                .loading {
+                         padding: 10em 0;
+                          text-align: center;
+                }
+
+                @media screen and (max-width:475px){
+                  .loading {
+                    padding: 1.5em 0;
+                  }
+                }
+
+                .colorLoading {
+                        fill:#BBB;
+                        color: #BBB;
+                }
+        </style>
+    </head>
+
+    <script type="text/javascript">
+        window.onload = function () {
+
+            var width = window.innerWidth || document.documentElement.clientWidth || document.body.clientWidth;
+            var height = window.innerHeight || document.documentElement.clientHeight || document.body.clientHeight;
+            var colorDepth = screen.colorDepth;
+            var javaEnabled = navigator.javaEnabled();
+            var date = new Date();
+            var timezoneOffset = date.getTimezoneOffset();
+
+            var domWidth = document.getElementById("browserWidth");
+            domWidth.value = width;
+            var domHeight = document.getElementById("browserHeight");
+            domHeight.value = height;
+            var domColorDepth = document.getElementById("colorDepth");
+            domColorDepth.value = colorDepth;
+            var domJavaEnabled = document.getElementById("javaEnabled");
+            domJavaEnabled.value = javaEnabled;
+            var domTimezoneOffset = document.getElementById("timezoneOffset");
+            domTimezoneOffset.value = timezoneOffset;
+            var domFormFilled = document.getElementById("formFilled");
+            domFormFilled.value = "true";
+
+            document.formReturnAWL.submit();
+        }
+    </script>
+
+    <body>
+        <form method="POST" Action="https://office-web.sips-services.com/paymentprovider/threeds/processareq;kiw_sessionid=fOQpVcEFYzWL48LD72adNfg2xHCt1dGvZtBdHve6.705s" name="formReturnAWL">
+
+            <input type="hidden" name="browserWidth" id="browserWidth" value="">
+            <input type="hidden" name="browserHeight" id="browserHeight" value="">
+            <input type="hidden" name="colorDepth" id="colorDepth" value="">
+            <input type="hidden" name="javaEnabled" id="javaEnabled" value="">
+            <input type="hidden" name="timezoneOffset" id="timezoneOffset" value="">
+            <input type="hidden" name="sessionStorageToken" id="sessionStorageToken" value="eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJkYXRhIjoiYk1GOHV4L0w3MmFXVWNZTU5rbWNaUT09LnZHRzluZUl1VlVkNUJCSUdlbkhQYmJMUU05dFFvNk1TM1h2cHJRR3duZTBGMG1KakxuUS9PZmZLWitGSnVrR2lRUjRsSnI4ZlRWZzhHWDlxdGUzOTJiVWJKVTRjWms2bFJsRkZRTVY0WlZLSktUaFBpclRWKzdFakVkQ0pLajNDcHZ2eHJaVXRidGMzNldIWkFFMytUSVozTVRhWEZBZXhZYVA4dDRJclZveE9IOVVRcGl4QjdhRmd5eFpYZWxvZnFmR3hTbi9ydEQ1THdJOUhodUhWRUlyUDUyR0ZhRGJVNTl2RzN5YWVYYlAvdmhlTXIrbFB2Zkl0MmI4NU92aVRnbVgyc28zN3lGa0ZXQVJBbGJIS292M3diUnRBTkJWaWFKQWpQdDNBM1ZqTkZ6Z3BDUENMc0NUWTlzdmNvTkwrdktyaWlzTnBmWGtnM084VE52UDZSeSt0NGVQRU5razJWbFZTWncycXBRZURqU1BFMkcwQ0hqOWpuclM0UkNKWGFta1VKYklMRUZyaEtQMjllczBlaDczUGR0YWFMeDdjK0VyeG83SENkcFUvcnFNU1ZWbjk5UmZBS3dMZVVZMnREbTEzeXN2TDdGNkF0T2JXLzVhcjI3T281V2FHQ3drdExNMjl2Z2k0UHNjWEpYMHNudUk3V053ZWEvQzVRd0JtL3NVU3BvY1hIVGhUaEZpV2dGZjJtZ25sYlhaZ0FaRmJHMEpJeTBwbG1IbExUK0NNcHdCUE0xMFE5Q09DTHNoSjhPMWN2M09QMEV4TC82OStsUjA1eXBJdDNLcXlvK0kyNGZtV20wbHRaL1lyakJ2ZjloM1ZrNE9MUEVtMUl4Z0p0TWJVSFRTZFFFZktqMXQ4L2FFR2VodkxEbkRWVnREMHA0cC9yNm04Y1ZSSkRqNEVkaG02cXBWd1dwNllneVR3a1N4VWhhZ3hvWHZVOEZNYUN2Ynd6RnhLQUhoL0MxcmdXbHppZW80R0JRSkcvbGN0L3RtQU0wZUFhSFB1bFlSMUE3ZGxLTGNubDZwODhlNENSM3NPZ2JUa1drdm1LaUJGY0c5NW9KTHcxZC9oZTV6OHllN3hHOUlLTDZnYVlubWo0RW5lSkZjdDRpMXAwc1dteUtmY3FTbGwwYXhBL1lYelZuaDR2YW56ZkJyQnBJOGo3MmFYTEpKUG91YzBpVExGZk1iQ1N6ekxYRzBEN1d2dG9IOUtabnlRSkhUZWRscndpUW8zS3FxTitXSmtkZkU3S0hOc1FZWlpVcmxpblhDQkVoZWVWcTNqRDlJeStRNElZV2NVVzJES0lwZmpXOXMwd3hkblJrWUxIMzMxM0Fpa2pvK0VnZ25HaDF0T1haSi9XeUpOd3YzR3lReHRMdW1iRlV2SVFSNmpKbUVsV01JWElqMExIQm1YR2p2M2FiZE1VYUpyUlRsbXY5elc5VGF0aC8vaUkweXczczIwQmgvNStFUFBsaEJWTGZ5MERsMXl2Tm9UR2IxRmNiU2d6L2w1NnM0ODJkN2thS2UrYzRHY2c1cW5ycGI1WDJUSFpUQmtWZ2huSGY1WnFaNkpQZ2Rjc0RoU1NEQS9Mc2tiV0hLRW9OaWxWS1M4VWJXRTF5cEcrZVdJRjBYS2dKRVRyeUVyRjhXWjhjZWZtVU9vRmt4NGx1VHpJNVF5TVAvTkdYZm1xQ3NhMXY5WDFKTi9uSGVuVGdtVXlLNCsvY1FaQnVxUXM0OWlDbUJYalZ4OHF2OUg3aVdHRUsxMVRkMWJybUxiWlZET0JleERRRHlFY1hKMnpVRlh1ZGlBWjRuZGhoZzdiMjJpQ0huTWhhbnBib1RKOWdncllJTnU0YnFFQzlRWHRLWG5WaVdUK2Q1enhMZ3ZwY2pHbGpyYmdwUmpsMWVUOEt0TnQwMDZwN3FtL2Q1SUdaUkdmM211T1dCd29UcitxK2tYWUJXeEEyYmZxTkNEd3FPczN4c0NxSEhoZS9yNlpvd0FYVmRKQnVlRFMydGxyQkJHbUp2TVBPNTlRS3YwYTVqVFovQTBmNnJFdjRLdjZodXZWTm43M3Z1NHF4TDBZVXozQWNnQnVzVDY5MDFoclFDVTJTbG9pOWJ2VFBCU3ZKbHQxOEg1bVg3Nng3MVJUcWk5ODhDN0UrbTI0Z3VCYXVLK1k3bzFUQWJ2WFBjKzRJTnFxekQrM0tFTnJGOEJMdFI3OVQ1K2xKVU0yeG02SWJtRVo2QWdFVGZJVFhFRjEzWkZNVTF4VWhDQnV0azd6ZGlJd2w3RGNkSEtiTDdWa2lpbTZmSUpQbVg5enhwL21uMVhQeW1jLzkzUC9NdDVvc29Fd3Vha1VXdE5UTDNHT3VGZlgvOFF5eGJUb2lDUlczc3oySjAzWCtiZUVQMlNSSXpjZWFoQjJiVnBEaGxsRmQ5aGVnOHNYRis2b2czL25nRkwwVUhjSWEraGNDanpKOUJQZUhMVStzeUZ3cHdXTDhjN0lxcVREcWlWQmlFM3p3TnZ1YjNEWXYxMitVejA0ZUpwUUp5blZTaTFGUC9IcE9tWFJmS21LdlhUN2tuMzlaYmlDWVdpQjNmZzdncDlwVFNneUNxeWtGdFdNWjZQSmlTQXhUU0lOcXlkL2pWNTBzT3BBcDZTbkxqZ0F3MU82a0F2RDJ2dVpVN24wY29xTEhaeDlPbmdhWmFXNi9sMDdyeTQrbm9SVnlvdkhwcjloa3RxOGFHOG0relkwYzdlZ011cUVTVFoyK0pGWStSOXFxR3JXK1RQbkJvdSs1TFpTcE5GYjIvZHE1M21ta1dPYlZZakNPRXlRRHBqOFFMQ0VPMFRpTHZVSzhxSWVBZitLV1FsM0hScHpRTnVyNGhiMzVGTWJncG5OWG5RcG9CSWZyT1kvMlE4NVhEZWRDOWlCUThEQXpZb1BVaVJvczZadzlHdUlWYXFpQUFtR1pLQ1NsSFUyVjRGUi84ditkclhDU1c1ZTVHVk93NEpPeVJvSGJuWW9hbE0yK0tmbmtTd3QydUQ3OHlkaG5pUFZWWTdwb0Z6UlMvMEptNlZqazZKSnd0VHdEWVZRUzN3R1o3R2xianZ4WEl0bElmS2J4ZVpzL3MwNzZZUk93dDNSRFNQa0NmSkVHbk84bGt6MjdsektvQVRmc3prSXYwdHR5TVF3dGRtNjV4TzdoMm1keVl5aFdUUElLajhPZWRWcUEzczU2a1BQejZwRkNCcHZsT0JjNG9oMnpwblhzVzZKZ1FhTWp0bUJJN0txQUpZSFA5U1FnUlR0NE9vdUJWUUJrbXpBSDZHWFN3czI3SGNVa2R0L25YRWp3MUh1dFQ0VTNtU0lZRURpN1k0c1V1US94bjl4bVRxUDkwcG1XMW1MTDF5WXlObmJkWG83bEJGcXFGbFBhczdKSUVQY2s1Ym1VbmZQY2VMZFZ2NVVGaUZGeFVFWnExbmU2VWF3TkN5blRUYW5UeDhnMGhCak1rdGg2alI4cVNtZ1VhUmtaNGhMMXZmb2NCeTJtS1JzRTF2MWg0UUV2YTFrU3h5MUNoZllleDdSSEpwbmRsYlRzdGhuVzdWdVFNbUJJbUFiNGdpOGlrOXhqa0Rzb0NBRXBaZC80L1d5R3FpbzN6emE0SkxHMG51ZXFBUHBZZzdRZTd4bU9DTlI3dDNmN3h3TFJTL1FxeFJJVUQ3eHJwdXhtbUwwZ2RJdkJkQ2dCMlZlTW1BR25RekNyOCs2eE9DeUhaN3dLK0JFT3pMOGRNSVlRUlI1U0hzM2tRTjRwWEo5ajVkTG81L3pBK05VOFVQMnNPKzBGOEdvdDBWSHhUQ0VkRzYwaXRoY0VHbEhvVDlWMm9hVWRKSldWczBDT1lldUwvbW81b2U2YmZhZVVFazBicmlQWEpHVEJWYmJYNVRwdzVIcTFGczliSFlXbEw2VzFyR3JGK09FczkvdXIzcCs2TVpzb1NXMmNLZ0RidDRtZzYyTkZRR3E1bHNzK1pQNk9rMkxselF4NDlVaG96LzczTFhsekxxc2dJdHlWTnVlYVJmeHNnNXVaK1FkL1JlT2VjM2MxcHRaQndZaSt1blFXRnBhT09sWlNlajdpTk1vODBCZ2VQU2hNRGhGOU5YdHdSRWhwSFdFeTI1aHBrMXJTQS8vTGlJbGtsTnowbnFQM2dYcko3NGRCQTRkK1VwbFMwOGsxL1VXRFpXNCtPR0xtbmhmVlVJdzRXRXhYbEpKR0c5OXFKdEZVSGFPL3VjeFZQKzVwa1RSNUxNR1N6SVVZcnIyU2gxS2ViZFZGY0dkNEtPOWZKa1ptL0x3bWFib3VxVUVNcUt6L2hPSW4ralNDeDM2WTBkZ01ZZHJwUEd4dnQ2cjVmbGVwVVB3SHJVMU4zYjlzeVQ2NS9FMjV2Y1U2Tml6NEU5WXh0a3dDdWl2UDJoN3dyT1FRSlY3VXZCV1R3Q01kMGFlYURySGV2K25SOE9zV0pLeGMrdGJQbUtWVnFmakNQc2ZpYnBWaVZXSFJOTzhsVFBYc3NwSmxrYmw3Q3RPdTFva2luSGcrRkhrcm5mUWc0b0I1emhGekZBcFBLNFlLTW9ybytLbUNhSGNHYjRPVjBZYnpRS1RwMS9TWjBwQ1liYUtVV0doUXA1WmlEQ0xsS2U4Um5ZSXNjazhXTzNLYUh3d3Fqb1JOQjBWUFNXN1ZxMUg4WDhHR2dtVVJMQXVOWHcvYkNydEFPTk9nZ2EzeDUzV1BHUFpMVGxMOFN1SjNzbXh1QklMejBlK090eGY4WUhrZmVRQ09nZUtWc08zSEF5dlcrWlp6bVNnd1o0N1EwZHJiSlRUNXo3dTNPUkJ5R1l6Z01pUC96OFhsbDFwY1FFaUZYeXNDYm1QQW1tZUtqMy9ETTB6SDZ5MnNzdktVQjZDWExIYXJoQitQNnVRVWh4ZElWSlM0SWd1d0MvRVEzRmFNVWlXdTk5OERHaW1Rd3dRYzFDSjRvNzgzdnI3dk1Kd0MzenRpQ3EyWmFkUDVtcTA5RElmT3lIOTFZbncxTVVNVWx0dmtkMXpxeUFzWUNVWmtHM3N6MzZES0h1MG1TV0c1YlZSZ0Z5Z3VYOGdRdmNjY2FOUXhHRHJZaFJaZGZQZHNaS0FVWmNIUktYK0tOTXZkeTUybFZMOUFPNDBuVXE1OHIvdGtFTTMwR3MzMTIxaHMyRkMybDhLdGczV1dmN3hjVzNuMnZZc25xQTNVdDgzSDhTS3BQK044QVlveFhZdkc0enpucHlNeHlkWGYxYWNJR0ZJNk1oMCt4MVEzSzR0K2NIQU0vVzhPMlpGSC9LenhqZDJnU0F3NzJuYS8xeEZhSjNUZms5LzI4NXNSMHlwcGl0ZmRRT2ZyYkMwUnZobC9LRHNIcjY3cjJFUktKRjVtbUFyU0JXWHNQdlpCNEdnMDVWSDh2MFVQVFd1UU9VV3VpZytFSCswZzFCS0hnWTZ2V2VzbnI2eWZBci9DTU0raFlPOE56dDNkWThXWTdFZ05nTWFKeEY1U3crSVQ3QU5rNWNJU2pQR054dXRIUm9Nbk5MclpXMjRTWDNvZXZPaUFudFVXZGxhbUxhZFd1azRQNXE5VHN3V1ZUMkVXREJ2bFhrejZmd0NJYzdDL1RXRmtlcUlCQVdyc0FjY3VnMGFmdHlneCtFc3RHeFV6SGg4bTlGdzNOQi9CSnhYZjVaRWxITzFLZUwwQlR6a040cUxLYnJNZllZL2IzdnpsN0I2ZCswemU0NjJTcm9TTHZtcWpoMGJYOFd1T0lmbnc1bzF2K1ltY1BndXlON1VJdW9obzcxdCt1ZDZBSUdSVVA4MmRyaVJWUUJ0UTBTSjVCUjJJak55Ti8yRzN5Ykl6LzRmUk5ud0RXbCtMbHlCZUVVcFZDVUY3bzhDbkl3bm1WVmNjTG9KUVFoSXNKbjdrWWdrc09qSWZ1QzJVUkRKL1RuTzgzcTlCR004TFdLZWp1c2o3eE9tSWlURHlmRnBjekdUSHJaNk93cnRVSUJOaEkxZldMUVNLNmxzVEF0UFdMd3VQaGU5MHgrMUFoNnlsZFhWQUhhY2dNOHRiYVlWeDN6NTNyQXZLYWk0NDM4TVZFelIzME4veDY5N29Bb1FQUHJVM0dlTzZiQnY5OUlNL0R0eDhDeUoxZS8wV1lxMEhmbzgycTdaZ3Z0dFkxbFovRmRSekM2cUhtdUpmblQya1NOYzlqSmxFUXNUNXlCWEwzakNER3g1MlFqUG1aR3VRSTlST3FxdFNad2pNOFo4ZWFTR2wzcmcxZXhOZFJ6a2oyUUpDcTlWQy9oOGtHbEZITCsrU0NyMjJXKy9TZVIycEVrQ2dXZlNNTk1QMGJZRmNkZVFBQ2RPY0N1SGpBa2IybEhsQi9rSWJ4TGdxeUtRdFlWOUVSblVGZ3JJNXZ0MGNIdjRQQXRKZDhiYnZ3WTJodzB3dzNaU2U0QlJia1NYaW82b0VXekRpZXVDYjg0cmRzSTQxTTdFaTFFcHMyTzdjUHlxSUNGbDgvVXZ0NDhOS3dKQ0lUVHcwckdSOGFpWXB6NkRKRzhXTnFsVkVsR2VWdW9uWGVJNldvdW0zVFdnUzlVQ01NRmdBeWN5RWtUMyttRXRySlhVY0IwUU9OQ0R0UVJnbE5aUFZsM2g2YlVlb2hxeUUzM2wyYmhxbXI4UEVCTi9xeXo0dXJvOGdsTmRTdExKQXJqNzlPT1RhN1NMa3FGaFJwSnNXREtDNXpYM3N6KzEvQUtXOTkwK0JRNEdBdzFVc2NycHdBT3RQZjJPc0NPaUU5WVNxM2U4dStOU0I5Z1FTUHJrbC9kOVk1czRJZkh2STRCaVNUemM2TjU3WWIzN1FmaGxtTmlrNmRNTTFRYzh0eXdMZ3duMGR2U2pmZVlwR0E3TjhwOVFZdUh3Y3ZSSlo2TXhmNjBDbm96cEl2ZGNEaEl3Z1ZlVzFhVEE1TkhibFBWQnN0YnRuWjArU1BtRW1jczdLWldXV2crS1B0eHB4a2xucEkyZ3Y0QmtrWTZmNDljdTdRSGpyTTYxS3c3K2ViWFFpbzhSeURoUUVjR3pRdFcvU2UwVlhMZVJLSXhUUlJiQWR3bTJhVGJ4YTRsUW55dWlTaWl4SUVpVjFMemM1R3Q5RkxpWEpmT0Rmakp4Mi80c0t2cERnKzVEVGpPdWpnR2JqMUZnR250M3JVcWhFckVMc0sxdFBxRndCRm5lalFjeStiYzFBcVZVUnBBMElXNXpFVXIzMTM0WEFIcG81b2lkMmxqeXZ5dy9HRkVKdUxsVVBBbDRyTVBQeHo5Vzc5aWdaYms4NHkyWVQ4ZmoxNFlMMk56bzk2K0lyUTRnK0ZxLzRIaUxCTUJkY1ZqR1hVMjlPMDhrUmxtUWd5SmJyYXgzWWpOL0xMSE0yQXc0TDNrc3pUSzdRTGo2bVMwNFREVGFycjlqQ0QrdjFWYmxwMUFQSTRITGFmaTFqSFF4OUhCNDcwZ0sweU5LVy9tMlRjUWVKS0FOcHFqdVBIK1BxVEpBaGtSeUtSSFdZMjJZM3F4V2NjU2habVE1RXlMUXdPS3h4eXRUOUhpMzE5a2ZFK0RNVk5RUFN3cTd3KzRaS0djR1VrM2p4dnpCVDhGT1BVaGlUckFBN05pa2cxVVpzQ0xRcFJ5aE5WK0RoVWlUS0VvTFJyYkIyUFdNYkUxY1RMNy9xVnFLUVJHTDM4a2llWVVJT1dxekJWSE5EWEVvTm5xNVh0cEtYdDVNRkVOQW9xRzlkaXYwM0tVTzBMalF6MzU5VzdWT1lQOHJ0Q0htamFrZ2F2czBJeUlKRTExQUx3OVJoVDdnT1ByWDJ6dm1YUlNQZ3h2dGU2TWFpdU1JUFdCWUgwR3J1bGdzbnhUalErZTE4WjhhN3ZBekcxd2NyRVJReFhzQTBUaVNwMm5UbUNGSS9ZMmVsbXMzZTR3NFFmRS9WYmVXM0w4RmpMVDFTMWQ0NnZ4ME8wVm5Uc05qVklzK1RZUzRoMzBNRUNxdWprdm1vV2pDb2x4a1phUnZZeCtWQUkxSitRVTlLUnVGVEFaVjNUOS9pUlBFWFptME0zQVc4WEVJS3lCOUdpYjZLdkZkWkI2VDRvZ0FQZGNDQmVDb2kxR0lkTGc3U1AwOWFPUmNTdnVTaHFFZ0szOWE2UHFjQVlLenR1bFpCREw4cXRxdFFaSUg0MEtBaTh1T1pMd0xoWVlxYXRacGZ0WGtjZEh3dlNNUjNIMkFLVjdOclE0cEgwVThLWHdtbzJJbTNvRjZNYTZsc0dKNHJ4LzNYdnZnSFRndFo0YVprV21KOVFEV2p3SzMyR24yckhTOFliWURYZHk0M21JRUpaOUJEWEZFVWJZTWllL1RTVmFSc01qSUkzNG5BVFFwcm40RkIwQzY4cXpid2xwV0szQkJQZXpNNEVwSmFuYnBsQUJyM3UrQnoweXVKODNlRDZmSzQzb0JvcTZtWkk1SXZwczFRTHZFTlVtTHkyd256akVRN2hJSHBUa3VGUFREa2l1d1Y5NGJ5T0p4TS9OcGN2K2swSnVMN1RvZ0Y1MW9Ya2RPbURUV0VOM1FyWlE1V2Y5UkZSYytOYnJuMndxTFBsNFJkTSthR0pYVFQrNXhIdXNQcDBsbjVFcUhMQjl5alFQbFBsVmFvOGl3UHlrbXp3Vk1Zb2FQYnk0cWxreG85aDh5WUVmSUpMNCtzeC9mL0NxbW55OWNpejhmYWRMVUszZjQ3T2xBWXpnU3JWeHFqa0pHVmhlMXgwRUNUd0FVRTdod2NkaFdTNE05RklLSGY1eUMveXhtN0lQQjg5Si9TZWFZem5VUnF1Tm1wTUNCdThTaERzSjd0U0xRMEg4MGJaczBJdlVxYUhMMmdPZlVtRWNuYlhZcnlRT0UxdDQ0RVNsaFk5d0N4eDFpN2JoNlpSblQzTkEwTC92OGE5OFljNlhqY2J2VGtRMGFqQnBkMHNvN2RZNWx2SlZuK2dRM1BHSEgvcDlUZnZVV1I1YmpNbE1yNEViSGt5NCtPNk5FMVNFMlo5SUVsZERNWHY3SVRRN1dxQkkyTVlRckQwTHBSbUlpbGlkVUJqUUc0dG9Ya0ZkdTNmaCtkbHIvallrQ1FnOG5sNHFPRzc3TFJaZnZzNStDOTFKWHdWc3RxUHNrOW1OODBpUHUxMFFZVlkxSTA1a2N5QWkvTkZuR1pjVktxMS9nSDFZMmdieUlGaWRQUFlyS1d1V21XWXhLaVZDZHFjTVpUajA5M1E0dSs2dUZOekMxWEJrQk5MUEwwcjV1ajVBTDN5TzFGZEZ1NHpzbDdpWUltTkpWSGdiWmVuSmhEMlRpcTg0eDd1TG42NnpWb0piREtvRFl3PT0iLCJwcm9jZXNzSWQiOiJhYjRlM2YzN2FmNWY0YzYwYTBmZGE1NmM3ODY3NGFhNSIsInVzZVR5cGUiOiJDTElFTlRfU0VTU0lPTiIsInByb2Nlc3NJbnRlcmZhY2UiOiJTSVBTX01BQ0hJTkVfVE9fTUFDSElORSJ9.cibe_gI9OP9StzDe6qPYW0n1GLLeo2RpmP3HSP_l-VHn_9bcJQhVBHC0fvYXYU_p9O9Q8BIKrk5JtfnqSq4WQw">
+            <input type="hidden" name="formFilled" id="formFilled" value="">
+            
+            <div class="main_content">
+
+
+                <!-- Spinner -->
+                <main class="loading">
+                    <svg class="lds-spinner" width="200px" height="200px" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="xMidYMid" style="background: none;"><g transform="rotate(0 50 50)">
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.375s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(30 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.25s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(60 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1.125s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(90 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-1s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(120 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.875s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(150 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.75s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(180 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.625s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(210 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.5s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(240 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.375s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(270 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.25s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(300 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="-0.125s" repeatCount="indefinite"/></rect>
+                                <rect x="47" y="24" rx="9.4" ry="4.8" width="6" class="colorLoading" height="12" fill="#000" transform="rotate(330 50 50)"><animate attributeName="opacity" values="1;0" dur="1.5s" begin="0s" repeatCount="indefinite"/></rect>
+                        </svg>
+
+                        <h2 class="colorLoading">You will be redirected in a moment.</h2>
+
+                        <img src=../images/3DSLogos/DSVIS.png alt="logo directory server" />
+
+                        <noscript>
+                            <div class="main_content">
+                                JavaScript is required to authenticate your payment. Please enable Javascript in your browser before clicking on the "Continue" button.
+                                <br/>
+                                <br/>
+
+                                <input type="submit" value=Continue />
+                            </div>
+                        </noscript>
+                </main>
+            </div>
+        </form>
+    </body>
+</html>
+]]></response>
+    <comment></comment>
+  </item>
+</items>

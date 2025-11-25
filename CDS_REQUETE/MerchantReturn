@@ -1,0 +1,162 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.6" exportTime="Mon Nov 24 18:19:02 CET 2025">
+  <item>
+    <time>Mon Nov 24 18:06:54 CET 2025</time>
+    <url><![CDATA[https://payment.cdiscount.com/Cdiscount/CardPayment/MerchantReturn?requestId=01cf111d-b2ea-485a-b99a-dce2859f68f5&hmacPay=762AE790986DD857782144862B3E363F0E553957]]></url>
+    <host ip="45.60.87.29">payment.cdiscount.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[GET]]></method>
+    <path><![CDATA[/Cdiscount/CardPayment/MerchantReturn?requestId=01cf111d-b2ea-485a-b99a-dce2859f68f5&hmacPay=762AE790986DD857782144862B3E363F0E553957]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[GET /Cdiscount/CardPayment/MerchantReturn?requestId=01cf111d-b2ea-485a-b99a-dce2859f68f5&hmacPay=762AE790986DD857782144862B3E363F0E553957 HTTP/2
+Host: payment.cdiscount.com
+Cookie: VisitContextCookie=ct3_k1EhCZ-pX8ysSLtQnPUzG6tpZ-gasuZDB2875Tq8URyd5YcYCw; UniqueVisitContext=UniqueVisitId__251122195235DROWDMLT__TrackingCustomerId__fc4a87c5-11b2-45dc-abdc-f2754ba6410d__; cf_clearance=fPWXB9Cg_VMaR4iOv_X3zsdVpWFH8C.6VGoOMvpOepI-1764003886-1.2.1.1-9ZJwTSYpbKk4dn9dhAjTtpsju_vmY_wp5ATLCWDSvxI_9N43S0Cs445IsTeR9dsvg34fCf6uVAvrwfYFBsardN0e.uEpQZdFvtwsL7I.Yio37RoLJLvV4y3Wgak6ThgtkPgn26OmpGRKkfs_7rD3DQ5jLbAjOIioincGFud6T9Qi_BrZRmQUGpNc9sS6HgRTON3GrudDr89wnkmDhm28c7ZHOzSfWg1El7S9ABfR9u0; CookieId=CookieId=251122195240CDMALKWB&IsA=1&GUID=fc4a87c5-11b2-45dc-abdc-f2754ba6410d&MID=1&CUP=0&CDAV=0; TCPID=1251161952411437239710; _$3custap=0; _$cst=1; _$1okcook=1; _$iel=0; articles_count=1; SitePersoCookie=PersoCountryKey__FR__PersoLatitudeKey__48.08616485__PersoLongitudeKey__-1.67882515__PersoTownKey__Rennes__GeolocPriorityKey__21__PersoPostalCodeKey__35200__PersoUrlGeoSCKey____ExpressSellerId____ExpressShopName____ExpressGlobalSellerId____ShowroomVendorId____RetailStoreName____VehicleId__0__AddressId____; TC_PRIVACY=0%40300%7C3%7C5%7C133%7C10%7C335%403%2C4%2C6%2C10001%2C10003%2C10007%2C10013%2C10019%2C10005%2C10009%2C10017%2C10011%2C10015%2C10021%2C13001%2C13002%2C10004%2C10014%2C10020%2C10018%2C10016%2C10022%407%401763837564019%2C1763837564019%2C1779389564019%40qu7LPFfT-BIPcBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABiGAYaB4YEBAAaAARgGAAaAgRkAYAAGAIAGGAAAAIABABgAABgAgAEAAACAAQAAABgAAAAAAAAAAAAGAAAGYIABAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAACAAABgAAAACAAQAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAABgABgCAAQAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAACAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAgBg%3D; TC_PRIVACY_CENTER=3%2C4%2C6%2C10001%2C10003%2C10007%2C10013%2C10019%2C10005%2C10009%2C10017%2C10011%2C10015%2C10021%2C13001%2C13002%2C10004%2C10014%2C10020%2C10018%2C10016%2C10022; _$ac7=seo; _gcl_au=1.1.1820452435.1763837564; _cs_c=3; _cs_id=1d1ee66b-f5f0-a1f7-909b-22244066ff1e.1763837564.13.1764003942.1764002774.1590586488.1798001564424.1; _scid=o_S5hz6lj7Lo7KNZmMx2TXcJdQnnzCnY; cto_bundle=bfviWV9sQms5WSUyRjhMNUZCY1dnWXNPbUl3cURFRWg4RzNoc0FMY3ZjNXZtZG1rUGtFbWNFWlNUYlV2QTQ3SlFLWVl6eE8wOWdkTWlUa3dua2NzUiUyRjd3WnRlSzF5bkdhWkZTdWdTM1dLZ0x0UVc1TXZkaVFQSnNxVEwwRWdjdkhzclJyTWQ4NmhaJTJCY0VSQjcxTWtySVBzZm5BSkNJaWd6OE5XRTlTZWk1bG8lMkJqU2pKVzltY1l5SU5sJTJGbWUlMkJoZVJYaGxMJTJGcg; SiteVersionCookie=2100.1|2323.1|4077.1|7004.1|7007.0|7008.0; SiteVersionCookieNoChanges=56.1|68.0|1370.1|1418.1|1423.1|1426.1|1433.1|1441.1|1458.1|1464.0|1466.1|1467.1|1469.1|1475.1|1482.1|1484.1|1488.1|1491.1|5008.1|5015.1|5019.1|5021.1|5024.1|5038.1|5039.1|5046.1|5048.1|5058.1|5060.1|5065.1|5066.1|5067.1|5071.1|5072.1; mssodse=8YnBP1axmAc1fDwK1XprlvlewL-foCXpguLzZbsuAASGH1pyvv0PXFqvwAuFoNW9kzH_H7BwuC2NCEtWFXadU3Nna3AsRA4WqpGcRpqhuv4rRLV2BaWAXj1H3N4wmk0Bv2UEr8HHp47PNtYtkNiirm60qZkOJfbc16D3a9GAJ5lKSBbn7h5hEPFUzAdMRmwC; tcId=3654eb48-0d27-4357-a064-b63d61aef283; tcIdNe=cb3570c0-094f-4ae5-9afb-7ad3cd7e2cf0; _$culture=CultureName__fr-FR__; iadvize-11-consent=true; iadvize-11-vuid=2773da9194434a5d836ded1a56af3a579a9c8914f7974; mssctse=ClfaekoikhwU8qWHNFZslvA9I870WhtVrgR4K5N_TKe6u9_XBaluAK-OQMIYQB7P1coSCxAWd-BSXsIQ6cSqzmpzT8ZDH0m_QIRaZ86VgZ4fNLZGO53S6g; _$fsa=ClfaekoikhxNyCXNpc4cNsLfE1B4C5Fv; AMCV_6A63EE6A54FA13E60A4C98A7%40AdobeOrg=MCMID%7C84301755524841471993744734294065545215; nllastdelid=5f4a412; ABTasty=uid=cpa3kkcj41fyad8k&fst=1763837911544&pst=1763996016060&cst=1764002775121&ns=11&pvt=32&pvis=9&th=1413582.1755581.7.4.2.1.1763915547774.1764003942552.0.11_1473937.0.26.9.7.1.1763837941638.1764003942549.0.11_1485170.1848674.2.1.2.1.1763889900762.1763992785345.0.9_1485603.1849253.4.1.3.1.1763837911602.1763996016197.0.10_1514286.1886838.4.1.3.1.1763837911549.1763996016073.0.10_1536027.1914763.4.1.3.1.1763837911546.1763996016063.0.10; visid_incap_1446171=98QbDX+0Q0ie6lwNiBwKMxLTImkAAAAAQUIPAAAAAAD5XmZdol8RNYqK1YCBpf5p; mssctpa=W2dNXeEyrPKFT-1tgWH7MQZnRc2GaegSBsNjI4ftWBZceM3Rj_0q-EZK55LWCyM8cJEnmcNGd5YT3h9_XcIC1g; VisitContextCookie=ct3_k1EhCZ-nlItPC_YNkt2h-PJNaJv5ar82lBlWtAqXwwGVfPfj7g; visid_incap_2799110=TmAHUtFxTluNw/Th1ZQm8RfTImkAAAAAQUIPAAAAAACOLzrwSOIwfZeDVA+qw9Iv; _$dtype=t:d; _cs_cvars=%7B%7D; _$3custinf=CA=0&AUT=1&XV1=0&XV2=1032&CIO=0; _$3ci=CU=0&GDR=M.&AGE=32&NOO=0&HM=e1edeea46b69381becfca03756efaba967e83bb07f1ca855c1f3046ddf6f1d3c&HMG=e1edeea46b69381becfca03756efaba967e83bb07f1ca855c1f3046ddf6f1d3c; msstvt=U4qw2UrM0kX7wSBoA8OIOq7KFs0bh3U5Tor3F1R-GsmV-2SoLhNe3y7UKjCPAQz7OqKpeivaLBo6J_yP_4L70ziAGrU8EZzz9qJyE04RIvGOuGScIm4tsD0B2sni8aNIG1-O4dTY_-oDVJM6mjdWkw; msswt=; _$o1c=50zhYuMVsrj74aOZvsmv25N0eBL3CRFO9c8T8ycDegpa2QLFLoxGJjvRrQ1Ro60G; TS0afac0a5027=084e142d7dab200074a45386fdcde49d90a8493eed17fde3280560b7e629a6c498d59a68befd9f6f08de3d48a5113000f6a93a5dd6c63d7e0b5279037f527f029dd7b3ecad5f4919b3f379bf30091fded2df7830e285fc3293debb4b9c9fd735; nlbi_1446171=c6g2K4V9a3RmJe5+EdAJjgAAAACXSSyrrVj9UjrajbQNNT75; incap_ses_1855_1446171=ZkVwadqpHXM81RFZQ0m+GRuKJGkAAAAAqy4C9eC+uR5K8SsSZHy/Vg==; TS00000000076=084e142d7dab28006c96fa5f7f03c76f6188e51e47bebc8351368d5d2e4033a2c8bc5a1d665ac7ba271d2efb38294c780870e1ae1709d0006359b438876df794b1b2ced82a0c6347ecdfc06230ebcdd4ffc0aa342efd259ef55271ccb6de974e045410de0d3e9180f7f5a39bb56eb7c43cc77df878b27addbfcdaf5da2d672794982626e9633959cdb297daa172ec56edfd683238a12429814d348b5ae3d01c9f326c7c228790563750317b37179f206327505c6d357d00d136ec05ffef1325dc4fb943aa0b93150e0d8e3208925bb4a5c79c20ffb6067f5dbdf08abf0988dc56b9f7756554dc59ad9ff49a515a5f51ce0e4f2a905cbce87d8875a182376ca4e8f7df33dc639285f; TSPD_101_DID=084e142d7dab28006c96fa5f7f03c76f6188e51e47bebc8351368d5d2e4033a2c8bc5a1d665ac7ba271d2efb38294c780870e1ae170638001f629cd3c543d46f8322505fad4281f317cca3ca040652f0b0514d6402c0d82899d44abda35dece88b04d81de290f1e67864cd0575f6029d; msspctx=h6JkZ3xJ52I8JwPX2_5-CnB5u5wb0JUGDIKuYpKha1YuR1Pj26N5ahZhgcuL7-gUYpzOJmNwbUrfs4GrmUcpEhRWte4tMmigZ0JxkLUrlEnplID7b16G_k1ASue4OKx5sj3tN6hH4PTs317PDBjlDXiYY3WNgYRCTRAylocKYMUndAaisM1eSJfHFIndsuSxAhBOfuiUvwmOq01q9wKU39odYGlKCDol8aEq6TmgnxgmGVrV9tWJGaJ_qgpemdwI2N8qm-NIkVJwJP9wVVFyfMALq63e9E8vbQ3KqpQJHj6iXJIgV_rjamufcdaIHKM6Gi-6FmjuPQv_zfsBC3nc_EgF1n5TrDZ0AnjDP85nIGN31Mgvpe8wt6rSxF1337wUmVTQwodCdmLvbAukNYIrCYbWcKKVW6naQn6_kXNayBLFQjCNP65-mQiQAf7TN5AR0YHDhMhs85jRMszA-fWrYyqkLoMEKb6LJMqYyDvJkxMdGopZIDFOKoTdBa-bzyAZalykftfNdk5XU9_pN4E7JbWK6i1K9Lep4UyMqo7cnOEOt6N2B7fC9fn-gjHtM0CTPaC6Mi5ogKzPqYDuCzv-tbsHdt3Fq25RCKGiD3y7CzaWrSW2ViBFdt8Ez35idcG75sJu6hN6Pn8xsh5VE9o3K3_omzaYNFC_eVL9d0nwclMonYc39pNg50GH1t-VEDeeVHNKHOPsLjJs4i-WzIA1_cL4Ni0Pno-U-lysijrg6F1YmrLqSjnwgY4LghD-7LbS7pG7btKflZNqLPTdwaRUq8ZP0VjZEW-kwwlxsgdmcpvDXgw6ENWbyg; TS019b79a6=01c8cd318b7f8109c6f4728258a74597b2352b7f813ad86193f55c0919c6bc9cb56948d3b40835c8ecd7960929115e01632816bb50; nlbi_2799110=r0jDN4gkg2inhVfMSA7ApAAAAABVCERR3VA5JPnzxwVRI75X; incap_ses_1855_2799110=7RpGH5sZnAY1vi1ZQ0m+GcCMJGkAAAAAMGSCvdCSBHfnXnNe2ELBSw==; _uetsid=6e577870c7d411f0bae841cd4f901bed; _uetvid=6e57ac20c7d411f089f223d96a05ca18; _scid_r=tnS5hz6lj7Lo7KNZmMx2TXcJdQnnzCnYU7SDhg; __cf_bm=RmqKiMPw6x08g.Iyb4W_obAz3gMytrHrIeJgPPKynQk-1764004020.0077658-1.0.1.1-cV2y0.pN3L2y1oG3qy8rH1rMeYWyKnvGYZliLw6Zhak72a40EvikrVpEG3rdXmt7SfSTIQ2woy.9C7jCUFky8DVs7sO42Eh3KgeldgK4d6_U5w.Xhzrfifn6zC1bn3qn; _cs_s=9.0.0.1764005742449; ABTastySession=mrasn=&lp=https%253A%252F%252Forder.cdiscount.com%252FReturnPayment.html; PaymentSession=28d6ca610f034d2cb2358b154ca83b83; visit_baleen_ACM-655d42=OG-SqxRKpmdoMCqIjn8HpnN3J8TUQKhxQSFDkYu1UEhx_kiKeA1kgjbU115ATvz5BVozpvKwDTbxoKKfJcn9ZLPsqXbmr6MYavYXfxf-_flcFIPDyKb77ztT20I54CoaDo691WZI8CoNDIo2Bzh8Nclh0HnRiGuwHqbKSFlIbO8RYjZC6vozJAD8hG3r3Z2uDTdinTz9bri5zoQuwHN-uaJZBWbCGRp7b-4j7GLV2uckxm8R8fLIUQPYETv8o17YN-yTbtytlBCFhUBFyEUCxg; iAdvize:splitGroup=2
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://payment.cdiscount.com/Cdiscount/CardPayment/Initialization?requestId=01cf111d-b2ea-485a-b99a-dce2859f68f5&hmacPay=762AE790986DD857782144862B3E363F0E553957
+Upgrade-Insecure-Requests: 1
+Sec-Fetch-Dest: document
+Sec-Fetch-Mode: navigate
+Sec-Fetch-Site: same-origin
+Priority: u=0, i
+Te: trailers
+
+]]></request>
+    <status>200</status>
+    <responselength>5773</responselength>
+    <mimetype>HTML</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Cache-Control: private
+Content-Type: text/html; charset=utf-8
+Vary: Accept-Encoding
+X-Frame-Options: SAMEORIGIN
+Content-Security-Policy: frame-ancestors https://order.cdiscount.com/ https://payment.cdiscount.com/ https://clients.cdiscount.com/ https://quotation.cdiscount.com/ https://payment.cb4x.fr/ https://payment2.cb4x.fr/ https://paymenttest.dev-cdiscount.com/
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Date: Mon, 24 Nov 2025 17:07:00 GMT
+Content-Length: 4517
+Set-Cookie: VisitContextCookie=ct3_k1EhCZ-gBCP_EOsOuYT3CHsZI8Acj2fO914BUC54auUD-330nw; domain=payment.cdiscount.com; expires=Tue, 24-Nov-2026 17:07:00 GMT; path=/; HttpOnly
+Set-Cookie: TS019b79a6=01c8cd318b7f8109c6f4728258a74597b2352b7f813ad86193f55c0919c6bc9cb56948d3b40835c8ecd7960929115e01632816bb50; Path=/; Domain=.payment.cdiscount.com
+Set-Cookie: TS0afac0a5027=084e142d7dab2000c3429503113e07eef76c6ae3567f6636069b7a2f6090a0f00e90a8a4189e416e08d2be470711300009f812e7a8a6e2420b5279037f527f029dd7b3ecad5f4919b3f379bf30091fded2df7830e285fc3293debb4b9c9fd735; Path=/
+X-Cdn: Imperva
+X-Iinfo: 62-18493962-18494003 PNNN RT(1764004019690 698) q(0 0 0 -1) r(0 0) U24
+
+
+
+
+
+
+    <form id="redirectionForm" action="https://order.cdiscount.com/ReturnPayment.html" method="post">
+        <ul>
+                <li style="visibility: hidden">
+                    <input id="version" name="version" type="hidden" value="1.1" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="merchantID" name="merchantID" type="hidden" value="1" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="merchantSiteID" name="merchantSiteID" type="hidden" value="100" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="paymentOptionRef" name="paymentOptionRef" type="hidden" value="21" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="orderRef" name="orderRef" type="hidden" value="759250847" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="freeText" name="freeText" type="hidden" value="af#0$n2o#1" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="invoiceID" name="invoiceID" type="hidden" value="433334241" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="customerRef" name="customerRef" type="hidden" value="0000001D6S20" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="date" name="date" type="hidden" value="20251124" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="amount" name="amount" type="hidden" value="24900" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="orderAmountWithWelcomeOffer" name="orderAmountWithWelcomeOffer" type="hidden" value="24900" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="bondAmount" name="bondAmount" type="hidden" value="24900" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="decimalPosition" name="decimalPosition" type="hidden" value="2" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="currency" name="currency" type="hidden" value="EUR" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="country" name="country" type="hidden" value="FR" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="orderRef1" name="orderRef1" type="hidden" value="25112418045ZUU9" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="amount1" name="amount1" type="hidden" value="24900" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="invoiceID1" name="invoiceID1" type="hidden" value="433334241" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="returnCode1" name="returnCode1" type="hidden" value="3" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="complementaryReturnCode1" name="complementaryReturnCode1" type="hidden" value="0" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="merchantAccountRef1" name="merchantAccountRef1" type="hidden" value="" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="cardType" name="cardType" type="hidden" value="VISA" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="cardSubtype" name="cardSubtype" type="hidden" value="I" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="paymentSessionId" name="paymentSessionId" type="hidden" value="01cf111d-b2ea-485a-b99a-dce2859f68f5" />
+                </li>
+                <li style="visibility: hidden">
+                    <input id="hmac" name="hmac" type="hidden" value="3C1D646246C758AEBC62FDBC5DEDD62B72AAB1FA" />
+                </li>
+        </ul>
+    </form>
+    <script type="text/javascript">
+        document.getElementById('redirectionForm').submit();
+    </script>
+]]></response>
+    <comment></comment>
+  </item>
+</items>

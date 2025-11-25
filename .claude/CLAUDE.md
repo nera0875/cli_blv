@@ -1,162 +1,128 @@
-# BLV CLI - Claude Instructions
+# BLV CLI - Context Évolutif
 
-## PRE-COMMIT VALIDATION (MANDATORY)
+## OBJECTIF
+CLI pentest BLV avec routing intelligent multi-modèle.
+On itère - le système apprend de l'usage réel.
 
-Before ANY code change, ALWAYS run with `uv`:
+---
 
+## RÈGLES CRITIQUES
+
+### Validation (OBLIGATOIRE)
 ```bash
-# 1. Syntax check ALL modified files
 uv run python -m py_compile cli.py db.py llm.py
-
-# 2. Test imports
-uv run python -c "import db; db.init(); print('DB OK')"
-uv run python -c "import cli; print('CLI OK')"
-
-# 3. If DB changes: test init
-uv run python -c "import db; db.init(); print('Init OK')"
-
-# 4. Run CLI
-uv run python cli.py
+uv run python -c "import db; db.init(); print('OK')"
 ```
+**TOUJOURS `uv run python` - jamais `python` direct.**
 
-**NEVER skip validation.** If tests fail, fix before commit.
-**ALWAYS use `uv run python` - NEVER plain `python` or `python3`.**
-
-## GIT SAVE PROTOCOL (MANDATORY)
-
-**After EVERY major feature added, IMMEDIATELY run:**
-
+### Git Save
+Après chaque feature majeure:
 ```bash
-git add .
-git commit -m "feat: [description courte]"
-git push
+git add . && git commit -m "feat: [desc]" && git push
 ```
 
-**Major feature = any of:**
-- New command (/tables, /rules, etc.)
-- Interactive menu system
-- Database schema change
-- Core functionality (import, chat, etc.)
-- Bug fix that affects multiple functions
+---
 
-**NEVER continue to next feature without git save.**
-**If lost code: check .claude cache or git history.**
+## ARCHITECTURE
 
-## Project Context
+```
+cli.py  → REPL, commandes, UI Rich
+db.py   → SQLite (prompts, requests, findings, chat, tool_declines)
+llm.py  → Claude API direct + extended thinking + prompt caching
+```
 
-**Stack:**
-- Python 3.12+ (WSL Ubuntu)
-- UV package manager (MANDATORY)
-- LiteLLM proxy (VPS: http://89.116.27.88:5000)
-- SQLite (blv.db)
-- Rich + prompt_toolkit (CLI)
+**Stack:** Python 3.12, UV, Anthropic SDK, SQLite, Rich
 
-**Architecture:**
-- `cli.py` - REPL interface, commands
-- `db.py` - SQLite ops (prompts, rules, requests, findings, conversations, chat)
-- `llm.py` - LiteLLM streaming with prompt caching
+---
 
-**Key features:**
-- System prompts in SQLite (no more MD files)
-- Multi-conversations with /clear, /resume
-- Burp XML import
+## FEATURES ACTUELLES
+
+- Routing multi-modèle (haiku/sonnet/opus selon complexité)
+- `/idea` avec tool suggest_test
+- Tool decline history (évite re-proposer tools refusés)
+- Smart request summary
 - Prompt caching (90% cost reduction)
-- Model switching (/model)
+- Import Burp XML
+- Extended thinking pour tâches complexes
 
-## Code Rules
+---
 
-1. **DB Operations:**
-   - Use `cursor.lastrowid` (NOT `connection.lastrowid`)
-   - Always commit after INSERT/UPDATE
-   - Use context manager `with conn()`
+## MODÈLES CLAUDE
 
-2. **Global State:**
-   - `CURRENT_CONVERSATION_ID` in db.py
-   - Update via `set_current_conversation()`
+| Modèle | ID | Usage |
+|--------|-----|-------|
+| Haiku 4.5 | `claude-haiku-4-5-20251001` | Extraction rapide |
+| Sonnet 4.5 | `claude-sonnet-4-5-20250929` | Hypothèses, chat |
+| Opus 4.5 | `claude-opus-4-5-20251101` | Cartographie, analyse complexe |
 
-3. **Error Handling:**
-   - Try/except on user input
-   - Clear error messages (Rich formatting)
-   - Never crash on bad input
-
-4. **Testing:**
-   - Syntax: `uv run python -m py_compile file.py`
-   - Import: `uv run python -c "import module"`
-   - DB: Test init before validation
-   - Run: `uv run python cli.py`
-
-## Commands Reference
-
-```
-/chat   or /c  - Stream chat (reload hist each msg)
-/prompt or /p  - Manage system prompts (add/edit/del/toggle)
-/import or /i  - Import Burp XML (drag/drop)
-/model         - Switch LLM model
-/clear         - New conversation
-/resume        - Switch conversation + preview
-/stats  or /s  - Usage stats
-/cost          - LiteLLM cost analytics
-/help   or /h  - Show help
-/back          - Exit chat to main
-```
-
-## Common Fixes
-
-**AttributeError lastrowid:**
+### Extended Thinking
 ```python
-# WRONG
-c.execute("INSERT...")
-return c.lastrowid
+response = client.messages.create(
+    model="claude-opus-4-5-20251101",
+    max_tokens=16000,
+    thinking={"type": "enabled", "budget_tokens": 10000},
+    messages=[...]
+)
+```
 
-# RIGHT
+---
+
+## CODE PATTERNS
+
+```python
+# DB: toujours cursor.lastrowid
 cursor = c.execute("INSERT...")
 return cursor.lastrowid
+
+# Context manager obligatoire
+with conn() as c:
+    ...
 ```
 
-**History not updating after /resume:**
-```python
-# Reload hist inside loop
-hist = [{"role": h["role"], "content": h["content"]} for h in db.get_history()]
+---
+
+## CE QUE J'APPRENDS
+
+*(Mis à jour selon usage)*
+
+- User préfère itération rapide > plans rigides
+- Simplicité > over-engineering
+- Si feature pas validée par usage → pas implémenter
+- Routing intelligent > modèle fixe
+- Tool decline history évite frustration user
+- LiteLLM overkill pour prototype → Claude API direct
+
+---
+
+## À ÉVITER
+
+- Over-engineering features non demandées
+- Plans rigides multi-phases
+- Dupliquer data (DB = source unique)
+- `python` sans `uv run`
+- Commit sans validation syntaxe
+- Proxy/abstractions inutiles (LiteLLM)
+
+---
+
+## COMMANDES
+
+```
+/idea    → Suggère test BLV (tool-based)
+/chat    → Stream conversation
+/import  → Import Burp XML
+/analyze → Cartographie flow (Opus + extended thinking)
+/model   → Switch modèle
+/clear   → Nouvelle conversation
+/stats   → Statistiques usage
 ```
 
-**New convo each startup:**
-```python
-# db.py init()
-CURRENT_CONVERSATION_ID = create_conversation()  # NOT get_or_create
-```
+---
 
-## File Locations
+## ÉVOLUTIONS POSSIBLES
 
-```
-/home/gesti/projects/cli_blv/  (WSL)
-├── .env              # LiteLLM config
-├── blv.db            # SQLite database (prompts, rules, findings, requests, chat)
-├── cli.py            # Main CLI
-├── db.py             # Database ops
-├── llm.py            # LLM streaming
-├── tools.py          # Tools definitions (not used yet)
-└── pyproject.toml    # UV dependencies
-```
+*(Idées - à valider par usage réel)*
 
-## Validation Checklist
-
-Before saying "done":
-- [ ] `uv run python -m py_compile` all modified files
-- [ ] Test imports with `uv run python -c "import module"`
-- [ ] If DB changes: test `uv run python -c "import db; db.init()"`
-- [ ] Explain changes < 100 words
-
-## Database Schema
-
-**Tables:**
-- `prompts` - System prompts (name, content, active, priority)
-- `rules` - Conditional rules (trigger, action, priority, active)
-- `requests` - HTTP requests from Burp XML (url, method, headers, body, response)
-- `findings` - BLV patterns tested (pattern, worked, target, context)
-- `conversations` - Chat sessions (name, created_at)
-- `chat` - Messages (conversation_id, role, content, tokens)
-- `tasks` - Task queue (text, done)
-
-## Tasks Queue
-
-Si user dit "check tasks" ou "tâche" → `uv run python -c "import db; [print(t) for t in db.get_tasks(done=False)]"`. Traite première pending, marque done après.
+- Export rapport vulns
+- Techniques library (patterns qui marchent)
+- Cross-request linking

@@ -1,0 +1,77 @@
+<?xml version="1.1"?>
+<!-- NOTE: Any NULL bytes in requests and responses are preserved within this output, even though this strictly breaks the XML syntax. If your XML parser rejects the NULL bytes then you will need to remove or replace these bytes before parsing. Alternatively, you can use the option to base64-encode requests and responses. -->
+<!DOCTYPE items [
+<!ELEMENT items (item*)>
+<!ATTLIST items burpVersion CDATA "">
+<!ATTLIST items exportTime CDATA "">
+<!ELEMENT item (time, url, host, port, protocol, method, path, extension, request, status, responselength, mimetype, response, comment)>
+<!ELEMENT time (#PCDATA)>
+<!ELEMENT url (#PCDATA)>
+<!ELEMENT host (#PCDATA)>
+<!ATTLIST host ip CDATA "">
+<!ELEMENT port (#PCDATA)>
+<!ELEMENT protocol (#PCDATA)>
+<!ELEMENT method (#PCDATA)>
+<!ELEMENT path (#PCDATA)>
+<!ELEMENT extension (#PCDATA)>
+<!ELEMENT request (#PCDATA)>
+<!ATTLIST request base64 (true|false) "false">
+<!ELEMENT status (#PCDATA)>
+<!ELEMENT responselength (#PCDATA)>
+<!ELEMENT mimetype (#PCDATA)>
+<!ELEMENT response (#PCDATA)>
+<!ATTLIST response base64 (true|false) "false">
+<!ELEMENT comment (#PCDATA)>
+]>
+<items burpVersion="2025.10.5" exportTime="Sun Nov 23 10:28:12 CET 2025">
+  <item>
+    <time>Sun Nov 23 10:27:18 CET 2025</time>
+    <url><![CDATA[https://payment.cdiscount.com/api/card/checkEnrollment/859ee985-8a7a-45b7-ad32-2585d3c15c69]]></url>
+    <host ip="45.60.87.29">payment.cdiscount.com</host>
+    <port>443</port>
+    <protocol>https</protocol>
+    <method><![CDATA[POST]]></method>
+    <path><![CDATA[/api/card/checkEnrollment/859ee985-8a7a-45b7-ad32-2585d3c15c69]]></path>
+    <extension>null</extension>
+    <request base64="false"><![CDATA[POST /api/card/checkEnrollment/859ee985-8a7a-45b7-ad32-2585d3c15c69 HTTP/2
+Host: payment.cdiscount.com
+Cookie: VisitContextCookie=QVxsOV_20VS4ILOO4IjIr9ChdWhfea_AC0twlFI9onNMVcCa00VrDg; UniqueVisitContext=UniqueVisitId__251122195235DROWDMLT__TrackingCustomerId__fc4a87c5-11b2-45dc-abdc-f2754ba6410d__; cf_clearance=Qlpgcp9OrncxTrAG9NMwj6g6NCX1En_dZha6j7bfpEs-1763889902-1.2.1.1-kMeBJYLJ6qdY4di9EYL4kADQEOGaKLdaVRkTknuh8YXh00OiIMe2_gvGY6gSCxcXoCuiPWE9usoJek6RPp46mD9t8HuFZAjAzTqLYTWOiiGotklFa9lNMTXgHcflYLnW7ouo.0Zh0YCaylsyZgzkVcS7NMPsAcI_7leuKq82ppeatjuYKKf.3luGCca_DaRoC2_rWHv9CccDD10kjMm3s0jEsb8pRHmXr50x4OK4pHM; CookieId=CookieId=251122195240CDMALKWB&IsA=1&GUID=fc4a87c5-11b2-45dc-abdc-f2754ba6410d&MID=1&CUP=0&CDAV=0; TCPID=1251161952411437239710; _$3custap=0; _$cst=1; _$1okcook=1; _$iel=0; articles_count=1; SitePersoCookie=PersoCountryKey__FR__PersoLatitudeKey__48.08616485__PersoLongitudeKey__-1.67882515__PersoTownKey__Rennes__GeolocPriorityKey__21__PersoPostalCodeKey__35200__PersoUrlGeoSCKey____ExpressSellerId____ExpressShopName____ExpressGlobalSellerId____ShowroomVendorId____RetailStoreName____VehicleId__0__AddressId____; TC_PRIVACY=0%40300%7C3%7C5%7C133%7C10%7C335%403%2C4%2C6%2C10001%2C10003%2C10007%2C10013%2C10019%2C10005%2C10009%2C10017%2C10011%2C10015%2C10021%2C13001%2C13002%2C10004%2C10014%2C10020%2C10018%2C10016%2C10022%407%401763837564019%2C1763837564019%2C1779389564019%40qu7LPFfT-BIPcBwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABiGAYaB4YEBAAaAARgGAAaAgRkAYAAGAIAGGAAAAIABABgAABgAgAEAAACAAQAAABgAAAAAAAAAAAAGAAAGYIABAAAAAAAAAAAAAAAAAAAAAAAAAAAAABgAAAAAAAAAAAAACAAABgAAAACAAQAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAGAAAAAAAAAAAAABgABgCAAQAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAACAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIAAAgBg%3D; TC_PRIVACY_CENTER=3%2C4%2C6%2C10001%2C10003%2C10007%2C10013%2C10019%2C10005%2C10009%2C10017%2C10011%2C10015%2C10021%2C13001%2C13002%2C10004%2C10014%2C10020%2C10018%2C10016%2C10022; _$ac7=seo; _gcl_au=1.1.1820452435.1763837564; _cs_c=3; _cs_id=1d1ee66b-f5f0-a1f7-909b-22244066ff1e.1763837564.2.1763889914.1763889899.1590586488.1798001564424.1; _scid=o_S5hz6lj7Lo7KNZmMx2TXcJdQnnzCnY; cto_bundle=UL0m519sQms5WSUyRjhMNUZCY1dnWXNPbUl3cURBVk5laXZQRFE2TEJzJTJGS3ZhRVY2NldTZWpQZ0clMkZRMnVZMURDWFV6ZU9WdVpocEx4d2QwZyUyQkQ2YkFwVGNxQ2FNRkY1WnhZJTJCQyUyQnQ0JTJGZk1nRFFQRERsd04lMkZHMlYlMkJKUjdOcDRUWXdhVm9KenBmWlhLOVp5Vk1JV3VMSUd6a1ptZVdLQWFUeDhSalg1bnVmSkx0Vjc1WU5WU2pjNnVsMXl2RGp6dEkzMGNJZ0c; SiteVersionCookie=2100.1|2323.1|4077.1|7004.1|7007.0|7008.0; SiteVersionCookieNoChanges=56.1|68.0|1370.1|1418.1|1423.1|1426.1|1433.1|1441.1|1458.1|1464.0|1466.1|1467.1|1469.1|1475.1|1482.1|1484.1|1488.1|1491.1|5008.1|5015.1|5019.1|5021.1|5024.1|5038.1|5039.1|5046.1|5048.1|5058.1|5060.1|5065.1|5066.1|5067.1|5071.1|5072.1; mssodse=8YnBP1axmAc1fDwK1XprlvlewL-foCXpguLzZbsuAASGH1pyvv0PXFqvwAuFoNW9kzH_H7BwuC2NCEtWFXadU3Nna3AsRA4WqpGcRpqhuv4rRLV2BaWAXj1H3N4wmk0Bv2UEr8HHp469SG2NOOCIUZ34gePecxXub5FJ-60kP9YqMj6g2I2yrOV42mZXdzvD; tcId=3654eb48-0d27-4357-a064-b63d61aef283; tcIdNe=cb3570c0-094f-4ae5-9afb-7ad3cd7e2cf0; _$culture=CultureName__fr-FR__; iadvize-11-consent=true; iadvize-11-vuid=2773da9194434a5d836ded1a56af3a579a9c8914f7974; mssctse=ClfaekoikhwRBCo8ExdBk4hTBnPp21WP_zqFklWqxUk3kP70NbjnQXSxOSrI0uLlzzHlAocGm_RBDdIs04_pUTlOuCcR_wze48GC5nhnrj5zx4mXt4u9PQ; _$fsa=ClfaekoikhxNyCXNpc4cNsLfE1B4C5Fv; AMCV_6A63EE6A54FA13E60A4C98A7%40AdobeOrg=MCMID%7C84301755524841471993744734294065545215; nllastdelid=5f4a412; ABTasty=uid=cpa3kkcj41fyad8k&fst=1763837911544&pst=1763837911544&cst=1763889900588&ns=2&pvt=7&pvis=4&th=1473937.0.4.4.1.1.1763837941638.1763889914414.0.2_1485170.1848674.1.1.1.1.1763889900762.1763889900762.0.2_1485603.1849253.2.2.1.1.1763837911602.1763889902549.0.2_1514286.1886838.2.2.1.1.1763837911549.1763889902542.0.2_1536027.1914763.2.2.1.1.1763837911546.1763889902540.0.2; __cf_bm=APAMNJv01tYRx.uCFXfUGUItE.QcNi4l4xzjttq6UyM-1763889944.3730092-1.0.1.1-urZH4OvWvoYJ1lXgVuHgEGZm.6guiU_6WQqWil.B0cdUUV4leFuszwScfwn1BRIbDKwaDZ_yOyzmC736euhSdmtpTTD4euegKD0ihvWOcLR2T0wcIvt4QLXMvZMGXsqR; visit_baleen_ACM-655d43=OG-SqxRKpmdoMCqIjn8HpnN3J8TUQKhxQSFDkYu1UEhx_kiKeA1kgjbU115ATvz5BVozpvKwDTbxoKKfJcn9ZLPsqXbmr6MYavYXfxf-_flcFIPDyKb77ztT20I54Coa5X2w7LoM8UcHx1c1t8LcNdAkpky1xd5RL_YnVnN-5iDDg3Un3cQ-6nwTqpmpZhvylYRCI_9ty2VBuP7qHjNk6nCXTwHWpf3FLYVAjqNKmq3JlQOk_9_zSDGhOMLSvM3xWRZJB600TYHvIOwuOfP9pg; _$dtype=t:d; svisit=1; _$3custinf=CA=0&AUT=1&XV1=0&XV2=1032&CIO=0; _$3ci=CU=0&GDR=M.&AGE=32&NOO=0&HM=e1edeea46b69381becfca03756efaba967e83bb07f1ca855c1f3046ddf6f1d3c&HMG=e1edeea46b69381becfca03756efaba967e83bb07f1ca855c1f3046ddf6f1d3c; cs_heure_session=10; msstvt=U4qw2UrM0kX7wSBoA8OIOtL-gyXze9NU4UIcgDvlCKxPhtU1U-94vWZ43WFjRgjLWColfYs0DAb_kIfQQXEF5XDT42AKoY3VIZyqWP2zOl8P21KMXMl4pTLygeyvL4fYfX5JU1ZxXXUueehZJJkaNQ; _cs_cvars=%7B%228%22%3A%5B%22h_deb_session%22%2C%2210%22%5D%7D; _cs_s=3.0.0.1763891714332; ABTastySession=mrasn=&lp=https%253A%252F%252Fwww.cdiscount.com%252F; msswt=; _uetsid=6e577870c7d411f0bae841cd4f901bed; _uetvid=6e57ac20c7d411f089f223d96a05ca18; _scid_r=s3S5hz6lj7Lo7KNZmMx2TXcJdQnnzCnYU7SDgw; _$o1c=50zhYuMVsrj74aOZvsmv25N0eBL3CRFO9c8T8ycDegqqFlkfHb7fhojDZgVbXER2; iAdvize:splitGroup=2; TS0afac0a5027=084ea29731ab2000e47afadbc1c78cf553e0a193aa3afd55e9c806d352ff1d0f09d98e28ce8a36df0828a7262e11300003c2057b64220effcc461771e7eaf4b19e49c7e0f4ed33668db9b84b7c2db1524e799450825a8f2dfd31e6bd83163da5; visid_incap_1446171=98QbDX+0Q0ie6lwNiBwKMxLTImkAAAAAQUIPAAAAAAD5XmZdol8RNYqK1YCBpf5p; nlbi_1446171=jrMBfhNgak17LuvPEdAJjgAAAABUUlp//cg+TtXXY3bWhZUC; incap_ses_1612_1446171=B8kpJlh2uE7yMjg2gfleFhPTImkAAAAAscJNuPmUlKRYG5X1rCGesw==; TS00000000076=084ea29731ab28006f050e450218f525be03bf7e154e63c7e7c4ec4e20d0d58d2710e35c1b5a499ac6a5a3405f6829a90896199d4c09d00052b8cd9a764fe56086cff3d74be98d6ce285bd406d321dd2084df5efa443c486181a5af32a6b51f7314fb20b1c0b3793c6e82bc42b0050d285c0ebbe25ffd4db765ab8887217c32bcbb54a1b148a434639e2eba5a5231303e142308b73bae18118203c6a756d17e4b28eb857e54bc79781b3d95f80a52d007dff2653735270559b5987eafd406177ccbccfe5d6cd627a27444b6404aff5dafde0e6ddb5e2c86ee26aff20dbb65333cd1df7f0959a2011d441a1d13c4dbbc9ea760e10e74c78a2d6942675ca942bb80d980aed1031e372; TSPD_101_DID=084ea29731ab28006f050e450218f525be03bf7e154e63c7e7c4ec4e20d0d58d2710e35c1b5a499ac6a5a3405f6829a90896199d4c063800f3c111c232dbe07d24afd81e77cc45253b50a2e18e30b833f7e8e48e11ea9c667ef08030f37964843deaf701184e542ec949f3b27e0688d4; PaymentSession=91e445c9cfa6401ba1c04e3053d0a4fa; mssctpa=W2dNXeEyrPIyPtdpKaTFkSzz4Au_O6A3PBCPclwECIJC-2IaVxOgDuvIRh4-s3TuuV1EFjl0ErRL_1s8baqQ-g; VisitContextCookie=QVxsOV_20VQGGKiE6RnarGN_pBGS_KBKJEaQF5m3MTWDFwE-Flkriw; msspctx=h6JkZ3xJ52I8JwPX2_5-CnB5u5wb0JUGDIKuYpKha1YuR1Pj26N5ahZhgcuL7-gUYpzOJmNwbUrfs4GrmUcpEhRWte4tMmigZ0JxkLUrlEnplID7b16G_k1ASue4OKx5sj3tN6hH4PTs317PDBjlDXiYY3WNgYRCTRAylocKYMUndAaisM1eSJfHFIndsuSxAhBOfuiUvwmOq01q9wKU39odYGlKCDol8aEq6TmgnxgmGVrV9tWJGaJ_qgpemdwI2N8qm-NIkVJwJP9wVVFyfMALq63e9E8vbQ3KqpQJHj6iXJIgV_rjamufcdaIHKM6Gi-6FmjuPQv_zfsBC3nc_EgF1n5TrDZ0AnjDP85nIGN31Mgvpe8wt6rSxF1337wUmVTQwodCdmLvbAukNYIrCYbWcKKVW6naQn6_kXNayBLFQjCNP65-mQiQAf7TN5AR0YHDhMhs85jRMszA-fWrYyqkLoMEKb6LJMqYyDvJkxMdGopZIDFOKoTdBa-bzyAZalykftfNdk5XU9_pN4E7JbWK6i1K9Lep4UyMqo7cnOEOt6N2B7fC9fn-gjHtM0CTPaC6Mi5ogKzPqYDuCzv-tbsHdt3Fq25RCKGiD3y7CzaWrSW2ViBFdt8Ez35idcG75sJu6hN6Pn8xsh5VE9o3K3_omzaYNFC_eVL9d0nwclMonYc39pNg50GH1t-VEDeeVHNKHOPsLjJs4i-WzIA1_cL4Ni0Pno-U-lysijrg6F1YmrLqSjnwgY4LghD-7LbS7pG7btKflZNqLPTdwaRUq8ZP0VjZEW-kwwlxsgdmcpvDXgw6ENWbyg; TS019b79a6=0167df5c62ca4bab0d7ed0f7a9fd852c27f0eb21156d7d86be1fb4b6e1b901751b9f1968ff50b4e37d382c813735c3016222970751; visid_incap_2799110=TmAHUtFxTluNw/Th1ZQm8RfTImkAAAAAQUIPAAAAAACOLzrwSOIwfZeDVA+qw9Iv; nlbi_2799110=bl07KfeyJ0zDB7yCSA7ApAAAAAB5OeTS+F3O84W1W/i+9/6y; incap_ses_1612_2799110=tw3jIAuNWU/RMzg2gfleFhfTImkAAAAAlkWi9N05SydGAlStYlVVYg==
+User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0
+Accept: application/json
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: https://payment.cdiscount.com/Cdiscount/CardPayment/Initialization?requestId=859ee985-8a7a-45b7-ad32-2585d3c15c69&hmacPay=379292E0B58F1CDA5706C2E26EB28A6B07BB8097
+Content-Type: application/json
+X-Xsrf-Token: kpeEsEguuJuekM56JNW2DnDirnKKzSdR5pN510kdxBOEqh1bG6cJloGTyAKk8DP5o2C7BAtayBZm6yfY_mAmSWwsKeQ1:DScgq5Y0k2-lLMidhOS2Z6sGo8XO17sxFUpH43BEdj1w4U5k1JLJ01X2J6MFRRoufq7vby612i3i_E_RU7ivdWVSvTs1
+Content-Length: 666
+Origin: https://payment.cdiscount.com
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: same-origin
+Priority: u=0
+Te: trailers
+
+{"CardProduct":{"CardProductId":24,"Code":"I","Description":"Visa Infinite"},"CardScheme":{"CardSchemeId":2,"Name":"VISA","CardNetworkId":2,"DisplayName":"Visa","IsBrand":true,"CardProduct":null},"UserAllowCardStorage":false,"UsedPaymentCardType":2,"BrowserData":{"ColorDepth":24,"Language":"en-US","ScreenHeight":1440,"ScreenWidth":3413,"TimeZoneOffset":-60},"FreeSchedules":null,"SubOrderFreeSchedules":null,"BrandChoice":{"DefaultCardType":2,"DetectedCardTypes":[2],"SelectedCardType":2},"CardOwner":"martin tobias","IsValidatedCardOwner":true,"CardNumber":"4569330162787804","ExpirationDate":"2030-08-31T00:00:00+02:00","SecurityNumber":"656","RetryIn3DS":false}]]></request>
+    <status>200</status>
+    <responselength>1271</responselength>
+    <mimetype>JSON</mimetype>
+    <response base64="false"><![CDATA[HTTP/2 200 OK
+Cache-Control: no-cache
+Pragma: no-cache
+Content-Type: application/json; charset=utf-8
+Expires: -1
+X-Frame-Options: SAMEORIGIN
+Content-Security-Policy: frame-ancestors https://order.cdiscount.com/ https://payment.cdiscount.com/ https://clients.cdiscount.com/ https://quotation.cdiscount.com/ https://payment.cb4x.fr/ https://payment2.cb4x.fr/ https://paymenttest.dev-cdiscount.com/
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+Date: Sun, 23 Nov 2025 09:27:46 GMT
+Content-Length: 335
+Set-Cookie: TS0afac0a5027=084ea29731ab20005a1b928dc034c2e28e573240ca3044483b4de6b31bce7905d00c690142dd19840859e5512e1130004e5ca9d1ee05e7b1fa1eeb014d9e630ada4ea077c405cb34b76498613479dc2f65c381aee54753919da543bd8d0a7383; Path=/
+X-Cdn: Imperva
+X-Iinfo: 16-263658-263661 NNNN CT(54 57 0) RT(1763890063099 57) q(0 0 1 -1) r(33 33) U24
+
+{"IsFrictionless":false,"NeedsRedirection":true,"StopExecution":false,"ResponseCode":1,"PaymentRequestState":5,"RedirectUrl":null,"RedirectType":0,"RedirectData":null,"Fallback3DsData":null,"IsFinished":false,"OperationSucceeded":true,"ErrorMessage":null,"FieldWithErrorList":null,"MerchantReturnCode":0,"ErrorType":0,"RequestState":0}]]></response>
+    <comment></comment>
+  </item>
+</items>
