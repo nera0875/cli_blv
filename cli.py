@@ -54,7 +54,7 @@ db.init()
 THINKING_ENABLED = False
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/add', '/stats', '/s', '/import', '/i', '/model', '/thinking', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -486,9 +486,9 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                             status_spinner.start()
                     elif chunk_type == "thinking_chunk":
                         thinking_content += chunk_content
-                        # Show preview in status
-                        if len(thinking_content) < 60 and status_spinner:
-                            preview = thinking_content[:60].replace('\n', ' ')
+                        # Show preview in status (first 100 chars)
+                        if len(thinking_content) < 100 and status_spinner:
+                            preview = thinking_content[:100].replace('\n', ' ')
                             status_spinner.update(f"[magenta]∴ {preview}...")
                     # Legacy thinking event
                     elif chunk_type == "thinking":
@@ -523,7 +523,15 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                             if thinking_start_time and thinking_content:
                                 import time
                                 duration = time.time() - thinking_start_time
-                                console.print(f"[dim magenta]∴ Thought for {duration:.0f}s[/]")
+                                console.print(f"[dim magenta]∴ Thought for {duration:.0f}s[/]\n")
+                                # Display full thinking content in orange panel
+                                console.print(Panel(
+                                    thinking_content.strip(),
+                                    title="[bold #FF8C00]∴ Extended Thinking[/]",
+                                    border_style="#FF8C00",
+                                    padding=(1, 2),
+                                    expand=False
+                                ))
                             console.print("[white]●[/] ", end="")
                             first_content = False
                         response += chunk_content
@@ -804,15 +812,15 @@ def fetch_available_models():
     return []
 
 def cmd_model():
-    """Switch LLM model."""
-    current = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
+    """Switch LLM model with configuration submenu."""
+    current_model = os.getenv("LITELLM_MODEL", "claude-sonnet-4-5-20250929")
 
     # Model descriptions (Claude Code style) - IDs must match LiteLLM config
     models = [
         {
             "label": "1. Opus (recommended)",
             "desc": "Opus 4.5 · Most capable for complex work",
-            "id": "anthropic/claude-opus-4-5-20251101",  # LiteLLM requires anthropic/ prefix
+            "id": "anthropic/claude-opus-4-5-20251101",
             "price": "$5/$25 per M tokens"
         },
         {
@@ -832,7 +840,7 @@ def cmd_model():
     # Build choices with current marker
     choices = []
     for m in models:
-        marker = " ✔" if m["id"] == current else ""
+        marker = " ✔" if m["id"] == current_model else ""
         full_text = f"{m['label']:25} {m['desc']}{marker}"
         choices.append(full_text)
 
@@ -850,11 +858,11 @@ def cmd_model():
         return
 
     # Extract model index from choice
-    selected_idx = int(result[0]) - 1  # "1. Opus..." → index 0
+    selected_idx = int(result[0]) - 1
     selected_model_info = models[selected_idx]
     selected_model = selected_model_info["id"]
 
-    # Update .env
+    # Update model in .env
     env_path = Path(".env")
     lines = env_path.read_text().splitlines()
     updated = []
@@ -866,90 +874,176 @@ def cmd_model():
         else:
             updated.append(line)
 
-    # Add if not exists
     if not model_found:
         updated.append(f"LITELLM_MODEL={selected_model}")
 
     env_path.write_text("\n".join(updated) + "\n")
-
     os.environ["LITELLM_MODEL"] = selected_model
 
     # Show confirmation
     name = selected_model_info["label"].split(".")[1].strip().split("(")[0].strip()
-    console.print(f"[green]✓ Switched to {name}[/]")
-    console.print(f"[dim]  {selected_model_info['price']}[/]")
+    console.print(f"[green]✓ Model: {name}[/]")
+    console.print(f"[dim]  {selected_model_info['price']}[/]\n")
 
-def cmd_thinking():
-    """Configure thinking mode budget."""
-    current = os.getenv("THINKING_MODE", "none")
+    # Open configuration submenu
+    cmd_model_config(selected_model_info)
 
-    # Thinking budget options
-    budget_choices = {
-        "None (Disabled)": "none",
-        "Quick (4K tokens - fast)": "quick",
-        "Normal (16K tokens - balanced)": "normal",
-        "Deep (32K tokens - thorough)": "deep",
-        "Ultra (64K tokens - maximum)": "ultra",
-    }
 
-    # Build choices with current marker
-    choices = []
-    for desc, mode in budget_choices.items():
-        marker = " ✓" if mode == current else ""
-        choices.append(f"{desc}{marker}")
+def cmd_model_config(model_info):
+    """Configuration submenu for selected model (thinking, temperature, max_tokens)."""
+    env_path = Path(".env")
 
-    try:
-        result = questionary.select(
-            "Select Thinking Budget:",
-            choices=choices,
+    while True:
+        # Read current config
+        current_thinking = os.getenv("THINKING_MODE", "none")
+        current_temp = float(os.getenv("TEMPERATURE", "1.0"))
+        current_max_tokens = int(os.getenv("MAX_TOKENS", "8192"))
+
+        # Display current config
+        model_name = model_info["label"].split(".")[1].strip().split("(")[0].strip()
+
+        thinking_labels = {
+            "none": "None (Disabled)",
+            "quick": "Quick (4K tokens)",
+            "normal": "Normal (16K tokens)",
+            "deep": "Deep (32K tokens)",
+            "ultra": "Ultra (64K tokens)"
+        }
+
+        console.print(f"[bold cyan]━━━ {model_name} Configuration ━━━[/]")
+        console.print(f"[yellow]Thinking:[/] {thinking_labels.get(current_thinking, 'none')}")
+        console.print(f"[yellow]Temperature:[/] {current_temp}")
+        console.print(f"[yellow]Max tokens:[/] {current_max_tokens}\n")
+
+        # Menu
+        action = questionary.select(
+            "Configure:",
+            choices=[
+                "⚡ Thinking budget",
+                "🌡️  Temperature",
+                "📏 Max tokens",
+                "← Back"
+            ],
             style=custom_style
         ).ask()
-    except (EOFError, KeyboardInterrupt):
-        console.print("\n[yellow]Cancelled[/]")
-        return
 
-    if not result:
-        return
+        if not action or "Back" in action:
+            break
 
-    # Extract mode from description
-    selected_desc = result.replace(" ✓", "").strip()
-    selected_mode = budget_choices.get(selected_desc)
+        if "Thinking" in action:
+            # Thinking submenu
+            budget_choices = {
+                "None (Disabled)": "none",
+                "Quick (4K tokens - fast)": "quick",
+                "Normal (16K tokens - balanced)": "normal",
+                "Deep (32K tokens - thorough)": "deep",
+                "Ultra (64K tokens - maximum)": "ultra"
+            }
 
-    if not selected_mode:
-        console.print("[red]Invalid selection[/]")
-        return
+            choices = []
+            for desc, mode in budget_choices.items():
+                marker = " ✓" if mode == current_thinking else ""
+                choices.append(f"{desc}{marker}")
 
-    # Update .env
-    env_path = Path(".env")
-    lines = env_path.read_text().splitlines()
-    updated = []
-    mode_found = False
-    for line in lines:
-        if line.startswith("THINKING_MODE="):
-            updated.append(f"THINKING_MODE={selected_mode}")
-            mode_found = True
-        else:
-            updated.append(line)
+            result = questionary.select(
+                "Select Thinking Budget:",
+                choices=choices,
+                style=custom_style
+            ).ask()
 
-    # Add if not exists
-    if not mode_found:
-        updated.append(f"THINKING_MODE={selected_mode}")
+            if result:
+                selected_mode = budget_choices[result.split(" ✓")[0]]
 
-    env_path.write_text("\n".join(updated) + "\n")
+                # Update .env
+                lines = env_path.read_text().splitlines()
+                updated = []
+                mode_found = False
+                for line in lines:
+                    if line.startswith("THINKING_MODE="):
+                        updated.append(f"THINKING_MODE={selected_mode}")
+                        mode_found = True
+                    else:
+                        updated.append(line)
 
-    os.environ["THINKING_MODE"] = selected_mode
+                if not mode_found:
+                    updated.append(f"THINKING_MODE={selected_mode}")
 
-    # Update llm.py global
-    import llm
-    llm.THINKING_MODE = selected_mode
+                env_path.write_text("\n".join(updated) + "\n")
+                os.environ["THINKING_MODE"] = selected_mode
 
-    # Show info
-    if selected_mode == "none":
-        console.print(f"[yellow]✓ Thinking mode disabled[/]")
-    else:
-        budgets = {"quick": "4K", "normal": "16K", "deep": "32K", "ultra": "64K"}
-        console.print(f"[green]✓ Thinking budget: {budgets[selected_mode]} tokens[/]")
-        console.print(f"[dim]  Claude will think before responding[/]")
+                # Update llm.py global
+                import llm
+                llm.THINKING_MODE = selected_mode
+
+                console.print(f"[green]✓ Thinking: {result.split(' ✓')[0]}[/]\n")
+
+        elif "Temperature" in action:
+            # Temperature input
+            temp_str = questionary.text(
+                "Temperature (0.0-2.0):",
+                default=str(current_temp)
+            ).ask()
+
+            if temp_str:
+                try:
+                    temp = float(temp_str)
+                    if 0.0 <= temp <= 2.0:
+                        # Update .env
+                        lines = env_path.read_text().splitlines()
+                        updated = []
+                        temp_found = False
+                        for line in lines:
+                            if line.startswith("TEMPERATURE="):
+                                updated.append(f"TEMPERATURE={temp}")
+                                temp_found = True
+                            else:
+                                updated.append(line)
+
+                        if not temp_found:
+                            updated.append(f"TEMPERATURE={temp}")
+
+                        env_path.write_text("\n".join(updated) + "\n")
+                        os.environ["TEMPERATURE"] = str(temp)
+
+                        console.print(f"[green]✓ Temperature: {temp}[/]\n")
+                    else:
+                        console.print("[red]✗ Temperature must be 0.0-2.0[/]\n")
+                except ValueError:
+                    console.print("[red]✗ Invalid number[/]\n")
+
+        elif "Max tokens" in action:
+            # Max tokens input
+            max_str = questionary.text(
+                "Max tokens (1024-64000):",
+                default=str(current_max_tokens)
+            ).ask()
+
+            if max_str:
+                try:
+                    max_tok = int(max_str)
+                    if 1024 <= max_tok <= 64000:
+                        # Update .env
+                        lines = env_path.read_text().splitlines()
+                        updated = []
+                        max_found = False
+                        for line in lines:
+                            if line.startswith("MAX_TOKENS="):
+                                updated.append(f"MAX_TOKENS={max_tok}")
+                                max_found = True
+                            else:
+                                updated.append(line)
+
+                        if not max_found:
+                            updated.append(f"MAX_TOKENS={max_tok}")
+
+                        env_path.write_text("\n".join(updated) + "\n")
+                        os.environ["MAX_TOKENS"] = str(max_tok)
+
+                        console.print(f"[green]✓ Max tokens: {max_tok}[/]\n")
+                    else:
+                        console.print("[red]✗ Max tokens must be 1024-64000[/]\n")
+                except ValueError:
+                    console.print("[red]✗ Invalid number[/]\n")
 
 def cmd_clear():
     """Start new conversation."""
@@ -1033,7 +1127,7 @@ def cmd_resume():
             choices=choices,
             style=custom_style,
             instruction="(Use arrows · / to search · Esc to exit)",
-            use_shortcuts=True,
+            use_shortcuts=False,  # Disabled (limit 36 choices)
             use_indicator=True,
         ).ask()
     except (EOFError, KeyboardInterrupt):
@@ -1917,8 +2011,7 @@ def main():
     cmds_col1 = [
         "[cyan]/chat[/]     Chat with AI",
         "[cyan]/import[/]   Import Burp XML",
-        "[cyan]/model[/]    Switch model",
-        "[cyan]/thinking[/] Thinking budget"
+        "[cyan]/model[/]    Model config"
     ]
 
     cmds_col2 = [
@@ -2002,8 +2095,6 @@ def main():
                 cmd_import()
             elif cmd == "/model":
                 cmd_model()
-            elif cmd == "/thinking":
-                cmd_thinking()
             elif cmd == "/cls":
                 console.clear()
             elif cmd == "/clear":

@@ -56,21 +56,33 @@ Output:
 
 ## Usage
 
-### 1. Switch to Opus 4.5
+### 1. Configure API Key (FIRST TIME ONLY)
+
+Opus 4.5 + thinking mode utilise **directement l'API Anthropic** (pas LiteLLM).
+
+**Édite `.env`:**
+```bash
+# Décommente et ajoute ta clé:
+ANTHROPIC_API_KEY=sk-ant-your-actual-key-here
+```
+
+**Où trouver la clé:** https://console.anthropic.com/settings/keys
+
+### 2. Switch to Opus 4.5
 
 ```bash
 /model
 ```
-→ Select "Opus 4.5 (Most Intelligent - NEW!)"
+→ Select "1. Opus (recommended)"
 
-### 2. Configure Thinking Budget
+### 3. Configure Thinking Budget
 
 ```bash
 /thinking
 ```
-→ Choose budget level
+→ Choose budget level (recommandé: Normal or Deep)
 
-### 3. Chat
+### 4. Chat
 
 ```bash
 /chat
@@ -84,6 +96,22 @@ Output:
 ∴ Thought for 8s
 
 ● Claude répond avec analyse approfondie...
+```
+
+---
+
+## Technical Note: Direct API vs LiteLLM
+
+**Pourquoi API directe ?**
+- LiteLLM ne supporte pas encore le paramètre `thinking` (GitHub issue #8768)
+- Workaround: détection automatique Opus 4.5 + thinking → route vers Anthropic SDK
+- Autres modèles (Sonnet, Haiku, Opus sans thinking) → LiteLLM proxy
+
+**Code routing (llm.py:648):**
+```python
+if budget > 0 and "20251101" in model:
+    # Use direct Anthropic API
+    yield from chat_stream_anthropic(msg, history, budget, use_tools)
 ```
 
 ---

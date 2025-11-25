@@ -1,6 +1,7 @@
 """LLM streaming with LiteLLM."""
 import os
 from litellm import completion
+from anthropic import Anthropic
 from db import get_requests, add_msg, get_findings, add_finding, get_rules, get_triggers, get_prompts, get_plans
 
 API_BASE = os.getenv("LITELLM_API_BASE")
@@ -484,27 +485,188 @@ def build_messages(history, new_msg):
 
     return messages
 
-def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
-    messages = build_messages(history, msg)
+def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
+    """Direct Anthropic API streaming with Extended Thinking support."""
+    # Initialize Anthropic client (API key from .env)
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    if not anthropic_key:
+        raise ValueError("ANTHROPIC_API_KEY not set in .env")
 
+    client = Anthropic(api_key=anthropic_key)
+
+    # Build system prompt
+    sys_prompt = build_prompt()
+
+    # Build messages (Anthropic format) - filter empty content
+    messages = []
+    for h in history:
+        content = h["content"]
+        # Skip messages with empty content (tool calls without response)
+        if content and content.strip():
+            messages.append({
+                "role": h["role"],
+                "content": content
+            })
+    messages.append({"role": "user", "content": msg})
+
+    # Add user message to DB
     add_msg("user", msg)
 
-    # Get current model from env (may have changed via /model)
+    # Get model ID (strip LiteLLM prefix if present)
     model = os.getenv("LITELLM_MODEL", MODEL)
+    if model.startswith("anthropic/"):
+        model = model.replace("anthropic/", "")
+
+    # Build API call kwargs (stream=True implicit with .stream())
+    # Get user config from .env
+    user_max_tokens = int(os.getenv("MAX_TOKENS", "8192"))
+    user_temperature = float(os.getenv("TEMPERATURE", "1.0"))
+
+    # Determine max_tokens based on thinking mode
+    if thinking_budget > 0:
+        # Thinking enabled: use 64K total (thinking uses budget, rest for response)
+        base_max_tokens = 64000
+    else:
+        # No thinking: use user config
+        base_max_tokens = user_max_tokens
 
     kwargs = {
         "model": model,
-        "messages": messages,
-        "stream": True,
-        "api_base": API_BASE,
-        "api_key": API_KEY,
-        "timeout": 120,  # Increased for thinking mode
+        "max_tokens": base_max_tokens,
+        "temperature": user_temperature,
+        "system": [
+            {
+                "type": "text",
+                "text": sys_prompt,
+                "cache_control": {"type": "ephemeral"}
+            }
+        ],
+        "messages": messages
     }
 
-    if use_tools:
-        kwargs["tools"] = BLV_TOOLS
+    # Add thinking
+    if thinking_budget > 0:
+        kwargs["thinking"] = {
+            "type": "enabled",
+            "budget_tokens": thinking_budget
+        }
 
-    # Add thinking parameter based on global THINKING_MODE or explicit override
+    # Add tools
+    if use_tools:
+        kwargs["tools"] = [
+            {
+                "name": tool["function"]["name"],
+                "description": tool["function"]["description"],
+                "input_schema": tool["function"]["parameters"]
+            }
+            for tool in BLV_TOOLS
+        ]
+
+    # Stream response
+    text = ""
+    thinking_text = ""
+    thinking_detected = False
+    tool_calls_builder = {}
+    usage_data = None
+
+    with client.messages.stream(**kwargs) as stream:
+        for event in stream:
+            # Handle thinking blocks
+            if hasattr(event, 'type'):
+                if event.type == 'content_block_start':
+                    if hasattr(event, 'content_block'):
+                        block = event.content_block
+                        if hasattr(block, 'type') and block.type == 'thinking':
+                            thinking_detected = True
+                            yield ("thinking_start", "")
+
+                elif event.type == 'content_block_delta':
+                    if hasattr(event, 'delta'):
+                        delta = event.delta
+                        if hasattr(delta, 'type'):
+                            if delta.type == 'thinking_delta':
+                                thinking_text += delta.thinking
+                                yield ("thinking_chunk", delta.thinking)
+                            elif delta.type == 'text_delta':
+                                text += delta.text
+                                yield ("content", delta.text)
+                            elif delta.type == 'input_json_delta':
+                                # Tool call arguments streaming
+                                pass  # Handle below
+
+                elif event.type == 'content_block_stop':
+                    # Block finished
+                    pass
+
+            # Handle tool use (simpler in SDK)
+            if hasattr(event, 'type') and event.type == 'content_block_start':
+                if hasattr(event, 'content_block'):
+                    block = event.content_block
+                    if hasattr(block, 'type') and block.type == 'tool_use':
+                        idx = event.index if hasattr(event, 'index') else 0
+                        tool_calls_builder[idx] = {
+                            "id": block.id,
+                            "name": block.name,
+                            "arguments": ""
+                        }
+                        yield ("tool_start", block.name)
+
+            # Accumulate tool arguments
+            if hasattr(event, 'type') and event.type == 'content_block_delta':
+                if hasattr(event, 'delta') and hasattr(event.delta, 'type'):
+                    if event.delta.type == 'input_json_delta':
+                        idx = event.index if hasattr(event, 'index') else 0
+                        if idx in tool_calls_builder:
+                            tool_calls_builder[idx]["arguments"] += event.delta.partial_json
+
+        # Extract usage after stream ends
+        final_message = stream.get_final_message()
+        if hasattr(final_message, 'usage'):
+            usage_data = final_message.usage
+
+    # Extract cache info and update globals
+    global LAST_CACHE_READ_TOKENS, LAST_PROMPT_TOKENS
+    if usage_data:
+        # Anthropic SDK format
+        LAST_PROMPT_TOKENS = getattr(usage_data, 'input_tokens', 0)
+        LAST_CACHE_READ_TOKENS = getattr(usage_data, 'cache_read_input_tokens', 0)
+    else:
+        LAST_CACHE_READ_TOKENS = 0
+        LAST_PROMPT_TOKENS = len(text) // 4  # Fallback estimate
+
+    # Execute tool calls
+    import json
+    for idx in sorted(tool_calls_builder.keys()):
+        tc = tool_calls_builder[idx]
+        if tc["name"]:
+            try:
+                args = json.loads(tc["arguments"]) if tc["arguments"] else {}
+                result = handle_tool_call(tc["name"], args)
+                yield ("tool", result)
+            except Exception as e:
+                yield ("tool_error", str(e))
+
+    # Save assistant response with actual tokens
+    output_tokens = getattr(usage_data, 'output_tokens', len(text)//4) if usage_data else len(text)//4
+    add_msg("assistant", text, output_tokens)
+
+    # Parse and save findings
+    import re
+    pattern_regex = r'\[FINDING:([^|\]]+)\|([^|\]]+)\|([^\]]*)\]'
+    for match in re.finditer(pattern_regex, text, re.IGNORECASE):
+        pat, worked, target = match.groups()
+        add_finding(
+            pattern=pat.strip(),
+            worked=worked.strip().lower() in ('true', '1', 'yes', 'oui'),
+            target=target.strip() if target.strip() else None
+        )
+        yield ("tool", f"save_finding({pat.strip()}, worked={worked.strip()}, target={target.strip()})")
+
+def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
+    # Get current model from env (may have changed via /model)
+    model = os.getenv("LITELLM_MODEL", MODEL)
+
+    # Determine thinking budget
     global THINKING_MODE
     thinking_mode = os.getenv("THINKING_MODE", THINKING_MODE)
     budget = THINKING_BUDGETS.get(thinking_mode, 0)
@@ -512,7 +674,41 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
     # Override if thinking_enabled explicitly passed
     if thinking_enabled and budget == 0:
         budget = THINKING_BUDGETS["normal"]
+    elif not thinking_enabled:
+        # Force disable thinking if explicitly False (e.g., /idea)
+        budget = 0
 
+    # Route to Anthropic SDK if Opus 4.5 (always, thinking or not)
+    # Reason: LiteLLM doesn't support thinking, and consistent routing
+    if "20251101" in model:
+        # Use direct Anthropic API (thinking optional)
+        yield from chat_stream_anthropic(msg, history, budget, use_tools)
+        return
+
+    # Otherwise use LiteLLM (existing implementation)
+    messages = build_messages(history, msg)
+
+    add_msg("user", msg)
+
+    # Get user config from .env
+    user_max_tokens = int(os.getenv("MAX_TOKENS", "8192"))
+    user_temperature = float(os.getenv("TEMPERATURE", "1.0"))
+
+    kwargs = {
+        "model": model,
+        "messages": messages,
+        "stream": True,
+        "api_base": API_BASE,
+        "api_key": API_KEY,
+        "timeout": 120,
+        "max_tokens": user_max_tokens,
+        "temperature": user_temperature
+    }
+
+    if use_tools:
+        kwargs["tools"] = BLV_TOOLS
+
+    # Note: LiteLLM doesn't support thinking yet, but keep for future
     if budget > 0 and "claude" in model.lower():
         kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget}
 
