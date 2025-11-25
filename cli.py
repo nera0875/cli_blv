@@ -329,18 +329,24 @@ def cmd_chat():
                         console.print()
                         idea_data = None
 
-                        # Empty history to force fresh idea (no context bleeding)
-                        with console.status("[cyan]💡 Generating idea...", spinner="dots"):
-                            try:
-                                for chunk_type, chunk_content in chat_stream(idea_prompt, [], thinking_enabled=False, use_tools=True):
-                                    if chunk_type == "tool_ready":
-                                        tool_info = chunk_content
-                                        if tool_info["name"] == "suggest_test":
-                                            idea_data = tool_info["args"]
-                                    # Ignore all other events (content, tool_start, save_event, etc.)
-                            except Exception as e:
-                                console.print(f"[red]Error: {e}[/]")
-                                break
+                        # Status live avec modèle (comme le chat)
+                        idea_status = console.status("[magenta]⚡ IDEA[/] → [#FF8C00]🤖 Sonnet[/] → [cyan]🔧 suggest_test[/]", spinner="dots")
+                        idea_status.start()
+
+                        try:
+                            for chunk_type, chunk_content in chat_stream(idea_prompt, [], thinking_enabled=False, use_tools=True):
+                                if chunk_type == "tool_ready":
+                                    tool_info = chunk_content
+                                    if tool_info["name"] == "suggest_test":
+                                        idea_data = tool_info["args"]
+                                        break  # Got idea, stop streaming
+                                # Ignore other events
+                        except Exception as e:
+                            idea_status.stop()
+                            console.print(f"[red]Error: {e}[/]")
+                            break
+                        finally:
+                            idea_status.stop()
 
                         if not idea_data:
                             console.print("[yellow]⚠ L'IA n'a pas généré d'idée structurée. Retry...[/]")
@@ -391,7 +397,7 @@ def cmd_chat():
                             choices=[
                                 "✓ Go (AI explique)",
                                 "→ Next idée",
-                                "✗ Skip"
+                                "✗ Cancel"
                             ],
                             style=custom_style
                         ).ask()
@@ -401,9 +407,13 @@ def cmd_chat():
                             console.print(f"[dim]Auto: {msg[:50]}...[/]\n")
                             break  # Sort du loop /idea, continue chat
                         elif action and "Next" in action:
+                            console.print("[dim]Génération nouvelle idée...[/]")
                             continue  # Re-génère nouvelle idée
-                        else:  # Skip
-                            break  # Sort du loop /idea sans explication
+                        else:  # Cancel (ESC ou bouton)
+                            console.print("[yellow]✗ Cancelled[/]")
+                            idea_data = None
+                            break  # Sort du loop /idea
+                    continue  # IMPORTANT: retour au prompt après /idea
                 elif cmd == "/clear":
                     console.clear()
                     name = safe_input("New conversation name (or Enter for auto): ")
@@ -740,7 +750,13 @@ def cmd_chat():
                             elif confirm and "Skip all" in confirm:
                                 BYPASS_PERMISSIONS = True  # Enable bypass for rest
                                 console.print("[dim]Bypass enabled for remaining tools[/]")
+                            elif confirm and "No" in confirm:
+                                # Add decline to history so LLM doesn't retry
+                                decline_msg = f"[User declined to save: {tool_args.get('pattern', 'unknown')}]"
+                                db.add_message("assistant", decline_msg)
+                                console.print("[yellow]⏭ Skipped[/]")
                             else:
+                                # ESC or other - also skip
                                 console.print("[yellow]⏭ Skipped[/]")
                     elif chunk_type == "tool":
                         # Legacy: direct tool result (shouldn't happen with new flow)

@@ -35,38 +35,38 @@ THINKING_MODE = os.getenv("THINKING_MODE", "none")  # none, quick, normal, deep,
 INTENT_CONFIG = {
     "SAVE": {
         "model": "claude-sonnet-4-5-20250929",
-        "tool_choice": {"type": "auto"},  # Auto pour permettre dedup (texte si duplicate)
-        "temperature": 0.3,  # Précis, pas créatif
-        "max_tokens": 1024,  # Réponse courte
-        "tools": ["save_event"],  # Seul tool disponible
-        "context": "minimal",  # Instructions + events pour dedup
+        "tool_choice": {"type": "auto"},  # Auto pour dedup (texte si duplicate)
+        "temperature": 0.2,  # Très précis - extraction de données
+        "max_tokens": 512,   # Tool call + message court
+        "tools": ["save_event"],
+        "context": "minimal",
         "description": "User rapporte résultat test"
     },
     "IDEA": {
-        "model": "anthropic/claude-opus-4-5-20251101",  # Opus pour qualité
+        "model": "claude-sonnet-4-5-20250929",
         "tool_choice": {"type": "tool", "name": "suggest_test"},
-        "temperature": 0.9,  # Créatif
-        "max_tokens": 4096,  # Réponse détaillée
+        "temperature": 0.85,  # Créatif mais cohérent
+        "max_tokens": 1500,   # Une idée structurée
         "tools": ["suggest_test"],
-        "context": "full",  # BESOIN: events, requests, rules pour générer idées
+        "context": "events",  # Events pour éviter doublons
         "description": "User demande suggestion test"
     },
     "MEMORY": {
-        "model": "claude-sonnet-4-5-20250929",  # Sonnet (Haiku pas sur LiteLLM proxy)
+        "model": "claude-sonnet-4-5-20250929",  # Haiku pas sur proxy
         "tool_choice": {"type": "none"},
-        "temperature": 0.1,  # Factuel
-        "max_tokens": 2048,
-        "tools": [],  # Pas de tools
-        "context": "events",  # Juste les events pour lister
+        "temperature": 0.1,  # Factuel - juste lister
+        "max_tokens": 1024,  # Liste simple
+        "tools": [],
+        "context": "events",
         "description": "User demande infos stockées"
     },
     "CHAT": {
         "model": "claude-sonnet-4-5-20250929",
         "tool_choice": {"type": "auto"},
-        "temperature": 0.7,  # Équilibré
-        "max_tokens": 4096,
+        "temperature": 0.6,  # Équilibré, légèrement précis
+        "max_tokens": 2048,  # Conversations normales
         "tools": ["save_event", "suggest_test", "show_analysis", "ask_clarification"],
-        "context": "full",  # Discussion peut référencer tout
+        "context": "full",
         "description": "Discussion générale"
     }
 }
@@ -605,12 +605,31 @@ Similaire = même pattern OU même technique OU même target+type de test
             parts.append(line + "\n")
         parts.append("\n⚠️ Ne JAMAIS suggérer un test similaire à ceux ci-dessus.\n\n")
 
-    # 6. HTTP Requests DB (SQL)
+    # 6. HTTP Requests DB (SQL) - Résumé intelligent pour BLV
     reqs = get_requests()
     if reqs:
-        parts.append(f"# HTTP REQUESTS ({len(reqs)})\n")
-        for r in reqs:
-            parts.append(f"- {r['method']} {r['url']}\n")
+        parts.append(f"# HTTP REQUESTS ({len(reqs)} endpoints)\n")
+        import json
+        import re
+        for r in reqs[:15]:  # Limite 15 pour le context
+            line = f"- {r['method']} {r['url']}"
+            # Extraire params du body (clés principales pour BLV)
+            if r.get('body'):
+                try:
+                    body_data = json.loads(r['body'])
+                    if isinstance(body_data, dict):
+                        keys = [k for k in body_data.keys() if any(
+                            x in k.lower() for x in ['id', 'user', 'amount', 'price', 'payment', 'order', 'token', 'card']
+                        )]
+                        if keys:
+                            line += f" | params: {', '.join(keys[:5])}"
+                except:
+                    pass
+            # Identifier IDs dynamiques dans l'URL
+            ids = re.findall(r'/(\d{4,})', r['url'])
+            if ids:
+                line += f" | IDs: {', '.join(ids[:3])}"
+            parts.append(line + "\n")
 
     return "".join(parts)
 
