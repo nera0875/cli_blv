@@ -155,3 +155,8 @@ Before saying "done":
 - `findings` - BLV patterns tested (pattern, worked, target, context)
 - `conversations` - Chat sessions (name, created_at)
 - `chat` - Messages (conversation_id, role, content, tokens)
+- `tasks` - Task queue (text, done)
+
+## Tasks Queue
+
+Si user dit "check tasks" ou "tâche" → `uv run python -c "import db; [print(t) for t in db.get_tasks(done=False)]"`. Traite première pending, marque done après.

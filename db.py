@@ -63,6 +63,11 @@ def init():
             priority INTEGER DEFAULT 0,
             active INTEGER DEFAULT 1,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
+        c.execute("""CREATE TABLE IF NOT EXISTS tasks (
+            id INTEGER PRIMARY KEY,
+            text TEXT NOT NULL,
+            done INTEGER DEFAULT 0,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
         c.execute("""CREATE TABLE IF NOT EXISTS requests (
             id INTEGER PRIMARY KEY, url TEXT, method TEXT,
             headers TEXT, body TEXT, response TEXT)""")
@@ -295,24 +300,25 @@ def toggle_trigger(trigger_name_or_id):
 
 # === FINDINGS ===
 def add_event(pattern, worked=True, target=None, technique=None, impact=None, notes=None, payload=None, context=None, request_id=None):
-    """Save test event with full details."""
+    """Save test event with full details. Returns ('new', id) or ('duplicate', existing_id)."""
     import hashlib
 
-    # Generate hash for deduplication
-    hash_input = f"{pattern}|{target}|{technique}|{impact}".encode('utf-8')
+    # Generate hash for deduplication (pattern + target only for flexibility)
+    hash_input = f"{pattern.lower().strip()}|{(target or '').lower().strip()}".encode('utf-8')
     event_hash = hashlib.sha256(hash_input).hexdigest()[:16]
 
     with conn() as c:
         # Check if hash exists (duplicate)
-        existing = c.execute("SELECT id FROM events WHERE hash=?", (event_hash,)).fetchone()
+        existing = c.execute("SELECT id, pattern, target FROM events WHERE hash=?", (event_hash,)).fetchone()
         if existing:
-            return  # Skip duplicate
+            return ("duplicate", dict(existing))
 
-        c.execute("""INSERT INTO events
+        cursor = c.execute("""INSERT INTO events
                      (pattern, worked, target, technique, impact, notes, payload, context, request_id, hash)
                      VALUES (?,?,?,?,?,?,?,?,?,?)""",
                   (pattern, 1 if worked else 0, target, technique, impact, notes, payload, context, request_id, event_hash))
         c.commit()
+        return ("new", cursor.lastrowid)
 
 # Aliases for backward compatibility
 def add_finding(pattern, worked=True, target=None, context=None, request_id=None):
@@ -463,4 +469,38 @@ def toggle_plan(plan_id):
     """Toggle plan active status."""
     with conn() as c:
         c.execute("UPDATE plans SET active = 1-active WHERE id=?", (plan_id,))
+        c.commit()
+
+# === TASKS ===
+def get_tasks(done=None):
+    """Get tasks, optionally filtered by done status."""
+    with conn() as c:
+        q = "SELECT * FROM tasks"
+        if done is not None:
+            q += f" WHERE done={1 if done else 0}"
+        q += " ORDER BY id ASC"
+        return [dict(r) for r in c.execute(q).fetchall()]
+
+def add_task(text):
+    """Add new task."""
+    with conn() as c:
+        c.execute("INSERT INTO tasks (text) VALUES (?)", (text,))
+        c.commit()
+
+def done_task(task_id):
+    """Mark task as done."""
+    with conn() as c:
+        c.execute("UPDATE tasks SET done=1 WHERE id=?", (task_id,))
+        c.commit()
+
+def delete_task(task_id):
+    """Delete task by ID."""
+    with conn() as c:
+        c.execute("DELETE FROM tasks WHERE id=?", (task_id,))
+        c.commit()
+
+def clear_done_tasks():
+    """Delete all completed tasks."""
+    with conn() as c:
+        c.execute("DELETE FROM tasks WHERE done=1")
         c.commit()

@@ -4,6 +4,7 @@ sys.stdout.reconfigure(encoding='utf-8')
 sys.stderr.reconfigure(encoding='utf-8')
 
 import os
+import time
 from pathlib import Path
 from datetime import datetime
 from prompt_toolkit import prompt
@@ -44,7 +45,7 @@ if env.exists():
             os.environ[k.strip()] = v.strip()
 
 import db
-from llm import chat_stream
+from llm import chat_stream, chat_stream_routed
 import llm
 
 console = Console()
@@ -53,9 +54,11 @@ db.init()
 # Global toggles
 THINKING_ENABLED = False
 BYPASS_PERMISSIONS = True  # Shift+Tab to toggle
+SHOW_THINKING = True  # Ctrl+O to toggle visibility
+USE_ROUTING = True  # Intent classification routing (Haiku → Sonnet/Opus)
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/task', '/t', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -135,22 +138,48 @@ def _(event):
     BYPASS_PERMISSIONS = not BYPASS_PERMISSIONS
     event.app.invalidate()  # Force refresh display
 
+@kb.add('c-o')
+def _(event):
+    """Toggle thinking visibility (Ctrl+O)."""
+    global SHOW_THINKING
+    SHOW_THINKING = not SHOW_THINKING
+    event.app.invalidate()  # Force refresh display
+
+@kb.add('c-t')
+def _(event):
+    """Toggle routing mode (Ctrl+T)."""
+    global USE_ROUTING
+    USE_ROUTING = not USE_ROUTING
+    event.app.invalidate()  # Force refresh display
+
 def bottom_toolbar():
-    """Bottom toolbar showing bypass and thinking status."""
-    # Bypass status
-    bypass_icon = "⏵⏵" if BYPASS_PERMISSIONS else "⏸⏸"
-    bypass_text = "bypass: ON" if BYPASS_PERMISSIONS else "bypass: OFF"
+    """Bottom toolbar showing routing, bypass and thinking status with colors."""
+    # Routing status (cyan ON = auto, gray OFF = manual /model)
+    if USE_ROUTING:
+        route = '<ansicyan>⚡ routing:</ansicyan> <ansibrightgreen>AUTO</ansibrightgreen>'
+    else:
+        # Show current model when manual
+        model_name = os.getenv("LITELLM_MODEL", "sonnet").split("/")[-1][:12]
+        route = f'<ansibrightblack>📌 model:</ansibrightblack> <ansibrightyellow>{model_name}</ansibrightyellow>'
 
-    # Thinking status
-    thinking_text = "thinking: ON" if THINKING_ENABLED else ""
+    # Bypass status (orange ON, red OFF)
+    if BYPASS_PERMISSIONS:
+        bypass = '<ansibrightyellow>bypass:ON</ansibrightyellow>'
+    else:
+        bypass = '<ansired>bypass:OFF</ansired>'
 
-    # Build toolbar
-    parts = [f"{bypass_icon} {bypass_text}"]
-    if thinking_text:
-        parts.append(thinking_text)
-    parts.append("(Shift+Tab: bypass · Tab: thinking)")
+    # Thinking status (green ON, gray OFF) - only relevant when routing OFF
+    if not USE_ROUTING and THINKING_ENABLED:
+        think = '<ansibrightgreen>think:ON</ansibrightgreen>'
+        if SHOW_THINKING:
+            think += '<ansibrightyellow>(👁)</ansibrightyellow>'
+    else:
+        think = '<ansibrightblack>think:OFF</ansibrightblack>'
 
-    return HTML(f'<b>{" | ".join(parts)}</b>')
+    # Shortcuts (dim)
+    shortcuts = '<ansibrightblack>C-t:route · Tab:think · S-Tab:bypass</ansibrightblack>'
+
+    return HTML(f"{route} <b>|</b> {bypass} <b>|</b> {think} <b>|</b> {shortcuts}")
 
 def safe_prompt(prompt_text, style_str="", **kwargs):
     """Prompt wrapper with ESC support and styled prompt."""
@@ -189,6 +218,7 @@ def cmd_help():
         ("/rules", "Manage behavioral rules", ""),
         ("/trigger", "Manage BLV triggers", ""),
         ("/plan", "Manage targets & objectives", ""),
+        ("/task", "Task queue for Claude", "/t"),
         ("/tables", "Browse database tables", ""),
         ("/model", "Switch LLM model", ""),
         ("/clear", "Start new conversation", ""),
@@ -247,7 +277,12 @@ def cmd_chat():
         prompt_cost_eur = prompt_cost_usd * 0.95
         prompt_info = f"Prompt: {llm.LAST_PROMPT_TOKENS/1000:.1f}k (~€{prompt_cost_eur:.4f}) | "
 
-    console.print(f"Model: [cyan]{current_model}[/] | {prompt_info}Tokens: {current_tokens:,}/200,000 [{bar}] {percentage:.1f}% | €{cost_eur:.4f}\n")
+    # Show routing mode or model
+    if USE_ROUTING:
+        mode_info = "[cyan]⚡ Routing: AUTO[/]"
+    else:
+        mode_info = f"Model: [cyan]{current_model}[/]"
+    console.print(f"{mode_info} | {prompt_info}Tokens: {current_tokens:,}/200,000 [{bar}] {percentage:.1f}% | €{cost_eur:.4f}\n")
 
     # Show existing conversation history
     history = db.get_history(limit=999)
@@ -288,19 +323,24 @@ def cmd_chat():
                 elif cmd == "/idea":
                     # Loop pour générer plusieurs idées
                     while True:
-                        # Use suggest_test tool for structured output (no parsing needed)
-                        idea_prompt = "Génère 1 idée de test BLV. OBLIGATOIRE: appelle suggest_test() avec pattern, target, steps, expected."
+                        # Use suggest_test tool - NO history to avoid context bleeding
+                        idea_prompt = "Génère 1 idée de test BLV créative. OBLIGATOIRE: appelle suggest_test() avec pattern, target, steps, expected. NE PAS utiliser save_event."
 
                         console.print()
                         idea_data = None
 
+                        # Empty history to force fresh idea (no context bleeding)
                         with console.status("[cyan]💡 Generating idea...", spinner="dots"):
-                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, thinking_enabled=False, use_tools=True):
-                                if chunk_type == "tool_ready":
-                                    tool_info = chunk_content
-                                    if tool_info["name"] == "suggest_test":
-                                        idea_data = tool_info["args"]
-                                # Ignore other events (content, tool_start, etc.)
+                            try:
+                                for chunk_type, chunk_content in chat_stream(idea_prompt, [], thinking_enabled=False, use_tools=True):
+                                    if chunk_type == "tool_ready":
+                                        tool_info = chunk_content
+                                        if tool_info["name"] == "suggest_test":
+                                            idea_data = tool_info["args"]
+                                    # Ignore all other events (content, tool_start, save_event, etc.)
+                            except Exception as e:
+                                console.print(f"[red]Error: {e}[/]")
+                                break
 
                         if not idea_data:
                             console.print("[yellow]⚠ L'IA n'a pas généré d'idée structurée. Retry...[/]")
@@ -489,39 +529,128 @@ def cmd_chat():
             thinking_content = ""
             thinking_start_time = None
 
+            live_display = None  # Rich Live for real-time thinking
+
             try:
-                for chunk_type, chunk_content in chat_stream(msg, hist, THINKING_ENABLED):
+                # Use routed stream if enabled (Haiku classifier → forced tool_choice)
+                stream_fn = chat_stream_routed if USE_ROUTING else chat_stream
+                stream_args = (msg, hist) if USE_ROUTING else (msg, hist, THINKING_ENABLED)
+
+                # Unified status display with Rich Live
+                current_intent = None
+                current_model = None
+                current_tool = None
+                status_live = None
+
+                def get_status_text():
+                    """Build status line: ⚡ INTENT → 🤖 Model → 🔧 tool ⠋"""
+                    parts = []
+                    if current_intent:
+                        intent_colors = {"SAVE": "green", "IDEA": "magenta", "MEMORY": "cyan", "CHAT": "white"}
+                        color = intent_colors.get(current_intent, "white")
+                        parts.append(f"[{color}]⚡ {current_intent}[/]")
+                    if current_model:
+                        parts.append(f"[#FF8C00]🤖 {current_model}[/]")
+                    if current_tool:
+                        parts.append(f"[cyan]🔧 {current_tool}[/]")
+                    return " → ".join(parts) if parts else "processing..."
+
+                for chunk_type, chunk_content in stream_fn(*stream_args):
+                    # Intent classification event (from router)
+                    if chunk_type == "intent":
+                        current_intent = chunk_content
+                        # Get model name from intent config
+                        from llm import INTENT_CONFIG
+                        config = INTENT_CONFIG.get(chunk_content, {})
+                        model_id = config.get("model", "")
+                        # Extract short name
+                        if "opus" in model_id.lower():
+                            current_model = "Opus"
+                        elif "sonnet" in model_id.lower():
+                            current_model = "Sonnet"
+                        elif "haiku" in model_id.lower():
+                            current_model = "Haiku"
+                        else:
+                            current_model = model_id.split("/")[-1][:10]
+                        # Start live status
+                        status_live = console.status(get_status_text(), spinner="dots")
+                        status_live.start()
+                        continue
+
+                    # Tool start event - update status
+                    if chunk_type == "tool_start":
+                        current_tool = chunk_content
+                        if status_live:
+                            status_live.update(get_status_text())
+                        continue
+
+                    # Stop status only when actual content arrives (not tool_ready)
+                    if status_live and chunk_type == "content":
+                        status_live.stop()
+                        status_live = None
+
                     # Thinking mode events (Claude 4+)
                     if chunk_type == "thinking_start":
                         import time
                         thinking_start_time = time.time()
-                        if not status_spinner:
+                        if SHOW_THINKING:
+                            # Real-time thinking with Live (no scroll)
+                            live_display = Live(
+                                Panel("∴ ...", title="[bold #FF8C00]∴ Thinking[/]", border_style="#FF8C00", expand=False),
+                                console=console,
+                                refresh_per_second=4,
+                                transient=False  # Keep final state visible
+                            )
+                            live_display.start()
+                        else:
+                            # Just spinner when hidden
                             status_spinner = console.status("[magenta]∴ Thinking...", spinner="dots")
                             status_spinner.start()
                     elif chunk_type == "thinking_chunk":
                         thinking_content += chunk_content
-                        # Show preview in status (first 100 chars)
-                        if len(thinking_content) < 100 and status_spinner:
-                            preview = thinking_content[:100].replace('\n', ' ')
+                        if SHOW_THINKING and live_display:
+                            # Update Live panel with full content (truncated for display)
+                            display_content = thinking_content[-2000:] if len(thinking_content) > 2000 else thinking_content
+                            duration = time.time() - thinking_start_time if thinking_start_time else 0
+                            live_display.update(Panel(
+                                display_content.strip(),
+                                title=f"[bold #FF8C00]∴ Thinking ({duration:.0f}s)[/]",
+                                border_style="#FF8C00",
+                                expand=False,
+                                height=min(15, display_content.count('\n') + 3)  # Max 15 lines
+                            ))
+                        elif status_spinner:
+                            # Update spinner preview
+                            preview = thinking_content[:80].replace('\n', ' ')
                             status_spinner.update(f"[magenta]∴ {preview}...")
                     # Legacy thinking event
                     elif chunk_type == "thinking":
                         import time
                         if not thinking_start_time:
                             thinking_start_time = time.time()
-                        if not status_spinner:
+                        if not status_spinner and not live_display:
                             status_spinner = console.status("[magenta]∴ Thinking...", spinner="dots")
                             status_spinner.start()
                     elif chunk_type == "tool_start":
-                        # Stop thinking spinner si actif
-                        if status_spinner:
-                            status_spinner.stop()
-                            status_spinner = None
-                        # Afficher spinner tool
-                        status_spinner = console.status(f"[cyan]🔧 Using {chunk_content}...", spinner="dots")
-                        status_spinner.start()
+                        # Stop thinking display
+                        if live_display:
+                            live_display.stop()
+                            live_display = None
+                        # Update status_live with tool name (if active)
+                        # Otherwise start a spinner
+                        if status_live:
+                            current_tool = chunk_content
+                            status_live.update(get_status_text())
+                        else:
+                            if status_spinner:
+                                status_spinner.stop()
+                            status_spinner = console.status(f"[cyan]🔧 Using {chunk_content}...", spinner="dots")
+                            status_spinner.start()
                     elif chunk_type == "tool_ready":
-                        # Stop spinner before confirmation
+                        # Stop all spinners before confirmation
+                        if status_live:
+                            status_live.stop()
+                            status_live = None
                         if status_spinner:
                             status_spinner.stop()
                             status_spinner = None
@@ -538,10 +667,40 @@ def cmd_chat():
                             if result:
                                 console.print(f"\n[cyan]{result}[/]")
                         else:
-                            # Ask confirmation
-                            import json
+                            # Ask confirmation with formatted args
+                            from rich.text import Text
+
+                            # Format args with colors
+                            formatted_lines = []
+                            for key, value in tool_args.items():
+                                if key == "pattern":
+                                    formatted_lines.append(f"[bold white]📌 Pattern:[/] [cyan]{value}[/]")
+                                elif key == "worked":
+                                    status = "[bold red]💥 VULN[/]" if value else "[bold blue]🛡️ BLOCKED[/]"
+                                    formatted_lines.append(f"[bold white]📊 Status:[/] {status}")
+                                elif key == "target":
+                                    formatted_lines.append(f"[bold white]🎯 Target:[/] [yellow]{value}[/]")
+                                elif key == "technique":
+                                    formatted_lines.append(f"[bold white]⚙️  Technique:[/] {value}")
+                                elif key == "impact":
+                                    formatted_lines.append(f"[bold white]💀 Impact:[/] [red]{value}[/]")
+                                elif key == "steps" and isinstance(value, list):
+                                    formatted_lines.append(f"[bold white]📝 Steps:[/]")
+                                    for i, step in enumerate(value, 1):
+                                        formatted_lines.append(f"   [dim]{i}.[/] {step}")
+                                elif key == "expected":
+                                    formatted_lines.append(f"[bold white]✓ Expected:[/] [green]{value}[/]")
+                                elif key == "question":
+                                    formatted_lines.append(f"[bold white]❓ Question:[/] [cyan]{value}[/]")
+                                elif key == "notes":
+                                    formatted_lines.append(f"[#FF8C00]📝 Notes:[/] [white]{value}[/]")
+                                elif key == "variables" and isinstance(value, list):
+                                    formatted_lines.append(f"[bold white]🔧 Variables:[/] [magenta]{', '.join(value)}[/]")
+                                else:
+                                    formatted_lines.append(f"[dim]{key}:[/] {value}")
+
                             console.print(Panel(
-                                json.dumps(tool_args, indent=2, ensure_ascii=False),
+                                "\n".join(formatted_lines),
                                 title=f"[bold yellow]🔧 {tool_name}[/]",
                                 border_style="yellow",
                                 padding=(0, 1),
@@ -549,7 +708,7 @@ def cmd_chat():
                             ))
                             confirm = questionary.select(
                                 "Execute?",
-                                choices=["✓ Yes", "✗ No", "⏭ Skip all"],
+                                choices=["✓ Yes", "✗ No", "📝 Répondre", "⏭ Skip all"],
                                 style=custom_style
                             ).ask()
 
@@ -558,6 +717,26 @@ def cmd_chat():
                                 result = handle_tool_call(tool_name, tool_args)
                                 if result:
                                     console.print(f"[cyan]{result}[/]")
+                            elif confirm and "Répondre" in confirm:
+                                # User wants to respond with text instead of tool
+                                response_text = questionary.text(
+                                    "Votre réponse:",
+                                    style=custom_style
+                                ).ask()
+                                if response_text and response_text.strip():
+                                    # Save response and continue chat
+                                    db.add_message("user", response_text.strip())
+                                    console.print(f"[green]→ {response_text.strip()}[/]\n")
+                                    # Recursive call to get AI response
+                                    for resp_type, resp_content in llm.chat_stream(
+                                        response_text.strip(),
+                                        [{"role": h["role"], "content": h["content"]} for h in db.get_history()[:-1]],
+                                        thinking_enabled=THINKING_ENABLED
+                                    ):
+                                        if resp_type == "content":
+                                            console.print(resp_content, end="")
+                                        elif resp_type == "done":
+                                            console.print()
                             elif confirm and "Skip all" in confirm:
                                 BYPASS_PERMISSIONS = True  # Enable bypass for rest
                                 console.print("[dim]Bypass enabled for remaining tools[/]")
@@ -571,6 +750,10 @@ def cmd_chat():
                         if chunk_content:
                             console.print(f"\n[cyan]{chunk_content}[/]")
                     elif chunk_type == "content":
+                        # Stop any active displays
+                        if live_display:
+                            live_display.stop()
+                            live_display = None
                         if status_spinner:
                             status_spinner.stop()
                             status_spinner = None
@@ -579,20 +762,27 @@ def cmd_chat():
                             if thinking_start_time and thinking_content:
                                 import time
                                 duration = time.time() - thinking_start_time
-                                console.print(f"[dim magenta]∴ Thought for {duration:.0f}s[/]\n")
-                                # Display full thinking content in orange panel
-                                console.print(Panel(
-                                    thinking_content.strip(),
-                                    title="[bold #FF8C00]∴ Extended Thinking[/]",
-                                    border_style="#FF8C00",
-                                    padding=(1, 2),
-                                    expand=False
-                                ))
+                                if not SHOW_THINKING:
+                                    # Only show panel if wasn't shown via Live
+                                    console.print(f"[dim magenta]∴ Thought for {duration:.0f}s[/]\n")
+                                    console.print(Panel(
+                                        thinking_content.strip(),
+                                        title="[bold #FF8C00]∴ Extended Thinking[/]",
+                                        border_style="#FF8C00",
+                                        padding=(1, 2),
+                                        expand=False
+                                    ))
+                                else:
+                                    console.print(f"\n[dim magenta]∴ Done thinking ({duration:.0f}s)[/]\n")
                             console.print("[white]●[/] ", end="")
                             first_content = False
                         response += chunk_content
                         console.print(chunk_content, end="", soft_wrap=True)
             except Exception as e:
+                if status_live:
+                    status_live.stop()
+                if live_display:
+                    live_display.stop()
                 if status_spinner:
                     status_spinner.stop()
                 console.print(f"\n[red]✗ Error: {str(e)}[/]")
@@ -600,6 +790,10 @@ def cmd_chat():
                     console.print("[yellow]💡 API limit reached. Try different model with /model[/]")
                 continue
 
+            if status_live:
+                status_live.stop()
+            if live_display:
+                live_display.stop()
             if status_spinner:
                 status_spinner.stop()
             console.print("\n")
@@ -648,7 +842,12 @@ def cmd_chat():
 
                 prompt_info = f"Prompt: {llm.LAST_PROMPT_TOKENS/1000:.1f}k ({cache_pct:.0f}% cached ~€{prompt_cost_eur:.4f}) | "
 
-            console.print(f"Model: [cyan]{current_model}[/] | {prompt_info}Tokens: {new_tokens:,}/200,000 [{bar}] {percentage:.1f}% | €{cost_eur:.4f}")
+            # Show routing mode or model
+            if USE_ROUTING:
+                mode_info = "[cyan]⚡ Routing: AUTO[/]"
+            else:
+                mode_info = f"Model: [cyan]{current_model}[/]"
+            console.print(f"{mode_info} | {prompt_info}Tokens: {new_tokens:,}/200,000 [{bar}] {percentage:.1f}% | €{cost_eur:.4f}")
 
             # Menu résultat après payload
             if detect_payload_shown(response):
@@ -1646,6 +1845,76 @@ def cmd_plan():
     elif action and "Retour" in action:
         return
 
+def cmd_task():
+    """Gestion des tâches à faire."""
+    tasks = db.get_tasks()
+
+    # Afficher table
+    table = Table(title="[bold cyan]Tasks[/]", border_style="cyan")
+    table.add_column("ID", width=5)
+    table.add_column("Task", style="white")
+    table.add_column("Status", width=8)
+
+    pending = 0
+    if tasks:
+        for t in tasks:
+            status = "[green]✓ done[/]" if t['done'] else "[yellow]○ todo[/]"
+            if not t['done']:
+                pending += 1
+            table.add_row(str(t['id']), t['text'], status)
+        console.print(table)
+        console.print(f"[dim]{pending} pending, {len(tasks) - pending} done[/]\n")
+    else:
+        console.print("[yellow]Aucune tâche[/]\n")
+
+    # Menu actions
+    choices = ["➕ Add task"]
+    if tasks:
+        pending_tasks = [t for t in tasks if not t['done']]
+        done_tasks = [t for t in tasks if t['done']]
+        if pending_tasks:
+            choices.append("✓ Mark done")
+        if done_tasks:
+            choices.append("🧹 Clear done")
+        choices.append("🗑️  Delete task")
+    choices.append("← Retour")
+
+    action = questionary.select("Action:", choices=choices, style=custom_style).ask()
+
+    if action and "Add" in action:
+        text = questionary.text("Task:").ask()
+        if text and text.strip():
+            db.add_task(text.strip())
+            console.print(f"[green]✓ Task added[/]")
+            cmd_task()
+
+    elif action and "Mark done" in action:
+        pending_tasks = [t for t in tasks if not t['done']]
+        choices = [f"{t['id']} - {t['text'][:50]}" for t in pending_tasks]
+        selected = questionary.select("Mark as done:", choices=choices, style=custom_style).ask()
+        if selected:
+            task_id = int(selected.split(" - ")[0])
+            db.done_task(task_id)
+            console.print(f"[green]✓ Task done[/]")
+            cmd_task()
+
+    elif action and "Clear done" in action:
+        db.clear_done_tasks()
+        console.print(f"[green]✓ Done tasks cleared[/]")
+        cmd_task()
+
+    elif action and "Delete" in action:
+        choices = [f"{t['id']} - {t['text'][:50]}" for t in tasks]
+        selected = questionary.select("Delete:", choices=choices, style=custom_style).ask()
+        if selected:
+            task_id = int(selected.split(" - ")[0])
+            db.delete_task(task_id)
+            console.print(f"[green]✓ Task deleted[/]")
+            cmd_task()
+
+    elif action and "Retour" in action:
+        return
+
 def cmd_hooks():
     """Gestion des hooks de validation."""
     hooks = db.get_hooks(active_only=False)
@@ -2263,6 +2532,8 @@ def main():
                 cmd_hooks()
             elif cmd == "/plan":
                 cmd_plan()
+            elif cmd in ["/task", "/t"]:
+                cmd_task()
             elif cmd in ["/stats", "/s"]:
                 cmd_stats()
             elif cmd.startswith("/tables"):

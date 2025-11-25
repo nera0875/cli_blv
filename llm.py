@@ -28,26 +28,117 @@ THINKING_BUDGETS = {
 # Global thinking config
 THINKING_MODE = os.getenv("THINKING_MODE", "none")  # none, quick, normal, deep, ultra
 
+# =============================================================================
+# INTENT CLASSIFICATION SYSTEM (Haiku classifier → deterministic routing)
+# =============================================================================
+
+INTENT_CONFIG = {
+    "SAVE": {
+        "model": "claude-sonnet-4-5-20250929",
+        "tool_choice": {"type": "auto"},  # Auto pour permettre dedup (texte si duplicate)
+        "temperature": 0.3,  # Précis, pas créatif
+        "max_tokens": 1024,  # Réponse courte
+        "tools": ["save_event"],  # Seul tool disponible
+        "context": "minimal",  # Instructions + events pour dedup
+        "description": "User rapporte résultat test"
+    },
+    "IDEA": {
+        "model": "anthropic/claude-opus-4-5-20251101",  # Opus pour qualité
+        "tool_choice": {"type": "tool", "name": "suggest_test"},
+        "temperature": 0.9,  # Créatif
+        "max_tokens": 4096,  # Réponse détaillée
+        "tools": ["suggest_test"],
+        "context": "full",  # BESOIN: events, requests, rules pour générer idées
+        "description": "User demande suggestion test"
+    },
+    "MEMORY": {
+        "model": "claude-sonnet-4-5-20250929",  # Sonnet (Haiku pas sur LiteLLM proxy)
+        "tool_choice": {"type": "none"},
+        "temperature": 0.1,  # Factuel
+        "max_tokens": 2048,
+        "tools": [],  # Pas de tools
+        "context": "events",  # Juste les events pour lister
+        "description": "User demande infos stockées"
+    },
+    "CHAT": {
+        "model": "claude-sonnet-4-5-20250929",
+        "tool_choice": {"type": "auto"},
+        "temperature": 0.7,  # Équilibré
+        "max_tokens": 4096,
+        "tools": ["save_event", "suggest_test", "show_analysis", "ask_clarification"],
+        "context": "full",  # Discussion peut référencer tout
+        "description": "Discussion générale"
+    }
+}
+
+def classify_intent(msg: str) -> str:
+    """
+    Classify user intent using Haiku (cheap, fast, deterministic).
+    Returns: SAVE | IDEA | MEMORY | CHAT
+    """
+    # Use Anthropic SDK directly for Haiku (more reliable than LiteLLM for this)
+    anthropic_key = os.getenv("ANTHROPIC_API_KEY")
+    if not anthropic_key:
+        # Fallback to CHAT if no API key
+        return "CHAT"
+
+    client = Anthropic(api_key=anthropic_key)
+
+    prompt = f"""Classifie ce message en UNE catégorie:
+- SAVE: user rapporte résultat de test (ex: "j'ai testé X", "ça marche", "vulnérable", "bloqué")
+- IDEA: user demande suggestion/idée (ex: "idée de bypass", "quoi tester", "suggère")
+- MEMORY: user demande infos stockées (ex: "t'as quoi en mémoire", "montre events", "liste")
+- CHAT: autre (questions, discussions, explications)
+
+Message: "{msg}"
+
+Réponds UNIQUEMENT par: SAVE, IDEA, MEMORY ou CHAT"""
+
+    try:
+        response = client.messages.create(
+            model="claude-haiku-4-5-20251001",
+            max_tokens=10,
+            temperature=0,  # CRITIQUE: déterministe
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        intent = response.content[0].text.strip().upper()
+
+        # Validate intent
+        if intent in INTENT_CONFIG:
+            return intent
+
+        # Fallback if unexpected response
+        return "CHAT"
+
+    except Exception as e:
+        # Fallback on error
+        print(f"[dim]Intent classifier error: {e}[/dim]")
+        return "CHAT"
+
 # Tools for auto-learning
 BLV_TOOLS = [
     {
         "type": "function",
         "function": {
             "name": "save_event",
-            "description": """Sauvegarde un event de test BLV. Appelle quand user confirme résultat.
+            "description": """Sauvegarde un résultat de test BLV (avec dédup automatique).
 
-EXEMPLE OBLIGATOIRE:
-User: "debit effectué carte2 avec PaRes carte1"
-→ save_event(
-    pattern="3DS PaRes replay cross-card",
-    worked=True,
-    target="Cdiscount",
-    technique="Replay valid PaRes from card1 authentication to card2 transaction",
-    impact="Payment bypass - unauthorized debit",
-    notes="Card1 validated 3DS, PaRes replayed on card2 with 0 balance, debit successful"
-)
+⚠️ QUAND UTILISER (OBLIGATOIRE - toutes conditions):
+- User décrit un test qu'il a FAIT dans son message ACTUEL
+- User confirme résultat (marche/bloqué) dans son message ACTUEL
+- Keywords: "j'ai testé", "ça marche", "vulnérable", "bloqué", "refusé"
 
-TOUJOURS remplir: pattern, worked, target, technique, impact.""",
+❌ JAMAIS UTILISER SI:
+- User demande une idée/suggestion → utilise suggest_test
+- User pose une question → réponds en texte
+- Info vient de messages PRÉCÉDENTS (anti-bleeding)
+- Aucun résultat explicite dans message ACTUEL
+- Pattern+target DÉJÀ dans les "PATTERNS VALIDÉS" du contexte
+
+📝 NOTE: Dédup automatique par hash(pattern+target). Si duplicate → message "déjà en mémoire".
+
+RÈGLE: 1 message = 1 intent. Ne JAMAIS combiner save_event + suggest_test.""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -89,7 +180,17 @@ Utilise pour: réponses hypothèses, analyses patterns, explications techniques.
         "type": "function",
         "function": {
             "name": "suggest_test",
-            "description": """Suggère un test précis avec steps. OBLIGATOIRE pour suggestions tests.""",
+            "description": """Suggère un test précis avec steps.
+
+⚠️ QUAND UTILISER:
+- User demande une idée: "idée de bypass", "quoi tester", "suggère"
+- User demande suite logique: "et après?", "next step"
+
+❌ JAMAIS UTILISER SI:
+- User rapporte un résultat de test → utilise save_event
+- User pose question générale → réponds en texte
+
+RÈGLE: Ne JAMAIS combiner avec save_event dans même réponse.""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -107,7 +208,16 @@ Utilise pour: réponses hypothèses, analyses patterns, explications techniques.
         "type": "function",
         "function": {
             "name": "ask_clarification",
-            "description": """Demande clarification user. OBLIGATOIRE si input ambigu/incomplet (ex: 'eazaze', <5 chars).""",
+            "description": """Demande clarification quand input ambigu.
+
+⚠️ QUAND UTILISER:
+- Message incompréhensible ou <10 caractères
+- Manque contexte critique pour répondre
+- Ambiguïté sur ce que user veut
+
+❌ JAMAIS UTILISER SI:
+- Message clair même si court
+- Contexte suffisant dans historique""",
             "parameters": {
                 "type": "object",
                 "properties": {
@@ -216,7 +326,8 @@ def handle_tool_call(tool_name, args):
         if not args.get("pattern") or not args.get("target"):
             return f"✗ Error: Missing required fields (pattern={args.get('pattern')}, target={args.get('target')})"
 
-        add_event(
+        # Try to save (returns status)
+        status, data = add_event(
             pattern=args.get("pattern"),
             worked=args.get("worked", True),
             target=args.get("target"),
@@ -226,49 +337,58 @@ def handle_tool_call(tool_name, args):
             payload=args.get("payload")
         )
 
-        # Build result message with Panel + smooth transition
+        # Handle duplicate
         try:
             from rich.console import Console
             from rich.panel import Panel
-            from rich.syntax import Syntax
-            import time
-
+            import sys
             console = Console(file=sys.stderr)
 
-            # Spinner pendant traitement (transition smooth)
-            with console.status("[cyan]🔧 Sauvegarde event...", spinner="dots"):
-                time.sleep(0.3)  # Mini pause pour transition
+            if status == "duplicate":
+                console.print(f"[yellow]⚠️ Duplicate:[/] [dim]{args.get('pattern')}[/] on [dim]{args.get('target')}[/] [yellow](déjà en mémoire)[/]")
+                return ""
 
-            # Status emoji + message
+            # Status line for new event
             if args.get("worked"):
-                emoji = "💥"
-                status = "VULNERABLE"
-                border_color = "red"
-                result_msg = f"{emoji} {args.get('pattern')} → {status} on {args.get('target')}"
+                status_line = f"[green]✓ Saved:[/] [bold red]💥 VULN[/] [white]{args.get('pattern')}[/] on [cyan]{args.get('target')}[/]"
             else:
-                emoji = "🛡️"
-                status = "BLOCKED"
-                border_color = "blue"
-                result_msg = f"{emoji} {args.get('pattern')} → {status} by {args.get('target')}"
+                status_line = f"[green]✓ Saved:[/] [bold blue]🛡️ BLOCKED[/] [white]{args.get('pattern')}[/] by [cyan]{args.get('target')}[/]"
 
-            # Panel content with JSON
-            syntax = Syntax(json.dumps(args, indent=2), "json", theme="monokai", line_numbers=False)
+            console.print(status_line)
 
-            # Print Panel with result as title
-            console.print(Panel(
-                syntax,
-                title=f"[bold]{result_msg}[/]",
-                border_style=border_color,
-                padding=(0, 1)
-            ))
+            # Quick prompt for details (Enter=skip, d=details)
+            console.print("[#FF8C00]   ↳ Enter=continuer, d=détails[/]", end="")
+            try:
+                choice = input(" ").strip().lower()
+                if choice == 'd':
+                    # Show full details in panel
+                    details = []
+                    if args.get("technique"):
+                        details.append(f"[yellow]Technique:[/] {args.get('technique')}")
+                    if args.get("impact"):
+                        details.append(f"[red]Impact:[/] {args.get('impact')}")
+                    if args.get("notes"):
+                        details.append(f"[#FF8C00]Notes:[/] [white]{args.get('notes')}[/]")
+                    if args.get("payload"):
+                        details.append(f"[cyan]Payload:[/] {args.get('payload')[:100]}...")
 
-            return ""  # No additional message needed (already in Panel)
+                    if details:
+                        console.print(Panel(
+                            "\n".join(details),
+                            title="[bold]📋 Détails[/]",
+                            border_style="dim",
+                            padding=(0, 1),
+                            expand=False
+                        ))
+            except (EOFError, KeyboardInterrupt):
+                pass  # User pressed Ctrl+C or Ctrl+D, just continue
+
+            return ""
         except Exception:
-            # Fallback si Rich pas dispo
             if args.get("worked"):
-                return f"💥 {args.get('pattern')} → VULNERABLE on {args.get('target')}"
+                return f"✓ Saved: VULN {args.get('pattern')} on {args.get('target')}"
             else:
-                return f"🛡️ {args.get('pattern')} → BLOCKED by {args.get('target')}"
+                return f"✓ Saved: BLOCKED {args.get('pattern')} by {args.get('target')}"
 
     elif tool_name == "show_analysis":
         try:
@@ -380,9 +500,65 @@ def count_tokens(messages):
         total += len(str(content)) // 4 + 4  # +4 for message overhead
     return total
 
-def build_prompt():
+def build_prompt(context_level="full"):
+    """
+    Build system prompt based on context level.
+
+    context_level:
+      - "full": everything (rules, plans, triggers, prompts, events, requests)
+      - "events": only events (for MEMORY intent)
+      - "minimal": just tool instructions (for SAVE intent)
+    """
     parts = []
 
+    # MINIMAL: instructions + recent events for dedup check
+    if context_level == "minimal":
+        parts.append("""# RÈGLE ABSOLUE
+AVANT d'appeler save_event, tu DOIS vérifier la liste ci-dessous.
+Si un event SIMILAIRE existe déjà → NE PAS appeler save_event → réponds "🔄 Déjà en mémoire: [pattern existant]"
+
+Similaire = même pattern OU même technique OU même target+type de test
+
+""")
+        # Add recent events for dedup check by LLM
+        from db import get_events
+        events = get_events(worked_only=False, limit=20)
+        if events:
+            parts.append("# EVENTS EXISTANTS\n")
+            for e in events:
+                status = "💥" if e.get('worked') else "🛡️"
+                parts.append(f"{status} {e['pattern']} | {e['target']}\n")
+            parts.append("\n")
+
+        parts.append("""# INSTRUCTION
+- Si NOUVEAU test (pas dans la liste) → appelle save_event
+- Si SIMILAIRE à un event existant → réponds "🔄 Déjà en mémoire: [pattern]"
+- Réponds TOUJOURS en français
+""")
+        return "".join(parts)
+
+    # EVENTS: only events list (for MEMORY intent)
+    if context_level == "events":
+        parts.append("Tu es un assistant BLV. Voici les events stockés en mémoire:\n\n")
+        from db import get_events
+        events = get_events(worked_only=False, limit=50)  # Plus d'events pour MEMORY
+        if events:
+            for e in events:
+                status = "💥 VULN" if e.get('worked') else "🛡️ BLOCKED"
+                line = f"- {status} | {e['pattern']}"
+                if e.get('target'):
+                    line += f" | {e['target']}"
+                if e.get('technique'):
+                    line += f" | {e['technique']}"
+                if e.get('impact'):
+                    line += f" | Impact: {e['impact']}"
+                parts.append(line + "\n")
+        else:
+            parts.append("(aucun event enregistré)\n")
+        parts.append("\nRéponds TOUJOURS en français.\n")
+        return "".join(parts)
+
+    # FULL: everything
     # 1. Behavioral Rules (SQLite) - FIRST for max impact
     rules = get_rules(active_only=True)
     if rules:
@@ -409,24 +585,27 @@ def build_prompt():
             parts.append(f"- {t['pattern']} → {t['response']}\n")
         parts.append("\n")
 
-    # 3. Prompts (SQLite)
+    # 4. Prompts (SQLite)
     prompts = get_prompts(active_only=True)
     for p in prompts:
         parts.append(p['content'] + "\n\n")
 
-    # 4. Findings DB (SQL)
-    findings = get_findings(worked_only=True, limit=10)
-    if findings:
-        parts.append("# PATTERNS VALIDÉS\n")
-        for f in findings:
-            status = "✓" if f['worked'] else "✗"
-            parts.append(f"- {status} {f['pattern']}")
-            if f.get('target'):
-                parts.append(f" ({f['target']})")
-            parts.append("\n")
-        parts.append("\n")
+    # 5. Events DB (mémoire de l'IA)
+    from db import get_events
+    events = get_events(worked_only=False, limit=15)
+    if events:
+        parts.append("# 🧠 MÉMOIRE (events déjà enregistrés - NE PAS re-suggérer)\n")
+        for e in events:
+            status = "💥" if e.get('worked') else "🛡️"
+            line = f"- {status} {e['pattern']}"
+            if e.get('target'):
+                line += f" | {e['target']}"
+            if e.get('technique'):
+                line += f" | {e['technique'][:50]}"
+            parts.append(line + "\n")
+        parts.append("\n⚠️ Ne JAMAIS suggérer un test similaire à ceux ci-dessus.\n\n")
 
-    # 5. HTTP Requests DB (SQL)
+    # 6. HTTP Requests DB (SQL)
     reqs = get_requests()
     if reqs:
         parts.append(f"# HTTP REQUESTS ({len(reqs)})\n")
@@ -435,12 +614,12 @@ def build_prompt():
 
     return "".join(parts)
 
-def build_messages(history, new_msg):
+def build_messages(history, new_msg, context_level="full"):
     """Build message list with cache_control for system + history."""
     messages = []
 
     # System prompt with cache
-    sys_prompt = build_prompt()
+    sys_prompt = build_prompt(context_level)
     if sys_prompt:
         messages.append({
             "role": "system",
@@ -485,7 +664,7 @@ def build_messages(history, new_msg):
 
     return messages
 
-def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
+def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True, tool_choice=None, temperature=None, max_tokens=None, filtered_tools=None, context_level="full"):
     """Direct Anthropic API streaming with Extended Thinking support."""
     # Initialize Anthropic client (API key from .env)
     anthropic_key = os.getenv("ANTHROPIC_API_KEY")
@@ -494,8 +673,8 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
 
     client = Anthropic(api_key=anthropic_key)
 
-    # Build system prompt
-    sys_prompt = build_prompt()
+    # Build system prompt with appropriate context level
+    sys_prompt = build_prompt(context_level)
 
     # Build messages (Anthropic format) - filter empty content
     messages = []
@@ -518,22 +697,22 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
         model = model.replace("anthropic/", "")
 
     # Build API call kwargs (stream=True implicit with .stream())
-    # Get user config from .env
-    user_max_tokens = int(os.getenv("MAX_TOKENS", "8192"))
-    user_temperature = float(os.getenv("TEMPERATURE", "1.0"))
+    # Get config (override or from .env)
+    final_max_tokens = max_tokens or int(os.getenv("MAX_TOKENS", "8192"))
+    final_temperature = temperature if temperature is not None else float(os.getenv("TEMPERATURE", "1.0"))
 
     # Determine max_tokens based on thinking mode
     if thinking_budget > 0:
         # Thinking enabled: use 64K total (thinking uses budget, rest for response)
         base_max_tokens = 64000
     else:
-        # No thinking: use user config
-        base_max_tokens = user_max_tokens
+        # No thinking: use override or user config
+        base_max_tokens = final_max_tokens
 
     kwargs = {
         "model": model,
         "max_tokens": base_max_tokens,
-        "temperature": user_temperature,
+        "temperature": final_temperature,
         "system": [
             {
                 "type": "text",
@@ -553,14 +732,19 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
 
     # Add tools
     if use_tools:
+        # Use filtered tools if provided, otherwise all tools
+        tools_to_use = filtered_tools if filtered_tools else BLV_TOOLS
         kwargs["tools"] = [
             {
                 "name": tool["function"]["name"],
                 "description": tool["function"]["description"],
                 "input_schema": tool["function"]["parameters"]
             }
-            for tool in BLV_TOOLS
+            for tool in tools_to_use
         ]
+        # Add tool_choice if specified (force specific tool or disable)
+        if tool_choice:
+            kwargs["tool_choice"] = tool_choice
 
     # Stream response
     text = ""
@@ -662,15 +846,30 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
         )
         yield ("tool", f"save_finding({pat.strip()}, worked={worked.strip()}, target={target.strip()})")
 
-def chat_stream(msg, history, thinking_enabled=None, use_tools=True):
+def chat_stream(msg, history, thinking_enabled=None, use_tools=True, tool_choice=None, force_model=None, temperature=None, max_tokens=None, filtered_tools=None, context_level="full"):
     """
     thinking_enabled:
       - None = use THINKING_MODE from .env (default)
       - True = force enable (use .env budget or normal)
       - False = force disable (for /idea, etc.)
+    tool_choice:
+      - None = auto (model decides)
+      - {"type": "tool", "name": "X"} = force specific tool
+      - {"type": "none"} = no tools
+      - {"type": "auto"} = explicit auto
+    force_model:
+      - Override model selection (for routing)
+    temperature:
+      - Override temperature (for routing)
+    max_tokens:
+      - Override max_tokens (for routing)
+    filtered_tools:
+      - List of tools to use (subset of BLV_TOOLS)
+    context_level:
+      - "full" / "events" / "minimal" (for routing optimization)
     """
-    # Get current model from env (may have changed via /model)
-    model = os.getenv("LITELLM_MODEL", MODEL)
+    # Get model (forced or from env)
+    model = force_model or os.getenv("LITELLM_MODEL", MODEL)
 
     # Determine thinking budget
     global THINKING_MODE
@@ -690,17 +889,17 @@ def chat_stream(msg, history, thinking_enabled=None, use_tools=True):
     # Reason: LiteLLM doesn't support thinking, and consistent routing
     if "20251101" in model:
         # Use direct Anthropic API (thinking optional)
-        yield from chat_stream_anthropic(msg, history, budget, use_tools)
+        yield from chat_stream_anthropic(msg, history, budget, use_tools, tool_choice, temperature, max_tokens, filtered_tools, context_level)
         return
 
     # Otherwise use LiteLLM (existing implementation)
-    messages = build_messages(history, msg)
+    messages = build_messages(history, msg, context_level)
 
     add_msg("user", msg)
 
-    # Get user config from .env
-    user_max_tokens = int(os.getenv("MAX_TOKENS", "8192"))
-    user_temperature = float(os.getenv("TEMPERATURE", "1.0"))
+    # Get config (override or from .env)
+    final_max_tokens = max_tokens or int(os.getenv("MAX_TOKENS", "8192"))
+    final_temperature = temperature if temperature is not None else float(os.getenv("TEMPERATURE", "1.0"))
 
     kwargs = {
         "model": model,
@@ -709,16 +908,28 @@ def chat_stream(msg, history, thinking_enabled=None, use_tools=True):
         "api_base": API_BASE,
         "api_key": API_KEY,
         "timeout": 120,
-        "max_tokens": user_max_tokens,
-        "temperature": user_temperature
+        "max_tokens": final_max_tokens,
+        "temperature": final_temperature
     }
 
     if use_tools:
-        kwargs["tools"] = BLV_TOOLS
+        # Use filtered tools if provided, otherwise all tools
+        kwargs["tools"] = filtered_tools if filtered_tools else BLV_TOOLS
+        # Add tool_choice if specified - convert Anthropic format to OpenAI format for LiteLLM
+        if tool_choice:
+            tc_type = tool_choice.get("type")
+            if tc_type == "tool" and "name" in tool_choice:
+                # Anthropic format → OpenAI format
+                kwargs["tool_choice"] = {"type": "function", "function": {"name": tool_choice["name"]}}
+            elif tc_type == "none":
+                kwargs["tool_choice"] = "none"
+            elif tc_type == "auto":
+                kwargs["tool_choice"] = "auto"
+            else:
+                kwargs["tool_choice"] = tool_choice
 
-    # Note: LiteLLM doesn't support thinking yet, but keep for future
-    if budget > 0 and "claude" in model.lower():
-        kwargs["thinking"] = {"type": "enabled", "budget_tokens": budget}
+    # Note: Thinking only works with Opus 4.5 via direct Anthropic SDK (above)
+    # LiteLLM/Sonnet don't support Extended Thinking - ignore budget here
 
     response = completion(**kwargs)
 
@@ -822,3 +1033,63 @@ def chat_stream(msg, history, thinking_enabled=None, use_tools=True):
         )
         # Notify about saved finding
         yield ("tool", f"save_finding({pat.strip()}, worked={worked.strip()}, target={target.strip()})")
+
+
+# =============================================================================
+# ROUTED CHAT (Auto intent classification → forced tool_choice)
+# =============================================================================
+
+def chat_stream_routed(msg, history, use_routing=True):
+    """
+    Smart routing: Haiku classifies intent → routes to appropriate model with forced tool_choice.
+
+    Args:
+        msg: User message
+        history: Conversation history
+        use_routing: If False, fallback to regular chat_stream (for /idea, etc.)
+
+    Yields: Same events as chat_stream + ("intent", intent_name) at start
+    """
+    if not use_routing:
+        # Bypass routing (e.g., /idea already knows it wants suggest_test)
+        yield from chat_stream(msg, history)
+        return
+
+    # 1. Classify intent with Haiku (~$0.0003, ~150ms)
+    intent = classify_intent(msg)
+
+    # Yield intent for UI feedback
+    yield ("intent", intent)
+
+    # 2. Get routing config
+    config = INTENT_CONFIG.get(intent, INTENT_CONFIG["CHAT"])
+
+    # 3. Extract all config params
+    force_model = config["model"]
+    tool_choice = config["tool_choice"]
+    temperature = config.get("temperature", 0.7)
+    max_tokens = config.get("max_tokens", 4096)
+    allowed_tools = config.get("tools", [])
+    context_level = config.get("context", "full")
+
+    # For MEMORY intent, disable tools entirely
+    use_tools = tool_choice.get("type") != "none" and len(allowed_tools) > 0
+
+    # 4. Filter tools based on config
+    filtered_tools = None
+    if use_tools and allowed_tools:
+        filtered_tools = [t for t in BLV_TOOLS if t["function"]["name"] in allowed_tools]
+
+    # 5. Stream with forced config + context level
+    yield from chat_stream(
+        msg=msg,
+        history=history,
+        thinking_enabled=False,  # No thinking for routed calls (speed)
+        use_tools=use_tools,
+        tool_choice=tool_choice if use_tools else None,
+        force_model=force_model,
+        temperature=temperature,
+        max_tokens=max_tokens,
+        filtered_tools=filtered_tools,
+        context_level=context_level
+    )
