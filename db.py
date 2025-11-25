@@ -79,6 +79,12 @@ def init():
             role TEXT, content TEXT, tokens INTEGER,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY(conversation_id) REFERENCES conversations(id))""")
+        c.execute("""CREATE TABLE IF NOT EXISTS flow_maps (
+            id INTEGER PRIMARY KEY,
+            site TEXT,
+            data TEXT NOT NULL,
+            created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+            updated_at TEXT DEFAULT CURRENT_TIMESTAMP)""")
         c.commit()
 
         # Migrate existing data if needed
@@ -503,4 +509,31 @@ def clear_done_tasks():
     """Delete all completed tasks."""
     with conn() as c:
         c.execute("DELETE FROM tasks WHERE done=1")
+        c.commit()
+
+# Flow Map functions
+def get_flow_map(site=None):
+    """Get latest flow map (optionally by site)."""
+    import json
+    with conn() as c:
+        if site:
+            row = c.execute("SELECT * FROM flow_maps WHERE site=? ORDER BY updated_at DESC LIMIT 1", (site,)).fetchone()
+        else:
+            row = c.execute("SELECT * FROM flow_maps ORDER BY updated_at DESC LIMIT 1").fetchone()
+        if row:
+            return json.loads(row['data'])
+        return None
+
+def save_flow_map(data: dict):
+    """Save or update flow map."""
+    import json
+    site = data.get('site', 'unknown')
+    data_json = json.dumps(data, ensure_ascii=False)
+    with conn() as c:
+        existing = c.execute("SELECT id FROM flow_maps WHERE site=?", (site,)).fetchone()
+        if existing:
+            c.execute("UPDATE flow_maps SET data=?, updated_at=? WHERE id=?",
+                     (data_json, datetime.now().isoformat(), existing['id']))
+        else:
+            c.execute("INSERT INTO flow_maps (site, data) VALUES (?, ?)", (site, data_json))
         c.commit()

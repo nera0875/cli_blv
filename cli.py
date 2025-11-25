@@ -58,7 +58,7 @@ SHOW_THINKING = True  # Ctrl+O to toggle visibility
 USE_ROUTING = True  # Intent classification routing (Haiku → Sonnet/Opus)
 
 # TAB autocompletion
-COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/task', '/t', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
+COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/task', '/t', '/add', '/stats', '/s', '/import', '/i', '/analyze', '/a', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
 completer = WordCompleter(COMMANDS, ignore_case=True)
 history = InMemoryHistory()
 
@@ -215,6 +215,7 @@ def cmd_help():
         ("/chat", "Stream chat with AI", "/c"),
         ("/prompt", "Manage system prompts", "/p"),
         ("/import", "Import Burp XML requests", "/i"),
+        ("/analyze", "Flow cartography (Opus)", "/a"),
         ("/rules", "Manage behavioral rules", ""),
         ("/trigger", "Manage BLV triggers", ""),
         ("/plan", "Manage targets & objectives", ""),
@@ -1063,6 +1064,71 @@ def cmd_import():
         console.print(msg)
     except Exception as e:
         console.print(f"[red]✗ Error importing: {e}[/]")
+
+def cmd_analyze():
+    """Cartographie cross-request avec Opus + Extended Thinking."""
+    requests_data = db.get_requests()
+
+    if not requests_data:
+        console.print("[yellow]Aucune requête importée. Utilise /import d'abord.[/]")
+        return
+
+    console.print(f"[cyan]Analyse de {len(requests_data)} requêtes avec Opus + Extended Thinking...[/]")
+    console.print("[dim]Cela peut prendre 30-60 secondes.[/]\n")
+
+    # Check for existing flow map in DB
+    existing_map = db.get_flow_map() if hasattr(db, 'get_flow_map') else None
+
+    try:
+        with Status("[bold cyan]Opus analyse le flow...", console=console):
+            result = llm.analyze_flow(requests_data, existing_map)
+
+        if "error" in result:
+            console.print(f"[red]✗ Erreur: {result['error']}[/]")
+            if "raw" in result:
+                console.print(f"[dim]{result['raw'][:500]}[/]")
+            return
+
+        # Display results
+        console.print(Panel(f"[bold green]Site: {result.get('site', 'N/A')}[/]", title="Cartographie"))
+        console.print(f"[cyan]Type de flow:[/] {result.get('flow_type', 'unknown')}")
+
+        # Endpoints
+        endpoints = result.get('endpoints', [])
+        if endpoints:
+            table = Table(title=f"Endpoints ({len(endpoints)})", border_style="cyan")
+            table.add_column("URL", style="white")
+            table.add_column("Method", style="yellow")
+            table.add_column("Role", style="green")
+            table.add_column("Params sensibles", style="red")
+            for ep in endpoints:
+                table.add_row(
+                    ep.get('url', '')[:50],
+                    ep.get('method', ''),
+                    ep.get('role', ''),
+                    ', '.join(ep.get('params_sensibles', []))[:30]
+                )
+            console.print(table)
+
+        # Attack surface
+        attacks = result.get('attack_surface', [])
+        if attacks:
+            console.print(f"\n[bold red]Surface d'attaque ({len(attacks)} hypothèses):[/]")
+            for i, atk in enumerate(attacks, 1):
+                conf_color = {"HIGH": "red", "MEDIUM": "yellow", "LOW": "dim"}.get(atk.get('confidence', ''), "white")
+                console.print(f"  [{conf_color}]{i}. {atk.get('pattern', '')}[/]")
+                console.print(f"     [dim]→ {atk.get('hypothesis', '')}[/]")
+                console.print(f"     [dim]Target: {atk.get('target_endpoint', '')} / {atk.get('target_param', '')}[/]")
+
+        # Save to DB if function exists
+        if hasattr(db, 'save_flow_map'):
+            db.save_flow_map(result)
+            console.print("\n[green]✓ Cartographie sauvegardée en DB[/]")
+
+        console.print(f"\n[dim]Tokens: ~{result.get('_tokens', 'N/A')} | Model: Opus 4.5[/]")
+
+    except Exception as e:
+        console.print(f"[red]✗ Erreur analyse: {e}[/]")
 
 def fetch_available_models():
     """Return available Claude models."""
@@ -2239,6 +2305,7 @@ def main():
     cmds_col1 = [
         "[cyan]/chat[/]     Chat with AI",
         "[cyan]/import[/]   Import Burp XML",
+        "[cyan]/analyze[/]  Flow cartography",
         "[cyan]/model[/]    Model config"
     ]
 
@@ -2321,6 +2388,8 @@ def main():
                     console.print("[red]Usage: /prompt [add|edit|del|toggle] <name>[/]")
             elif cmd in ["/import", "/i"]:
                 cmd_import()
+            elif cmd in ["/analyze", "/a"]:
+                cmd_analyze()
             elif cmd == "/model":
                 cmd_model()
             elif cmd == "/cls":
