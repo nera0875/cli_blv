@@ -308,8 +308,9 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                                 if chunk_type == "content":
                                     idea_text += chunk_content
 
-                        # Parse structured format
-                        lines = idea_text.strip().split('\n')
+                        # Parse structured format (clean markdown ** before parsing)
+                        clean_text = idea_text.replace('**', '')
+                        lines = clean_text.strip().split('\n')
                         parsed = {}
                         for line in lines:
                             if ':' in line:
