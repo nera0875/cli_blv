@@ -965,7 +965,7 @@ def cmd_model_config(model_info):
             "quick": "Quick (4K tokens)",
             "normal": "Normal (16K tokens)",
             "deep": "Deep (32K tokens)",
-            "ultra": "Ultra (64K tokens)"
+            "ultra": "Ultra (60K tokens)"
         }
 
         console.print(f"[bold cyan]━━━ {model_name} Configuration ━━━[/]")
@@ -995,7 +995,7 @@ def cmd_model_config(model_info):
                 "Quick (4K tokens - fast)": "quick",
                 "Normal (16K tokens - balanced)": "normal",
                 "Deep (32K tokens - thorough)": "deep",
-                "Ultra (64K tokens - maximum)": "ultra"
+                "Ultra (60K tokens - maximum)": "ultra"
             }
 
             choices = []
