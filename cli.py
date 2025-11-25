@@ -288,57 +288,54 @@ def cmd_chat():
                 elif cmd == "/idea":
                     # Loop pour générer plusieurs idées
                     while True:
-                        # Generate idea via AI with structured format
-                        idea_prompt = """Génère 1 idée de test structurée. Format exact:
-Pattern: [nom du pattern]
-Target: [site/API]
-Hypothesis: [hypothèse technique courte]
-Steps: [3 étapes max, séparées par |]
-
-Exemple:
-Pattern: requestId replay cross-card
-Target: Cdiscount
-Hypothesis: requestId faiblement bindé
-Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
+                        # Use suggest_test tool for structured output (no parsing needed)
+                        idea_prompt = "Génère 1 idée de test BLV. OBLIGATOIRE: appelle suggest_test() avec pattern, target, steps, expected."
 
                         console.print()
-                        idea_text = ""
+                        idea_data = None
+
                         with console.status("[cyan]💡 Generating idea...", spinner="dots"):
-                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, thinking_enabled=False, use_tools=False):
-                                if chunk_type == "content":
-                                    idea_text += chunk_content
+                            for chunk_type, chunk_content in chat_stream(idea_prompt, hist, thinking_enabled=False, use_tools=True):
+                                if chunk_type == "tool_ready":
+                                    tool_info = chunk_content
+                                    if tool_info["name"] == "suggest_test":
+                                        idea_data = tool_info["args"]
+                                # Ignore other events (content, tool_start, etc.)
 
-                        # Parse structured format (clean markdown ** before parsing)
-                        clean_text = idea_text.replace('**', '')
-                        lines = clean_text.strip().split('\n')
-                        parsed = {}
-                        for line in lines:
-                            if ':' in line:
-                                key, val = line.split(':', 1)
-                                parsed[key.strip().lower()] = val.strip()
+                        if not idea_data:
+                            console.print("[yellow]⚠ L'IA n'a pas généré d'idée structurée. Retry...[/]")
+                            continue
 
-                        # Format dans Panel avec style Combo 4
-                        # Highlight keywords in pattern
-                        pattern_text = parsed.get('pattern', 'Unknown')
+                        # Format Panel from tool args (guaranteed structure)
+                        pattern_text = idea_data.get('pattern', 'Unknown')
                         for keyword in ['bypass', 'injection', 'replay', 'corruption', 'HMAC', '3DS', 'requestId']:
-                            if keyword in pattern_text:
-                                pattern_text = pattern_text.replace(keyword, f'[bold red]{keyword}[/]', 1)
+                            if keyword.lower() in pattern_text.lower():
+                                import re
+                                pattern_text = re.sub(f'({keyword})', r'[bold red]\1[/]', pattern_text, count=1, flags=re.IGNORECASE)
 
-                        steps_list = parsed.get('steps', '').split('|') if parsed.get('steps') else []
-                        steps_formatted = '\n'.join([f"  [green]▸[/] {step.strip()}" for step in steps_list])
+                        steps_list = idea_data.get('steps', [])
+                        steps_formatted = '\n'.join([f"  [green]▸[/] {step}" for step in steps_list])
+
+                        variables_list = idea_data.get('variables', [])
+                        vars_formatted = '\n'.join([f"  [yellow]•[/] {var}" for var in variables_list]) if variables_list else ""
 
                         idea_formatted = f"""[bold cyan]═══════════════════════════════[/]
 [bold white]{pattern_text}[/]
 [bold cyan]═══════════════════════════════[/]
 
-🎯 [bold]Target:[/] [red]{parsed.get('target', 'Unknown')}[/]
-🧠 [bold]Hypothesis:[/] [italic yellow]{parsed.get('hypothesis', 'Unknown')}[/]
+🎯 [bold]Target:[/] [red]{idea_data.get('target', 'Unknown')}[/]
 
-[bold magenta]⚡ EXECUTION[/]
+[bold magenta]⚡ STEPS[/]
 {steps_formatted}
-
+"""
+                        if vars_formatted:
+                            idea_formatted += f"""
+[bold yellow]🎯 VARIABLES[/]
+{vars_formatted}
+"""
+                        idea_formatted += f"""
 [bold]─────────────────────────────[/]
-[green]✓ VULNERABLE[/] | [yellow]⚠ MEDIUM[/]"""
+[green]✓ Expected:[/] {idea_data.get('expected', 'Unknown')}"""
 
                         console.print(Panel(
                             idea_formatted,
@@ -348,7 +345,7 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                             expand=False
                         ))
 
-                        # Menu actions (chat only)
+                        # Menu actions
                         action = questionary.select(
                             "Action:",
                             choices=[
@@ -360,7 +357,7 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                         ).ask()
 
                         if action and "Go" in action:
-                            msg = f"Explique comment faire: {parsed.get('pattern', idea_text.strip())}"
+                            msg = f"Explique comment faire: {idea_data.get('pattern', 'ce test')}"
                             console.print(f"[dim]Auto: {msg[:50]}...[/]\n")
                             break  # Sort du loop /idea, continue chat
                         elif action and "Next" in action:
