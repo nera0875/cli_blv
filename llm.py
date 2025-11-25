@@ -634,15 +634,15 @@ def chat_stream_anthropic(msg, history, thinking_budget, use_tools=True):
         LAST_CACHE_READ_TOKENS = 0
         LAST_PROMPT_TOKENS = len(text) // 4  # Fallback estimate
 
-    # Execute tool calls
+    # Yield tool calls for cli.py to handle (with confirmation if needed)
     import json
     for idx in sorted(tool_calls_builder.keys()):
         tc = tool_calls_builder[idx]
         if tc["name"]:
             try:
                 args = json.loads(tc["arguments"]) if tc["arguments"] else {}
-                result = handle_tool_call(tc["name"], args)
-                yield ("tool", result)
+                # Yield for cli.py to confirm/execute
+                yield ("tool_ready", {"name": tc["name"], "args": args})
             except Exception as e:
                 yield ("tool_error", str(e))
 
@@ -773,15 +773,14 @@ def chat_stream(msg, history, thinking_enabled=False, use_tools=True):
                 text += delta.content
                 yield ("content", delta.content)
 
-    # Execute any tool calls (convert builder dict to list)
+    # Yield tool calls for cli.py to handle (with confirmation if needed)
     import json
     for idx in sorted(tool_calls_builder.keys()):
         tc = tool_calls_builder[idx]
         if tc["name"]:
             try:
                 args = json.loads(tc["arguments"]) if tc["arguments"] else {}
-                result = handle_tool_call(tc["name"], args)
-                yield ("tool", result)
+                yield ("tool_ready", {"name": tc["name"], "args": args})
             except Exception as e:
                 yield ("tool_error", str(e))
 

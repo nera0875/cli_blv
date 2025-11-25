@@ -50,8 +50,9 @@ import llm
 console = Console()
 db.init()
 
-# Global thinking toggle
+# Global toggles
 THINKING_ENABLED = False
+BYPASS_PERMISSIONS = True  # Shift+Tab to toggle
 
 # TAB autocompletion
 COMMANDS = ['/help', '/h', '/chat', '/c', '/prompt', '/p', '/rules', '/trigger', '/hooks', '/plan', '/add', '/stats', '/s', '/import', '/i', '/model', '/clear', '/resume', '/tables', '/quit', '/q', '/back']
@@ -129,13 +130,27 @@ def _(event):
 
 @kb.add('s-tab')
 def _(event):
-    """Autocomplete (Shift+TAB)."""
-    event.current_buffer.complete_next()
+    """Toggle bypass permissions (Shift+TAB)."""
+    global BYPASS_PERMISSIONS
+    BYPASS_PERMISSIONS = not BYPASS_PERMISSIONS
+    event.app.invalidate()  # Force refresh display
 
 def bottom_toolbar():
-    """Bottom toolbar showing thinking status."""
-    status = "Thinking enabled" if THINKING_ENABLED else "Thinking disabled"
-    return HTML(f'<b>{status}</b> (TAB to toggle)')
+    """Bottom toolbar showing bypass and thinking status."""
+    # Bypass status
+    bypass_icon = "⏵⏵" if BYPASS_PERMISSIONS else "⏸⏸"
+    bypass_text = "bypass: ON" if BYPASS_PERMISSIONS else "bypass: OFF"
+
+    # Thinking status
+    thinking_text = "thinking: ON" if THINKING_ENABLED else ""
+
+    # Build toolbar
+    parts = [f"{bypass_icon} {bypass_text}"]
+    if thinking_text:
+        parts.append(thinking_text)
+    parts.append("(Shift+Tab: bypass · Tab: thinking)")
+
+    return HTML(f'<b>{" | ".join(parts)}</b>')
 
 def safe_prompt(prompt_text, style_str="", **kwargs):
     """Prompt wrapper with ESC support and styled prompt."""
@@ -192,6 +207,7 @@ def cmd_help():
     console.print("\n[dim]💡 TAB: autocomplete | Shift+TAB: thinking toggle | ESC: cancel[/]\n")
 
 def cmd_chat():
+    global BYPASS_PERMISSIONS
     console.clear()
     chat_history = InMemoryHistory()
 
@@ -506,13 +522,55 @@ Steps: Capture requestId valide|Replay sur carte2|Observer bypass"""
                         # Afficher spinner tool
                         status_spinner = console.status(f"[cyan]🔧 Using {chunk_content}...", spinner="dots")
                         status_spinner.start()
-                    elif chunk_type == "tool":
-                        # Stop tool spinner avant Panel
+                    elif chunk_type == "tool_ready":
+                        # Stop spinner before confirmation
                         if status_spinner:
                             status_spinner.stop()
                             status_spinner = None
-                        # Tool result already printed by handle_tool_call with Panel
-                        if chunk_content:  # Only print if there's a fallback message
+
+                        tool_data = chunk_content  # {"name": ..., "args": ...}
+                        tool_name = tool_data["name"]
+                        tool_args = tool_data["args"]
+
+                        # Check bypass mode
+                        if BYPASS_PERMISSIONS:
+                            # Auto-execute
+                            from llm import handle_tool_call
+                            result = handle_tool_call(tool_name, tool_args)
+                            if result:
+                                console.print(f"\n[cyan]{result}[/]")
+                        else:
+                            # Ask confirmation
+                            import json
+                            console.print(Panel(
+                                json.dumps(tool_args, indent=2, ensure_ascii=False),
+                                title=f"[bold yellow]🔧 {tool_name}[/]",
+                                border_style="yellow",
+                                padding=(0, 1),
+                                expand=False
+                            ))
+                            confirm = questionary.select(
+                                "Execute?",
+                                choices=["✓ Yes", "✗ No", "⏭ Skip all"],
+                                style=custom_style
+                            ).ask()
+
+                            if confirm and "Yes" in confirm:
+                                from llm import handle_tool_call
+                                result = handle_tool_call(tool_name, tool_args)
+                                if result:
+                                    console.print(f"[cyan]{result}[/]")
+                            elif confirm and "Skip all" in confirm:
+                                BYPASS_PERMISSIONS = True  # Enable bypass for rest
+                                console.print("[dim]Bypass enabled for remaining tools[/]")
+                            else:
+                                console.print("[yellow]⏭ Skipped[/]")
+                    elif chunk_type == "tool":
+                        # Legacy: direct tool result (shouldn't happen with new flow)
+                        if status_spinner:
+                            status_spinner.stop()
+                            status_spinner = None
+                        if chunk_content:
                             console.print(f"\n[cyan]{chunk_content}[/]")
                     elif chunk_type == "content":
                         if status_spinner:
